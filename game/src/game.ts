@@ -132,6 +132,7 @@ export class Game {
 
   private update(dt: number): void {
     this.kingHud.update(dt, this.arena, this.view, this.phase === 'fight' || this.phase === 'roundEnd');
+    if (this.phase !== 'replay') this.view.setBottomInset(this.trayStrip(), dt);
     switch (this.phase) {
       case 'build': this.updateBuild(dt); break;
       case 'roundEnd':
@@ -446,6 +447,13 @@ export class Game {
         b.disabled = n <= 0;
       });
     }
+  }
+
+  /** Screen pixels the build trays (and their timers) take at the bottom, which the camera keeps clear. */
+  private trayStrip(): number {
+    let top = window.innerHeight;
+    for (const e of [...this.paletteEls, ...this.timerChips]) if (e) top = Math.min(top, e.getBoundingClientRect().top);
+    return top < window.innerHeight ? window.innerHeight - top + 6 : 0;
   }
 
   private clearPalettes(): void {

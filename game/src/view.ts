@@ -29,6 +29,7 @@ export class View {
   private time = 0;
   private homePos = new THREE.Vector3();
   private homeTarget = new THREE.Vector3();
+  private inset = 0;
   private raycaster = new THREE.Raycaster();
   private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   private zoneMarks: THREE.Mesh[] = [];
@@ -202,14 +203,28 @@ export class View {
   /** Fits the play width (or the play height on a narrow window) and pins the view's bottom edge
    * to ARENA.viewBottom, so a wide window shows more sky rather than more ravine. */
   resize(): void {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    this.renderer.setSize(w, h);
-    this.camera.aspect = w / h;
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.frame();
+  }
+
+  /** Keeps the bottom `px` of the screen clear of the play area (the build tray's strip), easing
+   * the camera there; with 0 the ground in front of the forts shows again. */
+  setBottomInset(px: number, dt: number): void {
+    const next = this.inset + (px - this.inset) * (1 - Math.exp(-dt * 8));
+    const inset = Math.abs(px - next) < 0.5 ? px : next;
+    if (inset === this.inset) return;
+    this.inset = inset;
+    this.frame();
+  }
+
+  private frame(): void {
     const tan = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
     const halfH = (ARENA.viewTop - ARENA.viewBottom) / 2;
-    const dist = Math.max(ARENA.viewHalfWidth / (tan * this.camera.aspect), halfH / tan);
-    const cy = ARENA.viewBottom + dist * tan;
+    // the framing box has to fit in the part of the screen above the inset
+    const clear = 1 - Math.min(0.4, this.inset / window.innerHeight);
+    const dist = Math.max(ARENA.viewHalfWidth / (tan * this.camera.aspect), halfH / (tan * clear));
+    const cy = ARENA.viewBottom - 2 * dist * tan * (1 - clear) + dist * tan;
     // a little above the plateaus, looking down: more yard and ravine behind the forts, less sky
     this.homePos.set(0, cy + dist * 0.1, dist);
     this.homeTarget.set(0, cy, 0);
