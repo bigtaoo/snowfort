@@ -213,7 +213,8 @@ export class Game {
     const simultaneous = this.touch;
     if (mode === 'cpu') {
       this.queueCpuBuild(PRESET_FORTS[Math.floor(Math.random() * PRESET_FORTS.length)]);
-      this.sessions = [{ sides: [0], time: simultaneous ? BUILD.simultaneousSeconds : BUILD.turnSeconds, repair: false, done: [false, true] }];
+      // against the CPU there is no clock: the player builds until they press Done
+      this.sessions = [{ sides: [0], time: Infinity, repair: false, done: [false, true] }];
     } else if (simultaneous) {
       this.sessions = [{ sides: [0, 1], time: BUILD.simultaneousSeconds, repair: false, done: [false, false] }];
     } else {
@@ -430,6 +431,7 @@ export class Game {
       pal.append(done);
       this.hud.append(pal);
       this.paletteEls[side] = pal;
+      if (!Number.isFinite(s.time)) continue;
       const chip = el('div', `timerChip p${side}`);
       this.hud.append(chip);
       this.timerChips[side] = chip;
@@ -630,7 +632,7 @@ export class Game {
     if (this.mode === 'cpu') {
       for (const p of REPAIR_PLAN) this.placeFromPlan(1, p);
       if (this.budgets[1].king) this.autoPlaceKing(1);
-      this.sessions = [{ sides: [0], time: this.touch ? BUILD.repairSimultaneousSeconds : BUILD.repairTurnSeconds, repair: true, done: [false, true] }];
+      this.sessions = [{ sides: [0], time: Infinity, repair: true, done: [false, true] }];
     } else if (this.touch) {
       this.sessions = [{ sides: [0, 1], time: BUILD.repairSimultaneousSeconds, repair: true, done: [false, false] }];
     } else {
@@ -875,7 +877,7 @@ export class Game {
       if (chip && this.session) chip.textContent = `${Math.max(0, Math.ceil(this.session.time))}s`;
     }
     if (this.phase === 'build' && this.session) {
-      this.clockEl.textContent = `${Math.max(0, Math.ceil(this.session.time))}`;
+      this.clockEl.textContent = Number.isFinite(this.session.time) ? `${Math.max(0, Math.ceil(this.session.time))}` : '';
       this.subEl.textContent = this.session.repair ? 'repair' : 'build';
     } else if (this.phase === 'fight' || this.phase === 'roundEnd') {
       const left = ROUND.blizzardAfter - this.roundTime;
