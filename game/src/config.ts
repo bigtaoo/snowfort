@@ -26,8 +26,9 @@ export const ARENA = {
   ravineY: -7,
   depth: 8,
   /** Each player builds in |x| from zoneNear to zoneFar on their own side. */
-  zoneNear: 2,
-  zoneFar: 10,
+  zoneNear: 1.7,
+  /** Short of the catapult, so a ball never leaves from inside its own fort. */
+  zoneFar: 8.7,
   buildCeiling: 9,
   /** A body below this y is off its plateau (fell into the ravine). */
   fallY: -1.5,

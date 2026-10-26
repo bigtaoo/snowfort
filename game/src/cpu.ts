@@ -15,31 +15,30 @@ export interface Placement {
 export const PRESET_FORTS: Placement[][] = [
   // shelter: king under a roof behind a snow wall
   [
-    { piece: 'snow', u: 3 }, { piece: 'snow', u: 3 }, { piece: 'snow', u: 3 },
-    { piece: 'snow', u: 4 }, { piece: 'snow', u: 4 }, { piece: 'snow', u: 4 },
-    { piece: 'plankH', u: 3.5, y: 3 },
-    { piece: 'ice', u: 5 }, { piece: 'ice', u: 5 },
-    { piece: 'plankV', u: 6.1 }, { piece: 'plankV', u: 8.7 }, { piece: 'king', u: 7.5 },
-    { piece: 'plankH', u: 7.5, y: 3 }, { piece: 'snow', u: 7, y: 3.3 }, { piece: 'snow', u: 8, y: 3.3 },
-    { piece: 'ice', u: 9.5 }, { piece: 'snow', u: 9.5 }, { piece: 'ice', u: 7.5, y: 4.3 },
+    { piece: 'snow', u: 2.7 }, { piece: 'snow', u: 2.7 }, { piece: 'snow', u: 2.7 },
+    { piece: 'snow', u: 3.7 }, { piece: 'snow', u: 3.7 }, { piece: 'snow', u: 3.7 },
+    { piece: 'plankH', u: 3.2, y: 3 }, { piece: 'ice', u: 2.7, y: 3.3 }, { piece: 'snow', u: 3.7, y: 3.3 },
+    { piece: 'ice', u: 4.7 }, { piece: 'ice', u: 4.7 },
+    { piece: 'plankV', u: 5.8 }, { piece: 'plankV', u: 8.4 }, { piece: 'king', u: 7.1 },
+    { piece: 'plankH', u: 7.1, y: 3 }, { piece: 'snow', u: 6.6, y: 3.3 }, { piece: 'snow', u: 7.6, y: 3.3 }, { piece: 'ice', u: 7.1, y: 4.3 },
   ],
   // bunker: low and wide, king hugging the ground
   [
-    { piece: 'snow', u: 3 }, { piece: 'snow', u: 3 }, { piece: 'ice', u: 3 },
-    { piece: 'snow', u: 4 }, { piece: 'snow', u: 4 }, { piece: 'ice', u: 4 },
-    { piece: 'snow', u: 5 }, { piece: 'snow', u: 5 }, { piece: 'plankH', u: 4, y: 3 },
-    { piece: 'plankV', u: 6.1 }, { piece: 'plankV', u: 8.7 }, { piece: 'king', u: 7.5 },
-    { piece: 'plankH', u: 7.5, y: 3 }, { piece: 'snow', u: 6.9, y: 3.3 }, { piece: 'snow', u: 8.1, y: 3.3 }, { piece: 'ice', u: 7.5, y: 4.3 },
-    { piece: 'snow', u: 9.5 }, { piece: 'snow', u: 9.5 }, { piece: 'ice', u: 9.5 },
+    { piece: 'snow', u: 2.7 }, { piece: 'snow', u: 2.7 }, { piece: 'ice', u: 2.7 },
+    { piece: 'snow', u: 3.7 }, { piece: 'snow', u: 3.7 }, { piece: 'ice', u: 3.7 },
+    { piece: 'snow', u: 4.7 }, { piece: 'snow', u: 4.7 }, { piece: 'plankH', u: 3.7, y: 3 },
+    { piece: 'snow', u: 2.7, y: 3.3 }, { piece: 'snow', u: 3.7, y: 3.3 }, { piece: 'ice', u: 4.7, y: 3.3 },
+    { piece: 'plankV', u: 5.8 }, { piece: 'plankV', u: 8.4 }, { piece: 'king', u: 7.1 },
+    { piece: 'plankH', u: 7.1, y: 3 }, { piece: 'snow', u: 6.5, y: 3.3 }, { piece: 'snow', u: 7.7, y: 3.3 }, { piece: 'ice', u: 7.1, y: 4.3 },
   ],
   // perch: king up on a pedestal behind a tall ice-and-snow wall
   [
-    { piece: 'ice', u: 3.5 }, { piece: 'ice', u: 3.5 }, { piece: 'ice', u: 3.5 },
-    { piece: 'snow', u: 4.5 }, { piece: 'snow', u: 4.5 }, { piece: 'snow', u: 4.5 },
-    { piece: 'plankV', u: 5.7 },
-    { piece: 'snow', u: 7.5 }, { piece: 'snow', u: 7.5 }, { piece: 'snow', u: 8.5 }, { piece: 'snow', u: 8.5 },
-    { piece: 'plankH', u: 8, y: 2 }, { piece: 'king', u: 8, y: 2.3 },
-    { piece: 'snow', u: 9.5 }, { piece: 'snow', u: 9.5 }, { piece: 'ice', u: 9.5 }, { piece: 'snow', u: 2.5 },
+    { piece: 'ice', u: 3.2 }, { piece: 'ice', u: 3.2 }, { piece: 'ice', u: 3.2 }, { piece: 'snow', u: 3.2 },
+    { piece: 'snow', u: 4.2 }, { piece: 'snow', u: 4.2 }, { piece: 'snow', u: 4.2 }, { piece: 'snow', u: 4.2 },
+    { piece: 'plankV', u: 5.4 },
+    { piece: 'snow', u: 6.7 }, { piece: 'snow', u: 6.7 }, { piece: 'snow', u: 7.7 }, { piece: 'snow', u: 7.7 },
+    { piece: 'plankH', u: 7.2, y: 2 }, { piece: 'king', u: 7.2, y: 2.3 },
+    { piece: 'snow', u: 2.2 }, { piece: 'ice', u: 2.2 },
   ],
 ];
 
