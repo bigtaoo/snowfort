@@ -1,7 +1,8 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
+import { blockMesh, debrisMesh, hurtBlock, kingMesh, projectileMesh } from './look/meshes';
 import {
-  AMMO, ARENA, BLOCK_HALF_DEPTH, CATAPULT, COLORS, MATERIALS, PHYSICS, PIECES, PROJECTILE, REPLAY,
+  AMMO, ARENA, BLOCK_HALF_DEPTH, CATAPULT, MATERIALS, PHYSICS, PIECES, PROJECTILE, REPLAY,
   type PieceId,
 } from './config';
 
@@ -52,7 +53,6 @@ const blockGroups = (s: Side) => groups(s === 0 ? G.b0 : G.b1, ALL & ~(s === 0 ?
 const shotGroups = (s: Side) => groups(s === 0 ? G.p0 : G.p1, ALL & ~(s === 0 ? G.b0 : G.b1) & ~G.debris);
 const debrisGroups = groups(G.debris, G.world | G.b0 | G.b1 | G.debris);
 
-const SIDE_COLOR = [COLORS.p1, COLORS.p2];
 
 export interface ImpactEvent {
   x: number;
@@ -89,7 +89,9 @@ export class Arena {
   private makeWorld(): RAPIER.World {
     const w = new RAPIER.World({ x: 0, y: PHYSICS.gravity, z: 0 });
     w.timestep = PHYSICS.dt;
-    const hz = ARENA.depth / 2;
+    // the plateaus reach the drawn cliffs (look/scenery.ts CLIFF_Z); the replay frees z, so the
+    // ravine floor is one wide slab that also catches whatever falls off their fronts
+    const hz = ARENA.depth / 2 + 1;
     const plateauHalfX = (ARENA.outerX - ARENA.edgeX) / 2;
     const plateauHalfY = (ARENA.groundY - ARENA.ravineY) / 2;
     for (const sign of [-1, 1]) {
@@ -102,7 +104,7 @@ export class Arena {
       );
     }
     w.createCollider(
-      RAPIER.ColliderDesc.cuboid(ARENA.edgeX + 1, 0.5, hz)
+      RAPIER.ColliderDesc.cuboid(ARENA.outerX, 0.5, 40)
         .setTranslation(0, ARENA.ravineY - 0.5, 0)
         .setFriction(1)
         .setCollisionGroups(groups(G.world, ALL)),
@@ -140,7 +142,7 @@ export class Arena {
       colliderHandle: collider.handle,
       born: this.time,
       body,
-      mesh: makeMesh(data),
+      mesh: makeMesh(data, this.nextId),
       alive: true,
     };
     this.ents.push(e);
@@ -201,7 +203,7 @@ export class Arena {
       body,
     );
     const e = this.register({ kind: 'debris', owner: 0, hp: 1, maxHp: 1, dieAt: this.time + PHYSICS.debrisLife }, body, col);
-    ((e.mesh as THREE.Mesh).material as THREE.MeshStandardMaterial).color.setHex(color);
+    ((e.mesh as THREE.Mesh).material as THREE.MeshToonMaterial).color.setHex(color);
   }
 
   remove(e: Entity): void {
@@ -337,7 +339,7 @@ export class Arena {
     this.time = snap.time;
     this.byCollider.clear();
     this.ents = snap.ents.map((d) => {
-      const e: Entity = { ...d, body: this.world.getRigidBody(d.bodyHandle), mesh: makeMesh(d), alive: true };
+      const e: Entity = { ...d, body: this.world.getRigidBody(d.bodyHandle), mesh: makeMesh(d, d.id), alive: true };
       this.byCollider.set(d.colliderHandle, e);
       this.group.add(e.mesh);
       return e;
@@ -413,75 +415,11 @@ const dataOf = (e: Entity): EntityData => {
 
 // ---------- meshes ----------
 
-const geoCache = new Map<string, THREE.BufferGeometry>();
-const geo = (key: string, make: () => THREE.BufferGeometry) => {
-  let g = geoCache.get(key);
-  if (!g) geoCache.set(key, (g = make()));
-  return g;
-};
-
-function makeMesh(d: Omit<EntityData, 'id' | 'bodyHandle' | 'colliderHandle' | 'born'>): THREE.Object3D {
-  if (d.kind === 'king' || d.kind === 'decoy') return makeKing(d.owner);
-  if (d.kind === 'projectile') {
-    const r = d.radius ?? PROJECTILE.radius;
-    const color = d.ammo === 'bigIce' ? 0x9fdcff : d.ammo === 'cocoa' ? 0x7a4a2a : d.ammo === 'firework' ? 0xffc23d : d.ammo === 'split' ? 0xd8f0ff : 0xffffff;
-    const m = new THREE.Mesh(geo(`ball${r}`, () => new THREE.SphereGeometry(r, 16, 12)), new THREE.MeshStandardMaterial({ color, roughness: 0.6, emissive: d.ammo === 'firework' ? 0x553300 : 0 }));
-    m.castShadow = true;
-    return m;
-  }
-  if (d.kind === 'debris') {
-    const s = PHYSICS.debrisSize;
-    return new THREE.Mesh(geo('debris', () => new THREE.BoxGeometry(s, s, s)), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }));
-  }
-  const spec = PIECES[d.piece!];
-  const mat = MATERIALS[spec.material];
-  const m = new THREE.Mesh(
-    geo(`box${spec.hx},${spec.hy}`, () => new THREE.BoxGeometry(spec.hx * 2, spec.hy * 2, BLOCK_HALF_DEPTH * 2)),
-    new THREE.MeshStandardMaterial({
-      color: mat.color,
-      roughness: spec.material === 'ice' ? 0.15 : 0.85,
-      transparent: mat.opacity < 1,
-      opacity: mat.opacity,
-    }),
-  );
-  m.castShadow = true;
-  m.receiveShadow = true;
-  // a thin stripe in the owner's colour so forts read at a glance
-  const stripe = new THREE.Mesh(
-    geo(`stripe${spec.hx},${spec.hy}`, () => new THREE.BoxGeometry(spec.hx * 2 * 0.9, Math.min(0.06, spec.hy), 0.02)),
-    new THREE.MeshBasicMaterial({ color: SIDE_COLOR[d.owner] }),
-  );
-  stripe.position.set(0, -spec.hy + 0.08, BLOCK_HALF_DEPTH + 0.011);
-  m.add(stripe);
-  return m;
-}
-
-function makeKing(owner: Side): THREE.Object3D {
-  const g = new THREE.Group();
-  const snow = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
-  const spec = PIECES.king;
-  const base = new THREE.Mesh(geo('kingBase', () => new THREE.SphereGeometry(0.5, 20, 14)), snow);
-  base.position.y = -spec.hy + 0.48;
-  const head = new THREE.Mesh(geo('kingHead', () => new THREE.SphereGeometry(0.34, 20, 14)), snow);
-  head.position.y = -spec.hy + 1.16;
-  const scarf = new THREE.Mesh(geo('kingScarf', () => new THREE.TorusGeometry(0.3, 0.07, 8, 20)), new THREE.MeshStandardMaterial({ color: SIDE_COLOR[owner] }));
-  scarf.rotation.x = Math.PI / 2;
-  scarf.position.y = -spec.hy + 0.88;
-  const crown = new THREE.Mesh(geo('kingCrown', () => new THREE.CylinderGeometry(0.22, 0.26, 0.24, 5, 1, true)), new THREE.MeshStandardMaterial({ color: 0xffcc33, metalness: 0.4, roughness: 0.4, side: THREE.DoubleSide }));
-  crown.position.y = -spec.hy + 1.52;
-  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x222222 });
-  const facing = owner === 0 ? 1 : -1;
-  for (const dx of [-0.1, 0.1]) {
-    const eye = new THREE.Mesh(geo('eye', () => new THREE.SphereGeometry(0.045, 8, 6)), eyeMat);
-    eye.position.set(facing * 0.08 + dx, -spec.hy + 1.24, 0.3);
-    g.add(eye);
-  }
-  const nose = new THREE.Mesh(geo('nose', () => new THREE.ConeGeometry(0.06, 0.28, 8)), new THREE.MeshStandardMaterial({ color: 0xff8a1c }));
-  nose.rotation.z = -facing * Math.PI / 2;
-  nose.position.set(facing * 0.36, -spec.hy + 1.13, 0.12);
-  g.add(base, head, scarf, crown, nose);
-  g.traverse((o) => { o.castShadow = true; });
-  return g;
+function makeMesh(d: Omit<EntityData, 'id' | 'bodyHandle' | 'colliderHandle' | 'born'>, seed: number): THREE.Object3D {
+  if (d.kind === 'king' || d.kind === 'decoy') return kingMesh(d.owner);
+  if (d.kind === 'projectile') return projectileMesh(d.ammo, d.radius ?? PROJECTILE.radius);
+  if (d.kind === 'debris') return debrisMesh(0xffffff);
+  return blockMesh(d.piece!, seed);
 }
 
 function syncMesh(e: Entity): void {
@@ -489,9 +427,5 @@ function syncMesh(e: Entity): void {
   const r = e.body.rotation();
   e.mesh.position.set(p.x, p.y, p.z);
   e.mesh.quaternion.set(r.x, r.y, r.z, r.w);
-  if (e.kind === 'block' && e.hp < e.maxHp) {
-    const mat = (e.mesh as THREE.Mesh).material as THREE.MeshStandardMaterial;
-    const t = Math.max(0, e.hp / e.maxHp);
-    mat.emissive.setRGB((1 - t) * 0.25, 0, 0);
-  }
+  if (e.kind === 'block' && e.hp < e.maxHp) hurtBlock(e.mesh, e.hp / e.maxHp);
 }

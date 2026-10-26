@@ -1,3 +1,4 @@
+import { Vector3 } from 'three';
 import {
   AMMO, ARENA, BUILD, CARDS, CATAPULT, CPU, MATERIALS, PHYSICS, PIECES, REPLAY, ROUND,
   budgetKeyOf, type Budget, type PieceId,
@@ -114,11 +115,13 @@ export class Game {
       n++;
       if (this.phase === 'fight') this.fightStep(PHYSICS.dt);
       this.arena.step();
+      for (const imp of this.arena.impacts) this.view.puff.burst(new Vector3(imp.x, imp.y, 0), 24);
       if (this.phase === 'fight') this.afterStep();
       if (this.phase === 'replay' && this.arena.time - this.decidedAt > REPLAY.simSeconds - REPLAY.leadSeconds) this.endReplay();
     }
     if (n === PHYSICS.maxSubSteps) this.acc = 0;
     this.arena.sync();
+    this.view.puff.update(dt * this.timeScale);
     this.update(dt);
     this.view.updateSnow(dt, this.phase === 'fight' && this.roundTime > ROUND.blizzardAfter ? 1 : 0);
     this.view.render();
@@ -189,6 +192,7 @@ export class Game {
   startMatch(mode: Mode): void {
     this.mode = mode;
     this.arena.reset();
+    this.view.puff.clear();
     this.view.homeCamera();
     this.timeScale = 1;
     this.score = [0, 0];

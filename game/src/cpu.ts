@@ -19,18 +19,18 @@ export const PRESET_FORTS: Placement[][] = [
     { piece: 'snow', u: 6.5 }, { piece: 'snow', u: 6.5 }, { piece: 'snow', u: 6.5 },
     { piece: 'plankH', u: 6, y: 3 },
     { piece: 'ice', u: 7.5 }, { piece: 'ice', u: 7.5 },
-    { piece: 'plankV', u: 8.6 }, { piece: 'plankV', u: 11.4 }, { piece: 'king', u: 10 },
+    { piece: 'plankV', u: 8.6 }, { piece: 'plankV', u: 11.2 }, { piece: 'king', u: 10 },
     { piece: 'plankH', u: 10, y: 3 }, { piece: 'snow', u: 9.5, y: 3.3 }, { piece: 'snow', u: 10.5, y: 3.3 },
-    { piece: 'ice', u: 12.5 }, { piece: 'snow', u: 12.5 }, { piece: 'ice', u: 10, y: 4.3 },
+    { piece: 'ice', u: 12 }, { piece: 'snow', u: 12 }, { piece: 'ice', u: 10, y: 4.3 },
   ],
   // bunker: low and wide, king hugging the ground
   [
     { piece: 'snow', u: 5.5 }, { piece: 'snow', u: 5.5 }, { piece: 'ice', u: 5.5 },
     { piece: 'snow', u: 6.5 }, { piece: 'snow', u: 6.5 }, { piece: 'ice', u: 6.5 },
     { piece: 'snow', u: 7.5 }, { piece: 'snow', u: 7.5 }, { piece: 'plankH', u: 6.5, y: 3 },
-    { piece: 'plankV', u: 8.6 }, { piece: 'plankV', u: 11.4 }, { piece: 'king', u: 10 },
+    { piece: 'plankV', u: 8.6 }, { piece: 'plankV', u: 11.2 }, { piece: 'king', u: 10 },
     { piece: 'plankH', u: 10, y: 3 }, { piece: 'snow', u: 9.4, y: 3.3 }, { piece: 'snow', u: 10.6, y: 3.3 }, { piece: 'ice', u: 10, y: 4.3 },
-    { piece: 'snow', u: 12.6 }, { piece: 'snow', u: 12.6 }, { piece: 'ice', u: 12.6 },
+    { piece: 'snow', u: 12 }, { piece: 'snow', u: 12 }, { piece: 'ice', u: 12 },
   ],
   // perch: king up on a pedestal behind a tall ice-and-snow wall
   [
@@ -39,7 +39,7 @@ export const PRESET_FORTS: Placement[][] = [
     { piece: 'plankV', u: 8.2 },
     { piece: 'snow', u: 10 }, { piece: 'snow', u: 10 }, { piece: 'snow', u: 11 }, { piece: 'snow', u: 11 },
     { piece: 'plankH', u: 10.5, y: 2 }, { piece: 'king', u: 10.5, y: 2.3 },
-    { piece: 'snow', u: 12.6 }, { piece: 'snow', u: 12.6 }, { piece: 'ice', u: 12.6 }, { piece: 'snow', u: 5 },
+    { piece: 'snow', u: 12 }, { piece: 'snow', u: 12 }, { piece: 'ice', u: 12 }, { piece: 'snow', u: 5 },
   ],
 ];
 

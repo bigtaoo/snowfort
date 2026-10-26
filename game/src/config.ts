@@ -27,13 +27,13 @@ export const ARENA = {
   depth: 8,
   /** Each player builds in |x| from zoneNear to zoneFar on their own side. */
   zoneNear: 4.5,
-  zoneFar: 13.5,
+  zoneFar: 12.5,
   buildCeiling: 12,
   /** A body below this y is off its plateau (fell into the ravine). */
   fallY: -1.5,
   /** Visible framing: the camera fits this box. */
-  viewHalfWidth: 18,
-  viewBottom: -5,
+  viewHalfWidth: 16.5,
+  viewBottom: -3,
   viewTop: 15,
 };
 
@@ -99,7 +99,7 @@ export const BUILD = {
 
 export const CATAPULT = {
   /** Catapult sits at |x| = x, behind the fort; pivot at height pivotY. */
-  x: 15.5,
+  x: 14,
   pivotY: 1.6,
   barrelLength: 1.6,
   minAngleDeg: 12,
