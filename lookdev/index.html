@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Snow Fort Showdown — lookdev</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #cfe6f7; font-family: system-ui, sans-serif; }
+      canvas { display: block; touch-action: none; }
+      #hud { position: fixed; left: 12px; top: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+      #hud button { font: 600 15px system-ui, sans-serif; padding: 8px 14px; border: 3px solid #1b2333; border-radius: 12px; background: #fff; color: #1b2333; cursor: pointer; box-shadow: 0 3px 0 #1b2333; }
+      #hud button:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b2333; }
+      #hud button.go { background: #ff7a3d; color: #fff; }
+      #stats { position: fixed; right: 12px; top: 12px; font: 12px ui-monospace, monospace; color: #1b2333; background: #ffffffcc; padding: 6px 8px; border-radius: 8px; white-space: pre; }
+      body.clean #hud, body.clean #stats { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="hud">
+      <button id="collapse" class="go">Collapse (C)</button>
+      <button id="reset">Reset (R)</button>
+      <button id="side">Side view (V)</button>
+      <button id="pause">Pause (P)</button>
+      <button id="clean">Hide UI (H)</button>
+    </div>
+    <div id="stats"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
