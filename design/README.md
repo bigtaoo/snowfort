@@ -35,6 +35,16 @@
 5. 先赢 3 局获胜，一场约 6–10 分钟。
 6. **胜利回放**：最后一发慢镜头，镜头跟球、绕着倒塌的城堡转半圈。可截图，是分享和封面素材。
 
+## 外观（lookdev 已定，见 `lookdev/README.md` 和 `lookdev/shots/`）
+
+- 卡通平涂：三阶色带 toon 材质 + 反向外壳粗描边，不做 tone mapping；一个太阳硬阴影 + 天蓝半球光。
+- 三种积木一眼可分：雪（白、哑光、圆角大）、冰（青色半透 + 高光点，描边用模板缓冲只画在冰外面）、木（暖棕薄长板）。
+- 侧视镜头（fov 30）；降雪只在游戏平面后方，不挡战场。院子背景：篱笆、松树、雪堆，反方向有房子，给回放镜头看。
+- 人物：两个小孩一暖一冷（暖色在左），雪人国王戴王冠；投石车程序化，臂会转。目前全是基本体拼的
+  （每个模型 2 个 draw call），没有 GLB。
+- 回放：时间放慢到 0.3 倍约 5 秒，镜头 7 秒内绕城堡半圈并拉近。
+- 预算：整场约 40 个 draw call、约 19 万三角形（含阴影），核显上每帧 2 ms 以内。
+
 ## 单人
 
 - 对电脑的阶梯：8 个邻居小孩，各有城堡风格和弹药偏好，最后是雪怪。电脑按国王位置解抛物线加按难度的误差，会挑卡。
@@ -43,7 +53,8 @@
 ## 参考
 
 - 3D 渲染、卡通描边、GLB 瘦身、微信 3D 包：`D:\dnf`（`client/src/three/`，尤其 `ink.ts`；`client/build/slimGlb.mjs`；`design/ART.md`）。
-  Tripo 图生 3D 积分约 145，**2026-11-01 过期**。
+  Tripo 图生 3D：2026-10-26 两个 key 都报 2010「积分不足」，暂时用不了；概念图和 prompt 在 `art/models/`，
+  积分恢复后可以直接送去做模型。
 - Playgama Bridge 接入、存档、遥测：`D:\standing\client\src\platform\playgama\`；打包必须用 Python zipfile
   （Compress-Archive 打的 zip 过不了 Bridge 检查），`index.html` 在 zip 根目录。
 - 同类调研：参赛前排 Wasteguard、Wobble Boxers、Couch Sumo、Sumo Cats、Flip Slam 全都有单人模式；
