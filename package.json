@@ -1,0 +1,9 @@
+{
+  "name": "snowfort",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix game run dev",
+    "typecheck": "npm --prefix game run typecheck",
+    "build": "npm --prefix game run build"
+  }
+}
