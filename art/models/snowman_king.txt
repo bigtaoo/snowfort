@@ -1,0 +1,4 @@
+3D game asset reference, single FRONT VIEW, straight-on camera, whole object visible and centered, filling the frame vertically.
+Object: a cute snowman king made of three stacked round snowballs (big bottom, medium middle, small head), coal-black dot eyes and a coal smile, an orange carrot nose pointing straight at the camera, a shiny golden crown with three points and small red gems sitting on the head, a short red royal cape with white trim tied around the neck, two small brown twig arms held out to the sides, three black coal buttons. Pure white snow body, friendly and proud.
+Style: chunky stylized 3D cartoon game asset like a cozy casual mobile game, soft rounded simple shapes, big clean flat colour blocks, matte materials, soft even studio lighting, no strong shadows, no outlines, no texture noise.
+Plain pure white background, no ground, no shadow, no text, no border, no extra views, only one object.

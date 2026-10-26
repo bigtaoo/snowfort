@@ -1,0 +1,4 @@
+3D game asset reference, single object in THREE-QUARTER SIDE VIEW, whole object visible and centered, filling the frame.
+Object: a small toy-like wooden catapult for a backyard snowball fight, built from chunky planks and logs: a low rectangular wooden base frame on four small round wooden wheels, two upright posts holding a crossbar, one long throwing arm with a round wooden bucket at the top end holding one snowball, a twisted rope at the pivot. Warm honey-brown wood with darker brown edges, simple chunky proportions, slightly cartoonish, a little snow on top of the base.
+Style: chunky stylized 3D cartoon game asset like a cozy casual mobile game, soft rounded simple shapes, big clean flat colour blocks, matte materials, soft even studio lighting, no strong shadows, no outlines, no texture noise.
+Plain pure white background, no ground, no shadow, no text, no border, no extra views, only one object.
