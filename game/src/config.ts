@@ -21,22 +21,22 @@ export const ARENA = {
   /** Top of both fort plateaus. */
   groundY: 0,
   /** Plateaus end at |x| = edgeX; between them is the ravine. */
-  edgeX: 2.5,
+  edgeX: 1.5,
   outerX: 24,
   ravineY: -7,
   depth: 8,
   /** Each player builds in |x| from zoneNear to zoneFar on their own side. */
-  zoneNear: 3,
-  zoneFar: 11,
-  buildCeiling: 12,
+  zoneNear: 2,
+  zoneFar: 10,
+  buildCeiling: 9,
   /** A body below this y is off its plateau (fell into the ravine). */
   fallY: -1.5,
   /** A king pushed further out than this (off the side of the screen, past his own catapult) is out of his yard and loses the round. */
-  yardEnd: 14.4,
+  yardEnd: 12.6,
   /** Visible framing: the camera fits this box. */
-  viewHalfWidth: 14.6,
-  viewBottom: -1.6,
-  viewTop: 15,
+  viewHalfWidth: 12.8,
+  viewBottom: -1.2,
+  viewTop: 10.4,
 };
 
 export type MaterialId = 'snow' | 'ice' | 'wood';
@@ -101,7 +101,7 @@ export const BUILD = {
 
 export const CATAPULT = {
   /** Catapult sits at |x| = x, behind the fort; pivot at height pivotY. */
-  x: 12.5,
+  x: 10.8,
   pivotY: 1.6,
   barrelLength: 1.6,
   minAngleDeg: 12,

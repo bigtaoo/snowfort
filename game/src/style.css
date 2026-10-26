@@ -75,5 +75,16 @@ kbd { background: #17324d; color: #fff; border-radius: 5px; padding: 1px 6px; fo
 .card kbd { display: inline-block; margin-top: 6px; }
 .who { font-size: 26px; font-weight: 900; color: var(--pc); background: #fff; padding: 4px 16px; border-radius: 12px; }
 
+/* short landscape phones: the HUD and the tray at about two thirds size, so they leave the field visible */
+@media (max-height: 520px) {
+  .top, .palette, .keys, .timerChip, .cards, .who, .menu, .help { zoom: .66; }
+  /* the tray goes up into the sky, off the ground it would otherwise cover (zoomed px) */
+  .palette { top: 150px; bottom: auto; }
+  .timerChip { top: 112px; bottom: auto; }
+  .kingBar { width: 54px; height: 8px; margin-left: -27px; }
+  .dmgPop { font-size: 26px; }
+  .dmgPop.big { font-size: 36px; }
+}
+
 #rotate { display: none; position: fixed; inset: 0; background: #17324d; color: #fff; font-size: 24px; align-items: center; justify-content: center; text-align: center; z-index: 10; }
 @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }

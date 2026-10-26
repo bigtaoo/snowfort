@@ -106,7 +106,7 @@ export class View {
 
     const child = kid(side === 0 ? WARM : COOL, body, line);
     child.scale.setScalar(1.15);
-    child.position.set(px - dir * 1.7, ARENA.groundY, 0.6);
+    child.position.set(px - dir * 1.1, ARENA.groundY, 1.0);
     child.rotation.y = dir * 0.7;
     child.traverse((o) => { if ((o as THREE.Mesh).isMesh) o.castShadow = true; });
     this.scene.add(child);
