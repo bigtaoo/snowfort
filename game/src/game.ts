@@ -5,6 +5,7 @@ import {
 } from './config';
 import { Arena, type AmmoId, type Entity, type Side } from './arena';
 import { View } from './view';
+import { KingHud } from './kingHud';
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
 import { CpuShooter, PRESET_FORTS, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
@@ -84,6 +85,7 @@ export class Game {
   private hud = document.getElementById('hud')!;
   private topEl = el('div', 'top');
   private pinfo: { root: HTMLElement; pips: HTMLElement; bar: HTMLElement; status: HTMLElement }[] = [];
+  private kingHud!: KingHud;
   private clockEl = el('div', 'clock');
   private subEl = el('div', 'sub');
   private bannerEl = el('div', 'banner');
@@ -116,6 +118,7 @@ export class Game {
       if (this.phase === 'fight') this.fightStep(PHYSICS.dt);
       this.arena.step();
       for (const imp of this.arena.impacts) this.view.puff.burst(new Vector3(imp.x, imp.y, 0), 24);
+      for (const h of this.arena.kingHits) this.kingHud.hit(h.owner, h.dmg);
       if (this.phase === 'fight') this.afterStep();
       if (this.phase === 'replay' && this.arena.time - this.decidedAt > REPLAY.simSeconds - REPLAY.leadSeconds) this.endReplay();
     }
@@ -128,6 +131,7 @@ export class Game {
   }
 
   private update(dt: number): void {
+    this.kingHud.update(dt, this.arena, this.view, this.phase === 'fight' || this.phase === 'roundEnd');
     switch (this.phase) {
       case 'build': this.updateBuild(dt); break;
       case 'roundEnd':
@@ -193,6 +197,7 @@ export class Game {
     this.mode = mode;
     this.arena.reset();
     this.view.puff.clear();
+    this.kingHud.clear();
     this.view.homeCamera();
     this.timeScale = 1;
     this.score = [0, 0];
@@ -381,13 +386,13 @@ export class Game {
         .filter((e) => e.owner === side && (e.kind === 'block' || e.kind === 'king'))
         .map((e) => { const p = e.body.translation(); return { piece: e.piece!, u: -dirOf(side) * p.x, y: p.y - PIECES[e.piece!].hy }; })
         .sort((a, b) => a.y! - b.y!);
-      try { localStorage.setItem(`snowfort.blueprint.${side}`, JSON.stringify(plan)); } catch { /* storage may be blocked */ }
+      try { localStorage.setItem(`snowfort.blueprint2.${side}`, JSON.stringify(plan)); } catch { /* storage may be blocked */ }
     }
   }
 
   private loadBlueprint(side: Side): Placement[] | null {
     try {
-      const s = localStorage.getItem(`snowfort.blueprint.${side}`);
+      const s = localStorage.getItem(`snowfort.blueprint2.${side}`);
       return s ? (JSON.parse(s) as Placement[]) : null;
     } catch { return null; }
   }
@@ -579,7 +584,7 @@ export class Game {
     const k = this.arena.king(side);
     if (!k) return true;
     const p = k.body.translation();
-    return p.y < ARENA.fallY || (k.impact ?? 0) >= MATERIALS.king.hp;
+    return p.y < ARENA.fallY || p.x * -dirOf(side) > ARENA.yardEnd || (k.impact ?? 0) >= MATERIALS.king.hp;
   }
 
   private endRound(lost: Side[]): void {
@@ -597,7 +602,9 @@ export class Game {
     this.lastWinner = winner;
     this.score[winner]++;
     const k = this.arena.king(lost[0]);
-    const how = !k || k.body.translation().y < ARENA.fallY ? 'king off the hill' : 'king knocked out';
+    const kp = k?.body.translation();
+    const how = !kp || kp.y < ARENA.fallY ? 'king off the hill'
+      : kp.x * -dirOf(lost[0]) > ARENA.yardEnd ? 'king pushed out of the yard' : 'king knocked out';
     this.bannerEl.innerHTML = `${NAMES[winner]} takes the round!<small>${NAMES[lost[0]]}'s ${how}</small>`;
   }
 
@@ -631,7 +638,8 @@ export class Game {
     for (const e of [...this.arena.ents]) {
       if (!e.alive) continue;
       const p = e.body.translation();
-      const fallen = p.y < ARENA.fallY || p.x * -dirOf(e.owner) < ARENA.edgeX;
+      const u = p.x * -dirOf(e.owner);
+      const fallen = p.y < ARENA.fallY || u < ARENA.edgeX || (e.kind === 'king' && u > ARENA.yardEnd);
       if (e.kind === 'projectile' || e.kind === 'debris' || e.kind === 'decoy' || fallen) this.arena.remove(e);
       else if (e.kind === 'king' && (e.impact ?? 0) >= MATERIALS.king.hp) this.arena.remove(e);
     }
@@ -823,6 +831,7 @@ export class Game {
       this.keyEls.push(k);
     }
     this.hud.append(this.topEl, this.bannerEl, this.overlayEl, ...this.keyEls);
+    this.kingHud = new KingHud(this.hud, this.pinfo.map((p) => p.bar.parentElement!));
     this.hideTop();
   }
 

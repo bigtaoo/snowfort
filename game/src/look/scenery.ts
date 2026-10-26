@@ -241,12 +241,12 @@ export function props(body: Material, line: Material): Group {
   const k = new Kit();
   fence(k, -20, -ARENA.edgeX - 0.6, -5.5);
   fence(k, ARENA.edgeX + 0.6, 20, -5.5);
-  // pines in clumps behind the fence, a couple further out to the sides; the space behind the
+  // pines in clumps well behind the fence (kept low in the frame so the fight reads first), a couple further out to the sides; the space behind the
   // right-hand fort is left open for the replay camera, which swings round behind it
   const pines: [number, number, number][] = [
-    [-13, -8, 1.5], [-10.5, -9.5, 1.9], [-8, -7.5, 1.2], [-4.5, -11, 2.2], [-1.5, -9, 1.4], [1.8, -12, 2.4],
-    [13.5, -11, 2.3], [-17, -14, 2.6], [17, -15, 2.8], [3, -21, 3.0], [10.5, -20, 3.2],
-    [-7, -16, 2.6], [6.5, -17, 2.8], [-15.5, -4, 1.3], [16, -3.5, 1.4],
+    [-14, -16, 1.4], [-11, -19, 1.7], [-8, -15, 1.1], [-4.5, -22, 1.9], [-1.5, -18, 1.3], [2, -24, 2.1],
+    [13.5, -20, 2.0], [-18, -26, 2.3], [18, -27, 2.4], [3, -34, 2.6], [11, -32, 2.8],
+    [-7, -29, 2.3], [7, -28, 2.4], [-15.5, -4, 1.3], [16, -3.5, 1.4],
   ];
   // the near side of the yard (behind the side-view camera, seen only when the replay turns round)
   pines.push([-20, 30, 2.6], [-9, 36, 2.9], [7, 40, 3.2], [20, 32, 2.8], [26, 40, 3.0], [-26, 38, 3.1], [11, 46, 3.4]);

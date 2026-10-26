@@ -15,36 +15,36 @@ export interface Placement {
 export const PRESET_FORTS: Placement[][] = [
   // shelter: king under a roof behind a snow wall
   [
-    { piece: 'snow', u: 5.5 }, { piece: 'snow', u: 5.5 }, { piece: 'snow', u: 5.5 },
-    { piece: 'snow', u: 6.5 }, { piece: 'snow', u: 6.5 }, { piece: 'snow', u: 6.5 },
-    { piece: 'plankH', u: 6, y: 3 },
-    { piece: 'ice', u: 7.5 }, { piece: 'ice', u: 7.5 },
-    { piece: 'plankV', u: 8.6 }, { piece: 'plankV', u: 11.2 }, { piece: 'king', u: 10 },
-    { piece: 'plankH', u: 10, y: 3 }, { piece: 'snow', u: 9.5, y: 3.3 }, { piece: 'snow', u: 10.5, y: 3.3 },
-    { piece: 'ice', u: 12 }, { piece: 'snow', u: 12 }, { piece: 'ice', u: 10, y: 4.3 },
+    { piece: 'snow', u: 4 }, { piece: 'snow', u: 4 }, { piece: 'snow', u: 4 },
+    { piece: 'snow', u: 5 }, { piece: 'snow', u: 5 }, { piece: 'snow', u: 5 },
+    { piece: 'plankH', u: 4.5, y: 3 },
+    { piece: 'ice', u: 6 }, { piece: 'ice', u: 6 },
+    { piece: 'plankV', u: 7.1 }, { piece: 'plankV', u: 9.7 }, { piece: 'king', u: 8.5 },
+    { piece: 'plankH', u: 8.5, y: 3 }, { piece: 'snow', u: 8, y: 3.3 }, { piece: 'snow', u: 9, y: 3.3 },
+    { piece: 'ice', u: 10.5 }, { piece: 'snow', u: 10.5 }, { piece: 'ice', u: 8.5, y: 4.3 },
   ],
   // bunker: low and wide, king hugging the ground
   [
-    { piece: 'snow', u: 5.5 }, { piece: 'snow', u: 5.5 }, { piece: 'ice', u: 5.5 },
-    { piece: 'snow', u: 6.5 }, { piece: 'snow', u: 6.5 }, { piece: 'ice', u: 6.5 },
-    { piece: 'snow', u: 7.5 }, { piece: 'snow', u: 7.5 }, { piece: 'plankH', u: 6.5, y: 3 },
-    { piece: 'plankV', u: 8.6 }, { piece: 'plankV', u: 11.2 }, { piece: 'king', u: 10 },
-    { piece: 'plankH', u: 10, y: 3 }, { piece: 'snow', u: 9.4, y: 3.3 }, { piece: 'snow', u: 10.6, y: 3.3 }, { piece: 'ice', u: 10, y: 4.3 },
-    { piece: 'snow', u: 12 }, { piece: 'snow', u: 12 }, { piece: 'ice', u: 12 },
+    { piece: 'snow', u: 4 }, { piece: 'snow', u: 4 }, { piece: 'ice', u: 4 },
+    { piece: 'snow', u: 5 }, { piece: 'snow', u: 5 }, { piece: 'ice', u: 5 },
+    { piece: 'snow', u: 6 }, { piece: 'snow', u: 6 }, { piece: 'plankH', u: 5, y: 3 },
+    { piece: 'plankV', u: 7.1 }, { piece: 'plankV', u: 9.7 }, { piece: 'king', u: 8.5 },
+    { piece: 'plankH', u: 8.5, y: 3 }, { piece: 'snow', u: 7.9, y: 3.3 }, { piece: 'snow', u: 9.1, y: 3.3 }, { piece: 'ice', u: 8.5, y: 4.3 },
+    { piece: 'snow', u: 10.5 }, { piece: 'snow', u: 10.5 }, { piece: 'ice', u: 10.5 },
   ],
   // perch: king up on a pedestal behind a tall ice-and-snow wall
   [
-    { piece: 'ice', u: 6 }, { piece: 'ice', u: 6 }, { piece: 'ice', u: 6 },
-    { piece: 'snow', u: 7 }, { piece: 'snow', u: 7 }, { piece: 'snow', u: 7 },
-    { piece: 'plankV', u: 8.2 },
-    { piece: 'snow', u: 10 }, { piece: 'snow', u: 10 }, { piece: 'snow', u: 11 }, { piece: 'snow', u: 11 },
-    { piece: 'plankH', u: 10.5, y: 2 }, { piece: 'king', u: 10.5, y: 2.3 },
-    { piece: 'snow', u: 12 }, { piece: 'snow', u: 12 }, { piece: 'ice', u: 12 }, { piece: 'snow', u: 5 },
+    { piece: 'ice', u: 4.5 }, { piece: 'ice', u: 4.5 }, { piece: 'ice', u: 4.5 },
+    { piece: 'snow', u: 5.5 }, { piece: 'snow', u: 5.5 }, { piece: 'snow', u: 5.5 },
+    { piece: 'plankV', u: 6.7 },
+    { piece: 'snow', u: 8.5 }, { piece: 'snow', u: 8.5 }, { piece: 'snow', u: 9.5 }, { piece: 'snow', u: 9.5 },
+    { piece: 'plankH', u: 9, y: 2 }, { piece: 'king', u: 9, y: 2.3 },
+    { piece: 'snow', u: 10.5 }, { piece: 'snow', u: 10.5 }, { piece: 'ice', u: 10.5 }, { piece: 'snow', u: 3.5 },
   ],
 ];
 
 export const REPAIR_PLAN: Placement[] = [
-  { piece: 'snow', u: 6.5, y: 6 }, { piece: 'snow', u: 7.5, y: 6 }, { piece: 'ice', u: 8.5, y: 6 }, { piece: 'snow', u: 5.5, y: 6 }, { piece: 'plankH', u: 7, y: 7 },
+  { piece: 'snow', u: 5, y: 6 }, { piece: 'snow', u: 6, y: 6 }, { piece: 'ice', u: 7, y: 6 }, { piece: 'snow', u: 4, y: 6 }, { piece: 'plankH', u: 5.5, y: 7 },
 ];
 
 const deg = Math.PI / 180;

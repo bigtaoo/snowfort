@@ -76,6 +76,8 @@ export class Arena {
   private lastSnapshotAt = -1;
   /** Projectile first-contacts this step, for sounds, effects and cocoa. */
   impacts: ImpactEvent[] = [];
+  /** Damage each king took this step, for the HUD. */
+  kingHits: { owner: Side; dmg: number }[] = [];
   /** Extra force on each side's shots (wind card), set at round start. */
   wind: [number, number] = [0, 0];
   /** Off while building: blocks dropped into place should not crack. */
@@ -130,7 +132,9 @@ export class Arena {
 
   private bodyDesc(x: number, y: number): RAPIER.RigidBodyDesc {
     const d = RAPIER.RigidBodyDesc.dynamic().setTranslation(x, y, 0);
-    if (!this.freed) d.enabledTranslations(true, true, false).enabledRotations(false, false, true);
+    // Only the rotations are locked: locking z translation as well leaves Rapier (0.21) with no
+    // friction at all, so bodies slid like on ice. z is pinned by hand after each step instead.
+    if (!this.freed) d.enabledRotations(false, false, true);
     return d;
   }
 
@@ -251,6 +255,7 @@ export class Arena {
 
   step(): void {
     this.impacts = [];
+    this.kingHits = [];
     this.world.step(this.events);
     this.time += PHYSICS.dt;
     const dt = PHYSICS.dt;
@@ -278,13 +283,22 @@ export class Arena {
         if (this.freed && other?.kind === 'projectile') {
           e.body.applyImpulse({ x: 0, y: 0, z: (Math.random() - 0.5) * REPLAY.hitZImpulse * impulse }, true);
         }
-        if (e.kind === 'king') e.impact = (e.impact ?? 0) + Math.min(dmg, MATERIALS.king.hp * PHYSICS.kingMaxHitShare);
+        if (e.kind === 'king') {
+          const hit = Math.min(dmg, MATERIALS.king.hp * PHYSICS.kingMaxHitShare);
+          e.impact = (e.impact ?? 0) + hit;
+          this.kingHits.push({ owner: e.owner, dmg: hit });
+        }
         else if (e.kind === 'block') e.hp -= dmg;
       }
     });
     for (const e of this.ents) {
       if (!e.alive) continue;
       const p = e.body.translation();
+      if (!this.freed && p.z !== 0) {
+        e.body.setTranslation({ x: p.x, y: p.y, z: 0 }, false);
+        const v = e.body.linvel();
+        e.body.setLinvel({ x: v.x, y: v.y, z: 0 }, false);
+      }
       if (p.y < ARENA.ravineY - 6) { this.remove(e); continue; }
       if (e.kind === 'block' && e.hp <= 0) this.breakBlock(e);
       else if (e.kind === 'debris' && e.dieAt !== undefined && this.time > e.dieAt) this.remove(e);

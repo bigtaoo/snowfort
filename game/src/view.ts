@@ -106,7 +106,7 @@ export class View {
 
     const child = kid(side === 0 ? WARM : COOL, body, line);
     child.scale.setScalar(1.15);
-    child.position.set(px - dir * 1.9, ARENA.groundY, 0.6);
+    child.position.set(px - dir * 1.7, ARENA.groundY, 0.6);
     child.rotation.y = dir * 0.7;
     child.traverse((o) => { if ((o as THREE.Mesh).isMesh) o.castShadow = true; });
     this.scene.add(child);
@@ -211,7 +211,7 @@ export class View {
     const dist = Math.max(ARENA.viewHalfWidth / (tan * this.camera.aspect), halfH / tan);
     const cy = ARENA.viewBottom + dist * tan;
     // a little above the plateaus, looking down: more yard and ravine behind the forts, less sky
-    this.homePos.set(0, cy + dist * 0.16, dist);
+    this.homePos.set(0, cy + dist * 0.1, dist);
     this.homeTarget.set(0, cy, 0);
     this.camera.updateProjectionMatrix();
     this.homeCamera();
