@@ -159,7 +159,7 @@ export const ROUND = {
 };
 
 export const CARDS = {
-  windForce: 9,
+  windForce: 4,
   /** Bouncy fence: a heavy springy upright plank at the front edge. */
   springRestitution: 1.25,
   springDensity: 14,
@@ -185,9 +185,9 @@ export const REPLAY = {
 
 export const CPU = {
   levels: {
-    easy: { angleNoiseDeg: 5, speedNoise: 1.6, correction: 0, thinkSeconds: 1.2, decoyFooled: 0.6 },
-    normal: { angleNoiseDeg: 2.5, speedNoise: 0.8, correction: 0.4, thinkSeconds: 0.7, decoyFooled: 0.4 },
-    hard: { angleNoiseDeg: 1.2, speedNoise: 0.35, correction: 0.75, thinkSeconds: 0.35, decoyFooled: 0.2 },
+    easy: { angleNoiseDeg: 5, speedNoise: 1.6, thinkSeconds: 1.2, decoyFooled: 0.6 },
+    normal: { angleNoiseDeg: 2.5, speedNoise: 0.8, thinkSeconds: 0.7, decoyFooled: 0.4 },
+    hard: { angleNoiseDeg: 1.2, speedNoise: 0.35, thinkSeconds: 0.35, decoyFooled: 0.2 },
   },
   /** Angles the CPU likes to throw at (it waits for the sweep to pass one). */
   preferredAnglesDeg: [55, 40, 30, 62],

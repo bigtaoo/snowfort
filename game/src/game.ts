@@ -73,6 +73,7 @@ export class Game {
   private cpuBuildTimer = 0;
   /** The card the CPU will take when its pick time runs out. */
   private cpuCard: number | null = null;
+  private cardClockEl = el('div', 'cardClock', '');
   private bannerTimer = 0;
   private cardQueue: Side[] = [];
   private hand: Card[] = [];
@@ -154,6 +155,9 @@ export class Game {
         break;
       case 'cards':
         this.cardTime -= dt;
+        // the last few seconds count down, so a random pick never comes as a surprise
+        this.cardClockEl.textContent = this.cardTime < 6 && !(this.mode === 'cpu' && this.cardQueue[0] === 1)
+          ? `random pick in ${Math.ceil(this.cardTime)}…` : '';
         if (this.cardTime <= 0) this.pickCard(this.cpuCard ?? Math.floor(Math.random() * 3));
         break;
       case 'replay': {
@@ -509,6 +513,7 @@ export class Game {
       this.pending[side] = [];
     }
     for (const e of this.arena.ents) if (e.kind === 'king') e.impact = 0;
+    this.kingHud.clear();
     this.turn = this.lastWinner === null ? 0 : other(this.lastWinner);
     this.turnFiredAt = null;
     this.trailBall = [null, null];
@@ -537,7 +542,9 @@ export class Game {
         break;
       }
       case 'spring': {
-        // on the strip between the cliff and the build zone, which nothing else uses
+        // on the strip between the cliff and the build zone, which nothing else uses; a new one replaces the old
+        for (const e of this.arena.ents) if (e.alive && e.spring && e.owner === side) this.arena.remove(e);
+        this.arena.ents = this.arena.ents.filter((e) => e.alive);
         this.arena.addPiece('plankV', side, xOf(side, ARENA.edgeX + PIECES.plankV.hx - 0.01), ARENA.groundY + PIECES.plankV.hy + 0.02, false, true);
         break;
       }
@@ -736,18 +743,21 @@ export class Game {
     }
     this.hand = dealHand();
     this.cardTime = ROUND.cardPickSeconds;
+    this.bannerEl.innerHTML = '';
+    this.bannerTimer = 0;
     const o = this.overlayEl;
     o.innerHTML = '';
     o.className = `overlay p${side}`;
     this.overlay(true);
     o.append(el('div', 'who', `${NAMES[side]}, pick a card${this.lastWinner === other(side) ? ' (loser picks first)' : ''}`));
+    this.cardClockEl = el('div', 'cardClock', '');
     const row = el('div', 'cards');
     this.hand.forEach((c, i) => {
       const card = el('div', 'card', `<div class="ic">${c.icon}</div><div class="kd">${c.kind}</div><div class="nm">${c.name}</div><div class="tx">${c.text}</div>${this.touch ? '' : `<kbd>${CARD_LABEL[side][i]}</kbd>`}`);
       card.onclick = () => this.pickCard(i);
       row.append(card);
     });
-    o.append(row);
+    o.append(row, this.cardClockEl);
     this.cpuCard = null;
     if (this.mode === 'cpu' && side === 1) {
       this.cardTime = 1.2;

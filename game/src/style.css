@@ -73,11 +73,12 @@ kbd { background: #17324d; color: #fff; border-radius: 5px; padding: 1px 6px; fo
 .card .kd { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; opacity: .6; }
 .card .tx { font-size: 13px; margin-top: 4px; }
 .card kbd { display: inline-block; margin-top: 6px; }
+.cardClock { min-height: 1.4em; font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px #0008; }
 .who { font-size: 26px; font-weight: 900; color: var(--pc); background: #fff; padding: 4px 16px; border-radius: 12px; }
 
 /* short landscape phones: the HUD and the tray at about two thirds size, so they leave the field visible */
 @media (max-height: 520px) {
-  .top, .palette, .keys, .timerChip, .cards, .who, .menu, .help, .mute { zoom: .66; }
+  .top, .palette, .keys, .timerChip, .cards, .who, .cardClock, .menu, .help, .mute { zoom: .66; }
   .kingBar { width: 54px; height: 8px; margin-left: -27px; }
   .dmgPop { font-size: 26px; }
   .dmgPop.big { font-size: 36px; }

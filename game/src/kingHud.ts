@@ -13,6 +13,8 @@ export class KingHud {
   private fills: HTMLElement[] = [];
   private pending = [0, 0];
   private sinceLast = [POP_EVERY, POP_EVERY];
+  /** A downed king says KO! once; debris landing on him afterwards stays quiet. */
+  private koShown = [false, false];
 
   /** `onPop` hears each gathered hit as it is shown (for the sound). */
   constructor(private host: HTMLElement, private topBars: HTMLElement[], private onPop: (side: Side, dmg: number) => void = () => {}) {
@@ -33,6 +35,7 @@ export class KingHud {
 
   clear(): void {
     this.pending = [0, 0];
+    this.koShown = [false, false];
   }
 
   update(dt: number, arena: Arena, view: View, show: boolean): void {
@@ -52,7 +55,9 @@ export class KingHud {
       bar.style.top = `${s.y}px`;
       const health = Math.max(0, 1 - (k.impact ?? 0) / MATERIALS.king.hp);
       this.fills[side].style.width = `${health * 100}%`;
+      if (this.koShown[side]) this.pending[side] = 0;
       if (this.pending[side] >= MIN_POP && this.sinceLast[side] >= POP_EVERY) {
+        this.koShown[side] = health <= 0;
         this.pop(side, s.x, s.y, this.pending[side], health <= 0);
         this.pending[side] = 0;
         this.sinceLast[side] = 0;

@@ -1,4 +1,4 @@
-import { CATAPULT, CPU, PHYSICS, type PieceId } from './config';
+import { AMMO, CATAPULT, CPU, PHYSICS, type PieceId } from './config';
 import { Arena, type Side } from './arena';
 import { Launcher } from './launcher';
 import type { Card } from './cards';
@@ -50,29 +50,17 @@ export const REPAIR_PLAN: Placement[] = [
 const deg = Math.PI / 180;
 const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
 
-/** Plays one catapult by solving the ballistic arc to the enemy king, plus noise. */
+/** Plays one catapult by solving the arc to the enemy king (gravity, wind and the ammo's flight), plus noise. */
 export class CpuShooter {
   private wantAngle: number | null = null;
   private wantPower = 0;
   private think = 0;
-  private bias = 0;
-  private targetX = 0;
-  private awaitingImpact = false;
   private prevPower = 0;
 
   constructor(readonly side: Side, readonly level: CpuLevel) {}
 
   update(dt: number, l: Launcher, arena: Arena): { press?: boolean; release?: boolean } {
     const cfg = CPU.levels[this.level];
-    for (const imp of arena.impacts) {
-      if (imp.owner === this.side && this.awaitingImpact) {
-        this.awaitingImpact = false;
-        // positive error means the shot went past the target
-        const err = (imp.x - this.targetX) * (this.side === 0 ? 1 : -1);
-        this.bias -= err * cfg.correction;
-        this.bias = Math.max(-6, Math.min(6, this.bias));
-      }
-    }
     if (l.phase === 'reload' || !l.ready && l.phase !== 'charge') {
       this.wantAngle = null;
       return {};
@@ -81,7 +69,7 @@ export class CpuShooter {
       if (this.wantAngle === null) {
         this.think -= dt;
         if (this.think > 0) return {};
-        if (!this.plan(arena)) return {};
+        if (!this.plan(arena, l)) return {};
       }
       if (Math.abs(l.angle - this.wantAngle!) < 1.6 * deg) {
         this.prevPower = 0;
@@ -96,13 +84,12 @@ export class CpuShooter {
     if ((rising && p >= this.wantPower) || (!rising && p < 0.05)) {
       this.wantAngle = null;
       this.think = cfg.thinkSeconds * (0.6 + Math.random() * 0.8);
-      this.awaitingImpact = true;
       return { release: true };
     }
     return {};
   }
 
-  private plan(arena: Arena): boolean {
+  private plan(arena: Arena, l: Launcher): boolean {
     const cfg = CPU.levels[this.level];
     const enemy = (1 - this.side) as Side;
     const kings = arena.ents.filter((e) => e.alive && e.owner === enemy && (e.kind === 'king' || e.kind === 'decoy'));
@@ -111,28 +98,32 @@ export class CpuShooter {
     const decoy = kings.find((k) => k.kind === 'decoy');
     const target = decoy && Math.random() < cfg.decoyFooled ? decoy : real;
     const tp = target.body.translation();
-    this.targetX = tp.x;
     const dir = this.side === 0 ? 1 : -1;
-    const g = -PHYSICS.gravity;
+    const firework = l.ammo[0] === 'firework';
+    const g = -PHYSICS.gravity * (firework ? AMMO.firework.gravityScale : 1);
+    const wind = arena.wind[this.side] * dir;
+    const speedMul = firework ? AMMO.firework.speedMul : 1;
+    // fireworks fly flat, so they also try the low angles
     const angles = [...CPU.preferredAnglesDeg].sort(() => Math.random() - 0.5);
+    if (firework) angles.unshift(CATAPULT.minAngleDeg + 2, 20);
     for (const a of angles) {
       const theta = (a + gauss() * cfg.angleNoiseDeg) * deg;
+      if (theta < CATAPULT.minAngleDeg * deg || theta > CATAPULT.maxAngleDeg * deg) continue;
       const m = Arena.muzzle(this.side, theta);
-      const dx = (tp.x - m.x) * dir + this.bias;
+      const dx = (tp.x - m.x) * dir;
       const dy = tp.y + 0.3 - m.y;
-      const denom = 2 * Math.cos(theta) ** 2 * (dx * Math.tan(theta) - dy);
-      if (denom <= 0) continue;
-      let v = Math.sqrt((g * dx * dx) / denom);
-      v += gauss() * cfg.speedNoise;
+      let v = solveSpeed(theta, dx, dy, g, wind, CATAPULT.minSpeed * speedMul, CATAPULT.maxSpeed * speedMul);
+      if (v === null) continue;
+      v = v / speedMul + gauss() * cfg.speedNoise;
       const power = Launcher.powerFor(v);
       if (power < 0.03 || power > 0.97) continue;
-      this.wantAngle = Math.max(CATAPULT.minAngleDeg * deg, Math.min(CATAPULT.maxAngleDeg * deg, theta));
+      this.wantAngle = theta;
       this.wantPower = power;
       return true;
     }
-    // nothing fits: lob something anyway
-    this.wantAngle = 45 * deg;
-    this.wantPower = 0.7;
+    // nothing fits: a firework skims in low and soft; anything else lobs
+    this.wantAngle = firework ? (CATAPULT.minAngleDeg + 1) * deg : 45 * deg;
+    this.wantPower = firework ? 0.08 : 0.7;
     return true;
   }
 }
@@ -154,4 +145,26 @@ export function cpuPickCard(hand: Card[], level: CpuLevel, behind: boolean, fort
     if (score > bestScore) { bestScore = score; best = i; }
   });
   return best;
+}
+
+/**
+ * The launch speed that brings a shot at angle `theta` down through (dx, dy), under gravity `g` and a steady
+ * horizontal acceleration `ax` (wind), by bisection: the landing distance grows with speed. Null if out of reach.
+ */
+export function solveSpeed(theta: number, dx: number, dy: number, g: number, ax: number, vMin: number, vMax: number): number | null {
+  const reach = (v: number): number => {
+    const vy = v * Math.sin(theta);
+    const disc = vy * vy - 2 * g * dy;
+    if (disc < 0) return -Infinity; // never climbs that high
+    const t = (vy + Math.sqrt(disc)) / g;
+    return v * Math.cos(theta) * t + 0.5 * ax * t * t;
+  };
+  if (reach(vMin) > dx || reach(vMax) < dx) return null;
+  let lo = vMin;
+  let hi = vMax;
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2;
+    if (reach(mid) < dx) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
 }
