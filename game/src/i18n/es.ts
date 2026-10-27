@@ -13,10 +13,7 @@ export const es: Table<typeof en> = {
   keys: { p0: 'Espacio', p1: 'Intro' },
   menu: {
     turns: '2 jugadores — por turnos',
-    cpu: 'contra {name} · {level}',
-    easy: 'fácil',
-    normal: 'normal',
-    hard: 'difícil',
+    cpu: 'contra {name}',
     startHere: '¿NUEVO? EMPIEZA AQUÍ',
     helpTouch: 'Construir: arrastra piezas de tu bandeja a tu lado. Luchar: mantén pulsada tu mitad de la pantalla para fijar la puntería y cargar, suelta para lanzar. Tira al rey de nieve rival de su colina o déjalo K.O. para ganar la ronda. Gana quien llegue a 3.',
     helpKeys: 'Construir: arrastra piezas de la bandeja a tu lado (haz clic en una pieza colocada para recogerla). Luchar: {red} {space}, {blue} {enter} — pulsa para fijar la puntería que oscila, mantén para cargar, suelta para lanzar. Tira al rey de nieve rival de su colina o déjalo K.O. para ganar la ronda. Gana quien llegue a 3.',
@@ -93,6 +90,7 @@ export const es: Table<typeof en> = {
     cpuWins: '¡Gana {name}!',
     wins: '¡{name} gana!',
     rematch: 'Revancha',
+    next: 'Siguiente partida ({n})',
     menu: 'Menú',
   },
   coach: {
@@ -107,6 +105,7 @@ export const es: Table<typeof en> = {
     chargeKey: 'Mantén… ¡suelta para lanzar!<small>cuanto más mantengas, más lejos llega</small>',
     chargeTouch: 'Sigue manteniendo… ¡suelta para lanzar!<small>cuanto más mantengas, más lejos llega</small>',
     goal: '¡Deja K.O. al rey {name}!<small>vacía su barra o tíralo de su colina · gana quien llegue a 3 rondas</small>',
+    goalCpu: '¡Deja K.O. al rey {name}!<small>vacía su barra o tíralo de su colina</small>',
     card: 'Elige una: es tuya para la próxima ronda<small>munición, una mejora del fuerte o una jugarreta a tu rival</small>',
   },
 };

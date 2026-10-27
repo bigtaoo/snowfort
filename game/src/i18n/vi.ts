@@ -13,10 +13,7 @@ export const vi: Table<typeof en> = {
   keys: { p0: 'Space', p1: 'Enter' },
   menu: {
     turns: '2 người — lần lượt',
-    cpu: 'đấu với {name} · {level}',
-    easy: 'dễ',
-    normal: 'thường',
-    hard: 'khó',
+    cpu: 'đấu với {name}',
     startHere: 'MỚI CHƠI? BẮT ĐẦU Ở ĐÂY',
     helpTouch: 'Xây: kéo khối từ khay sang phía của bạn. Đánh: giữ nửa màn hình của bạn để khóa hướng ngắm và nạp lực, thả ra để ném. Đẩy vua tuyết của đối thủ khỏi đồi hoặc hạ gục nó để thắng hiệp. Ai thắng 3 hiệp trước là thắng.',
     helpKeys: 'Xây: kéo khối từ khay sang phía của bạn (nhấp vào khối đã đặt để nhấc lại). Đánh: {red} {space}, {blue} {enter} — nhấn để khóa hướng ngắm đang lắc, giữ để nạp lực, thả để ném. Đẩy vua tuyết của đối thủ khỏi đồi hoặc hạ gục nó để thắng hiệp. Ai thắng 3 hiệp trước là thắng.',
@@ -93,6 +90,7 @@ export const vi: Table<typeof en> = {
     cpuWins: '{name} thắng!',
     wins: '{name} thắng!',
     rematch: 'Đấu lại',
+    next: 'Trận tiếp theo ({n})',
     menu: 'Menu',
   },
   coach: {
@@ -107,6 +105,7 @@ export const vi: Table<typeof en> = {
     chargeKey: 'Giữ… thả ra để ném!<small>giữ càng lâu bay càng xa</small>',
     chargeTouch: 'Tiếp tục giữ… thả ra để ném!<small>giữ càng lâu bay càng xa</small>',
     goal: 'Hạ gục vua {name}!<small>làm cạn thanh máu hoặc đẩy nó khỏi đồi · ai thắng 3 hiệp trước</small>',
+    goalCpu: 'Hạ gục vua {name}!<small>làm cạn thanh máu hoặc đẩy nó khỏi đồi</small>',
     card: 'Chọn một lá: dùng cho hiệp sau<small>đạn, nâng cấp pháo đài hoặc trò chơi khăm đối thủ</small>',
   },
 };

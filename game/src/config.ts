@@ -184,12 +184,20 @@ export const REPLAY = {
 };
 
 export const CPU = {
-  levels: {
-    // wildShot: share of throws given a big deliberate over/undershoot
-    easy: { angleNoiseDeg: 7, speedNoise: 2.2, thinkSeconds: 3.2, decoyFooled: 0.8, wildShot: 0.6 },
-    normal: { angleNoiseDeg: 2.5, speedNoise: 0.8, thinkSeconds: 0.7, decoyFooled: 0.4, wildShot: 0 },
-    hard: { angleNoiseDeg: 1.2, speedNoise: 0.35, thinkSeconds: 0.35, decoyFooled: 0.2, wildShot: 0 },
-  },
+  /**
+   * Frosty's hidden level runs from 1 to maxLevel; each win moves it up one, each loss down one.
+   * Every skill value slides in a straight line from `weakest` (level 1) to `strongest` (maxLevel).
+   */
+  maxLevel: 100,
+  // wildShot: share of throws given a big deliberate over/undershoot
+  weakest: { angleNoiseDeg: 9, speedNoise: 3, thinkSeconds: 4, decoyFooled: 0.9, wildShot: 0.75 },
+  strongest: { angleNoiseDeg: 1, speedNoise: 0.3, thinkSeconds: 0.3, decoyFooled: 0.15, wildShot: 0 },
+  /** Wild throws die out this far up the scale (0..1), so the middle levels already aim honestly. */
+  wildFadeAt: 0.6,
+  /** From the second match on, the player gets this long to adjust their fort. */
+  adjustSeconds: 30,
+  /** The results screen moves on to the next match by itself after this long. */
+  nextMatchSeconds: 5,
   /** Angles the CPU likes to throw at (it waits for the sweep to pass one). */
   preferredAnglesDeg: [55, 40, 30, 62],
   buildDropInterval: 0.12,

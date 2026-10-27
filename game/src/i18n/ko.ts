@@ -13,10 +13,7 @@ export const ko: Table<typeof en> = {
   keys: { p0: '스페이스', p1: 'Enter' },
   menu: {
     turns: '2인 — 번갈아',
-    cpu: '{name}와 대전 · {level}',
-    easy: '쉬움',
-    normal: '보통',
-    hard: '어려움',
+    cpu: '{name}와 대전',
     startHere: '처음인가요? 여기서 시작',
     helpTouch: '건설: 트레이의 블록을 내 진영으로 끌어 놓으세요. 전투: 내 쪽 화면을 누르면 조준이 멈추고 힘이 모이며, 떼면 던집니다. 상대 눈사람 왕을 언덕에서 떨어뜨리거나 쓰러뜨리면 라운드 승리. 먼저 3승하면 이깁니다.',
     helpKeys: '건설: 트레이의 블록을 내 진영으로 끌어 놓으세요 (놓은 블록을 클릭하면 다시 집습니다). 전투: {red} {space}, {blue} {enter} — 누르면 흔들리는 조준이 멈추고, 계속 누르면 힘이 모이며, 떼면 던집니다. 상대 눈사람 왕을 언덕에서 떨어뜨리거나 쓰러뜨리면 라운드 승리. 먼저 3승하면 이깁니다.',
@@ -93,6 +90,7 @@ export const ko: Table<typeof en> = {
     cpuWins: '{name} 승리!',
     wins: '{name} 승리!',
     rematch: '재대결',
+    next: '다음 경기 ({n})',
     menu: '메뉴',
   },
   coach: {
@@ -107,6 +105,7 @@ export const ko: Table<typeof en> = {
     chargeKey: '누르고 있다가… 떼면 던집니다!<small>오래 누를수록 멀리 날아갑니다</small>',
     chargeTouch: '계속 누르고… 떼면 던집니다!<small>오래 누를수록 멀리 날아갑니다</small>',
     goal: '{name} 왕을 쓰러뜨리세요!<small>게이지를 비우거나 언덕에서 밀어내기 · 먼저 3라운드</small>',
+    goalCpu: '{name} 왕을 쓰러뜨리세요!<small>게이지를 비우거나 언덕에서 밀어내기</small>',
     card: '하나를 고르세요: 다음 라운드에 쓸 수 있어요<small>탄약, 요새 강화, 또는 상대에게 장난</small>',
   },
 };

@@ -13,10 +13,7 @@ export const ja: Table<typeof en> = {
   keys: { p0: 'スペース', p1: 'Enter' },
   menu: {
     turns: '2人 — 交代で',
-    cpu: '{name}と対戦 · {level}',
-    easy: 'かんたん',
-    normal: 'ふつう',
-    hard: 'むずかしい',
+    cpu: '{name}と対戦',
     startHere: 'はじめて？ここから',
     helpTouch: '建設：トレイからパーツを自分の陣地へドラッグ。戦闘：自分側の画面を押して照準を止めてためる、離して投げる。相手の雪の王様を丘から落とすか倒せばラウンド勝利。先に3勝したほうの勝ち。',
     helpKeys: '建設：トレイからパーツを自分の陣地へドラッグ（置いたパーツをクリックすると拾い直せます）。戦闘：{red} {space}、{blue} {enter} — 押すと揺れる照準が止まり、押し続けてためて、離して投げる。相手の雪の王様を丘から落とすか倒せばラウンド勝利。先に3勝したほうの勝ち。',
@@ -93,6 +90,7 @@ export const ja: Table<typeof en> = {
     cpuWins: '{name}の勝ち！',
     wins: '{name}の勝ち！',
     rematch: '再戦',
+    next: '次の試合（{n}）',
     menu: 'メニュー',
   },
   coach: {
@@ -107,6 +105,7 @@ export const ja: Table<typeof en> = {
     chargeKey: '押し続けて… 離して投げる！<small>長く押すほど遠くへ飛ぶ</small>',
     chargeTouch: 'そのまま押して… 離して投げる！<small>長く押すほど遠くへ飛ぶ</small>',
     goal: '{name}の王様を倒そう！<small>ゲージを空にするか丘から落とす · 先に3ラウンド取れば勝ち</small>',
+    goalCpu: '{name}の王様を倒そう！<small>ゲージを空にするか丘から落とす</small>',
     card: '1枚選ぼう：次のラウンドで使える<small>弾、砦の強化、または相手へのいたずら</small>',
   },
 };

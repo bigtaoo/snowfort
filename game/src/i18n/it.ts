@@ -13,10 +13,7 @@ export const it: Table<typeof en> = {
   keys: { p0: 'Spazio', p1: 'Invio' },
   menu: {
     turns: '2 giocatori — a turni',
-    cpu: 'contro {name} · {level}',
-    easy: 'facile',
-    normal: 'normale',
-    hard: 'difficile',
+    cpu: 'contro {name}',
     startHere: 'NUOVO? INIZIA QUI',
     helpTouch: 'Costruisci: trascina i pezzi dal tuo vassoio nella tua metà. Combatti: tieni premuta la tua metà dello schermo per bloccare la mira e caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. Vince chi arriva a 3.',
     helpKeys: 'Costruisci: trascina i pezzi dal vassoio nella tua metà (clicca un pezzo piazzato per riprenderlo). Combatti: {red} {space}, {blue} {enter} — premi per bloccare la mira che oscilla, tieni premuto per caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. Vince chi arriva a 3.',
@@ -93,6 +90,7 @@ export const it: Table<typeof en> = {
     cpuWins: 'Vince {name}!',
     wins: '{name} vince!',
     rematch: 'Rivincita',
+    next: 'Prossima partita ({n})',
     menu: 'Menu',
   },
   coach: {
@@ -107,6 +105,7 @@ export const it: Table<typeof en> = {
     chargeKey: 'Tieni premuto… rilascia per lanciare!<small>più a lungo tieni, più lontano vola</small>',
     chargeTouch: 'Continua a tenere premuto… rilascia per lanciare!<small>più a lungo tieni, più lontano vola</small>',
     goal: 'Metti K.O. il re {name}!<small>svuota la sua barra o spingilo giù dalla collina · vince chi arriva a 3 round</small>',
+    goalCpu: 'Metti K.O. il re {name}!<small>svuota la sua barra o spingilo giù dalla collina</small>',
     card: 'Scegline una: è tua per il prossimo round<small>munizioni, un potenziamento del forte o un tiro mancino all’avversario</small>',
   },
 };

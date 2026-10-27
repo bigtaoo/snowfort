@@ -13,10 +13,7 @@ export const fr: Table<typeof en> = {
   keys: { p0: 'Espace', p1: 'Entrée' },
   menu: {
     turns: '2 joueurs — chacun son tour',
-    cpu: 'contre {name} · {level}',
-    easy: 'facile',
-    normal: 'normal',
-    hard: 'difficile',
+    cpu: 'contre {name}',
     startHere: 'NOUVEAU ? COMMENCE ICI',
     helpTouch: 'Construction : fais glisser les pièces de ton plateau vers ton camp. Combat : maintiens ta moitié d’écran pour bloquer la visée et charger, relâche pour lancer. Fais tomber le roi des neiges adverse de sa colline ou assomme-le pour gagner la manche. Le premier à 3 gagne.',
     helpKeys: 'Construction : fais glisser les pièces du plateau vers ton camp (clique une pièce posée pour la reprendre). Combat : {red} {space}, {blue} {enter} — appuie pour bloquer la visée qui oscille, maintiens pour charger, relâche pour lancer. Fais tomber le roi des neiges adverse de sa colline ou assomme-le pour gagner la manche. Le premier à 3 gagne.',
@@ -93,6 +90,7 @@ export const fr: Table<typeof en> = {
     cpuWins: '{name} gagne !',
     wins: '{name} gagne !',
     rematch: 'Revanche',
+    next: 'Partie suivante ({n})',
     menu: 'Menu',
   },
   coach: {
@@ -107,6 +105,7 @@ export const fr: Table<typeof en> = {
     chargeKey: 'Maintiens… relâche pour lancer !<small>plus tu maintiens, plus ça va loin</small>',
     chargeTouch: 'Continue de maintenir… relâche pour lancer !<small>plus tu maintiens, plus ça va loin</small>',
     goal: 'Mets K.-O. le roi {name} !<small>vide sa barre ou pousse-le de sa colline · le premier à 3 manches</small>',
+    goalCpu: 'Mets K.-O. le roi {name} !<small>vide sa barre ou pousse-le de sa colline</small>',
     card: 'Choisis-en une : elle est à toi pour la prochaine manche<small>munitions, renfort pour ton fort ou mauvais tour à ton adversaire</small>',
   },
 };

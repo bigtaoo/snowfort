@@ -13,10 +13,7 @@ export const zh: Table<typeof en> = {
   keys: { p0: '空格', p1: '回车' },
   menu: {
     turns: '双人 — 轮流出手',
-    cpu: '对战{name} · {level}',
-    easy: '简单',
-    normal: '普通',
-    hard: '困难',
+    cpu: '对战{name}',
     startHere: '新手？从这里开始',
     helpTouch: '搭建：把托盘里的材料拖到自己这边。战斗：按住你那半边屏幕锁定瞄准并蓄力，松手发射。把对方的雪人国王打下山或打晕就赢下这一局。先赢 3 局者胜。',
     helpKeys: '搭建：把托盘里的材料拖到自己这边（点一下已放好的材料可以拿起来重放）。战斗：{red} {space}，{blue} {enter} — 按一下锁定摆动的瞄准，按住蓄力，松开发射。把对方的雪人国王打下山或打晕就赢下这一局。先赢 3 局者胜。',
@@ -93,6 +90,7 @@ export const zh: Table<typeof en> = {
     cpuWins: '{name}赢了！',
     wins: '{name}获胜！',
     rematch: '再来一场',
+    next: '下一局（{n}）',
     menu: '菜单',
   },
   coach: {
@@ -107,6 +105,7 @@ export const zh: Table<typeof en> = {
     chargeKey: '按住… 松开就发射！<small>按得越久，飞得越远</small>',
     chargeTouch: '继续按住… 松手就发射！<small>按得越久，飞得越远</small>',
     goal: '打倒{name}的国王！<small>把血条打空或推下山 · 先赢 3 局</small>',
+    goalCpu: '打倒{name}的国王！<small>把血条打空或推下山</small>',
     card: '选一张：下一局归你用<small>弹药、城堡升级，或给对手使个坏</small>',
   },
 };

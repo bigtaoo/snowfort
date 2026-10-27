@@ -13,10 +13,7 @@ export const pl: Table<typeof en> = {
   keys: { p0: 'Spacja', p1: 'Enter' },
   menu: {
     turns: '2 graczy — na zmianę',
-    cpu: 'rywal: {name} · {level}',
-    easy: 'łatwy',
-    normal: 'normalny',
-    hard: 'trudny',
+    cpu: 'rywal: {name}',
     startHere: 'NOWY? ZACZNIJ TUTAJ',
     helpTouch: 'Budowa: przeciągaj elementy z tacki na swoją stronę. Walka: przytrzymaj swoją połowę ekranu, by ustalić celownik i naładować, puść, by rzucić. Zrzuć śnieżnego króla rywala z jego wzgórza albo go znokautuj, by wygrać rundę. Wygrywa ten, kto pierwszy zdobędzie 3.',
     helpKeys: 'Budowa: przeciągaj elementy z tacki na swoją stronę (kliknij postawiony element, by go podnieść). Walka: {red} {space}, {blue} {enter} — naciśnij, by zatrzymać kołyszący się celownik, przytrzymaj, by naładować, puść, by rzucić. Zrzuć śnieżnego króla rywala z jego wzgórza albo go znokautuj, by wygrać rundę. Wygrywa ten, kto pierwszy zdobędzie 3.',
@@ -93,6 +90,7 @@ export const pl: Table<typeof en> = {
     cpuWins: '{name} wygrywa!',
     wins: '{name} wygrywa!',
     rematch: 'Rewanż',
+    next: 'Następny mecz ({n})',
     menu: 'Menu',
   },
   coach: {
@@ -107,6 +105,7 @@ export const pl: Table<typeof en> = {
     chargeKey: 'Trzymaj… puść, by rzucić!<small>im dłużej trzymasz, tym dalej leci</small>',
     chargeTouch: 'Trzymaj dalej… puść, by rzucić!<small>im dłużej trzymasz, tym dalej leci</small>',
     goal: 'Znokautuj króla ({name})!<small>opróżnij jego pasek albo zepchnij go ze wzgórza · do 3 wygranych rund</small>',
+    goalCpu: 'Znokautuj króla ({name})!<small>opróżnij jego pasek albo zepchnij go ze wzgórza</small>',
     card: 'Wybierz jedną: jest twoja na następną rundę<small>amunicja, ulepszenie fortu albo psikus dla rywala</small>',
   },
 };

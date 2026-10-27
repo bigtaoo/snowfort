@@ -11,7 +11,7 @@ import { Coach, STEPS } from './coach';
 import { LOCALES, getLocale, loadLocale, localeName, setLocale, t, type Key, type Locale } from './i18n';
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
-import { CpuShooter, PRESET_FORTS, cpuPickCard, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
+import { CpuShooter, randomFort, type Placement } from './cpu';
 
 type Mode = 'turns' | 'cpu';
 type Phase = 'menu' | 'build' | 'fight' | 'roundEnd' | 'cards' | 'replay' | 'results';
@@ -48,6 +48,18 @@ export interface Portal {
 
 const NO_PORTAL: Portal = { gameplay: () => {}, achievement: () => {}, betweenMatches: async () => {}, track: () => {} };
 
+/** Frosty's hidden level and how many matches this player has had against him, kept across visits. */
+interface CpuProgress { level: number; played: number }
+const CPU_KEY = 'snowfort.cpu';
+
+function loadCpuProgress(): CpuProgress {
+  try {
+    const p = JSON.parse(localStorage.getItem(CPU_KEY) ?? 'null') as Partial<CpuProgress> | null;
+    if (p && Number.isFinite(p.level) && Number.isFinite(p.played)) return { level: p.level!, played: p.played! };
+  } catch { /* storage may be blocked: every visit starts at level 1 */ }
+  return { level: 1, played: 0 };
+}
+
 /** A player's name and fire key in the current language. */
 const keyOf = (s: Side) => t(s === 0 ? 'keys.p0' : 'keys.p1');
 const FIRE_KEYS = ['Space', 'Enter'];
@@ -73,7 +85,11 @@ export class Game {
   readonly sfx = new Sfx();
   readonly touch: boolean;
   mode: Mode = 'turns';
-  cpuLevel: CpuLevel = 'normal';
+  /** Frosty's level in the match under way. */
+  cpuLevel = 1;
+  cpuProgress = loadCpuProgress();
+  /** Off for dev self-play, so it neither moves Frosty's level nor counts as a match played. */
+  keepProgress = true;
   phase: Phase = 'menu';
   portal: Portal = NO_PORTAL;
   /** The platform paused the game (an ad, its own overlay): no frames run. */
@@ -100,7 +116,6 @@ export class Game {
   private cpuBuildQueue: Placement[] = [];
   private cpuBuildTimer = 0;
   /** The card the CPU will take when its pick time runs out. */
-  private cpuCard: number | null = null;
   private cardClockEl = el('div', 'cardClock', '');
   private bannerTimer = 0;
   private cardQueue: Side[] = [];
@@ -116,6 +131,11 @@ export class Game {
   private replayT = 0;
   private replayLoser: Side = 0;
   private winnerOfMatch: Side = 0;
+  /** Seconds until the results screen of a CPU match starts the next one. */
+  private nextMatchIn = 0;
+  private nextBtn: HTMLButtonElement | null = null;
+  /** Both forts as the fight began, so a drawn CPU round can be thrown again from the same start. */
+  private fortPlans: [Placement[], Placement[]] = [[], []];
 
   // HUD
   private hud = document.getElementById('hud')!;
@@ -188,9 +208,8 @@ export class Game {
       case 'cards':
         this.cardTime -= dt;
         // the last few seconds count down, so a random pick never comes as a surprise
-        this.cardClockEl.textContent = this.cardTime < 6 && !(this.mode === 'cpu' && this.cardQueue[0] === 1)
-          ? t('cards.randomIn', { n: Math.ceil(this.cardTime) }) : '';
-        if (this.cardTime <= 0) this.pickCard(this.cpuCard ?? Math.floor(Math.random() * 3));
+        this.cardClockEl.textContent = this.cardTime < 6 ? t('cards.randomIn', { n: Math.ceil(this.cardTime) }) : '';
+        if (this.cardTime <= 0) this.pickCard(Math.floor(Math.random() * 3));
         break;
       case 'replay': {
         this.replayT += dt;
@@ -198,6 +217,13 @@ export class Game {
         this.view.orbit(Math.min(1, this.replayT / total), this.replayLoser === 0 ? -10 : 10, REPLAY.orbitRadius, REPLAY.orbitHeight);
         break;
       }
+      case 'results':
+        if (this.nextBtn) {
+          this.nextMatchIn -= dt;
+          this.nextBtn.textContent = t('end.next', { n: Math.max(1, Math.ceil(this.nextMatchIn)) });
+          if (this.nextMatchIn <= 0) this.nextBtn.click();
+        }
+        break;
       default: break;
     }
     if (this.bannerTimer > 0 && this.phase !== 'roundEnd') {
@@ -247,17 +273,13 @@ export class Game {
       return b;
     };
     menu.append(add(t('menu.turns'), () => this.begin('turns'), 'btn big'));
-    const row = el('div', 'row');
-    for (const lv of Object.keys(CPU.levels) as CpuLevel[]) {
-      const b = add(t('menu.cpu', { name: t('names.cpu'), level: t(`menu.${lv}`) }), () => { this.cpuLevel = lv; this.begin('cpu'); });
-      // a first-timer is pointed at the gentlest way in
-      if (lv === 'easy' && this.coach.needs('menu')) {
-        b.classList.add('coachMark');
-        b.prepend(el('span', 'startHere', t('menu.startHere')));
-      }
-      row.append(b);
+    const vsCpu = add(t('menu.cpu', { name: t('names.cpu') }), () => this.begin('cpu'), 'btn big');
+    // a first-timer is pointed at the gentlest way in
+    if (this.coach.needs('menu')) {
+      vsCpu.classList.add('coachMark');
+      vsCpu.prepend(el('span', 'startHere', t('menu.startHere')));
     }
-    menu.append(row);
+    menu.append(vsCpu);
     o.append(menu);
     o.append(el('div', 'help', this.touch
       ? t('menu.helpTouch')
@@ -324,6 +346,7 @@ export class Game {
     this.lastWinner = null;
     this.thrown = [false, false];
     this.matchAt = performance.now();
+    if (mode === 'cpu') this.cpuLevel = this.cpuProgress.level;
     this.portal.track('progression_started', this.matchFields());
     this.cpu = mode === 'cpu' ? new CpuShooter(1, this.cpuLevel) : null;
     this.arena.damageMul = mode === 'turns' ? CATAPULT.turnDamageMul : 1;
@@ -333,9 +356,11 @@ export class Game {
     this.showTop();
     const simultaneous = this.touch;
     if (mode === 'cpu') {
-      this.queueCpuBuild(PRESET_FORTS[Math.floor(Math.random() * PRESET_FORTS.length)]);
-      // against the CPU there is no clock: the player builds until they press Done
-      this.sessions = [{ sides: [0], time: Infinity, repair: false, done: [false, true] }];
+      // both forts stand at once: a first match goes straight to throwing, later ones give a short
+      // look at the player's fort (their last one, else a preset) to move a few blocks
+      this.placeFort(0, (this.cpuProgress.played > 0 && this.loadBlueprint(0)) || randomFort());
+      this.queueCpuBuild(randomFort());
+      this.sessions = this.cpuProgress.played > 0 ? [{ sides: [0], time: CPU.adjustSeconds, repair: false, done: [false, true] }] : [];
     } else if (simultaneous) {
       this.sessions = [{ sides: [0, 1], time: BUILD.simultaneousSeconds, repair: false, done: [false, false] }];
     } else {
@@ -350,8 +375,8 @@ export class Game {
 
   /** What every telemetry event says about the match: its mode as the step, and the input. */
   private matchFields(): Record<string, string | number | boolean> {
-    const step_id = this.mode === 'cpu' ? `cpu_${this.cpuLevel}` : this.mode;
-    return { step_id, mode: this.mode, touch: this.touch, match_index: this.matchesPlayed + 1, new_player: !this.coach.finished };
+    const cpu: Record<string, number> = this.mode === 'cpu' ? { cpu_level: this.cpuLevel, cpu_match: this.cpuProgress.played + 1 } : {};
+    return { step_id: this.mode, mode: this.mode, touch: this.touch, match_index: this.matchesPlayed + 1, new_player: !this.coach.finished, ...cpu };
   }
 
   /** A match's end, finished or left: how long it ran and how far it got. */
@@ -409,8 +434,11 @@ export class Game {
     // flush any CPU placements still queued
     while (this.cpuBuildQueue.length) this.cpuPlaceNext();
     for (const side of [0, 1] as Side[]) this.ensureKing(side);
-    if (this.round === 0) this.saveBlueprints();
-    if (this.round === 0) this.startRound();
+    if (this.round === 0) {
+      this.fortPlans = [this.fortPlan(0), this.fortPlan(1)];
+      this.saveBlueprints();
+      this.startRound();
+    }
     else this.startCards();
   }
 
@@ -555,9 +583,14 @@ export class Game {
     this.arena.ents = this.arena.ents.filter((e) => e.alive);
   }
 
-  private loadPlan(side: Side, plan: Placement[]): void {
+  /** Replaces a side's fort with a plan, at once. */
+  private placeFort(side: Side, plan: Placement[]): void {
     this.clearFort(side);
     for (const p of plan) this.placeFromPlan(side, p);
+  }
+
+  private loadPlan(side: Side, plan: Placement[]): void {
+    this.placeFort(side, plan);
     this.refreshPalettes();
     this.coach.learn('drag');
     this.coach.learn('king');
@@ -567,12 +600,21 @@ export class Game {
   private saveBlueprints(): void {
     for (const side of [0, 1] as Side[]) {
       if (this.mode === 'cpu' && side === 1) continue;
-      const plan: Placement[] = this.arena.ents
-        .filter((e) => e.owner === side && (e.kind === 'block' || e.kind === 'king'))
-        .map((e) => { const p = e.body.translation(); return { piece: e.piece!, u: -dirOf(side) * p.x, y: p.y - PIECES[e.piece!].hy }; })
-        .sort((a, b) => a.y! - b.y!);
-      try { localStorage.setItem(`snowfort.blueprint2.${side}`, JSON.stringify(plan)); } catch { /* storage may be blocked */ }
+      try { localStorage.setItem(`snowfort.blueprint2.${side}`, JSON.stringify(this.fortPlans[side])); } catch { /* storage may be blocked */ }
     }
+  }
+
+  /** A side's fort as it stands, lowest pieces first so it rebuilds bottom up. */
+  private fortPlan(side: Side): Placement[] {
+    return this.arena.ents
+      .filter((e) => e.alive && e.owner === side && (e.kind === 'block' || e.kind === 'king'))
+      .map((e) => { const p = e.body.translation(); return { piece: e.piece!, u: -dirOf(side) * p.x, y: p.y - PIECES[e.piece!].hy }; })
+      .sort((a, b) => a.y! - b.y!);
+  }
+
+  /** Rounds to win the match: a CPU match is a single round. */
+  private get winsNeeded(): number {
+    return this.mode === 'cpu' ? 1 : ROUND.winsNeeded;
   }
 
   private loadBlueprint(side: Side): Placement[] | null {
@@ -606,7 +648,7 @@ export class Game {
           pal.append(b);
         }
         const r = el('button', '', t('build.randomFort'));
-        r.onclick = () => this.loadPlan(side, PRESET_FORTS[Math.floor(Math.random() * PRESET_FORTS.length)]);
+        r.onclick = () => this.loadPlan(side, randomFort());
         pal.append(r);
       }
       const done = el('button', 'done', t('build.done'));
@@ -686,7 +728,8 @@ export class Game {
     this.firePointers.clear();
     this.showKeys(true);
     this.sfx.bell();
-    this.banner(t('fight.round', { n: this.round }), this.mode === 'turns' ? t('fight.firstTurn', { name: this.nameOf(this.turn) }) : t('fight.fireAtWill'), 1.6);
+    if (this.mode === 'cpu') this.banner(t('fight.fireAtWill'), '', 1.6);
+    else this.banner(t('fight.round', { n: this.round }), this.mode === 'turns' ? t('fight.firstTurn', { name: this.nameOf(this.turn) }) : t('fight.fireAtWill'), 1.6);
   }
 
   private setArmed(): void {
@@ -790,7 +833,7 @@ export class Game {
       this.coach.learn('charge');
     }
     const rival = other(side);
-    this.coach.show('goal', 'goal', t('coach.goal', { name: this.nameOf(rival) }), () => {
+    this.coach.show('goal', 'goal', t(this.mode === 'cpu' ? 'coach.goalCpu' : 'coach.goal', { name: this.nameOf(rival) }), () => {
       const k = this.arena.king(rival);
       if (!k) return null;
       const p = k.body.translation();
@@ -889,8 +932,13 @@ export class Game {
 
   private afterRoundBanner(): void {
     this.bannerEl.innerHTML = '';
-    if (this.score[0] >= ROUND.winsNeeded || this.score[1] >= ROUND.winsNeeded) return this.startReplay();
+    if (this.score[0] >= this.winsNeeded || this.score[1] >= this.winsNeeded) return this.startReplay();
     this.cleanupBetweenRounds();
+    if (this.mode === 'cpu') {
+      // a drawn round is thrown again from the forts it started with
+      for (const s of [0, 1] as Side[]) this.placeFort(s, this.fortPlans[s]);
+      return this.startRound();
+    }
     const loser = this.lastWinner === null ? 0 : other(this.lastWinner);
     const order: Side[] = this.lastWinner === null ? [0, 1] : [loser, this.lastWinner];
     for (const s of [0, 1] as Side[]) {
@@ -898,11 +946,7 @@ export class Game {
       b.king = this.arena.king(s) ? 0 : 1;
       this.budgets[s] = b;
     }
-    if (this.mode === 'cpu') {
-      for (const p of REPAIR_PLAN) this.placeFromPlan(1, p);
-      if (this.budgets[1].king) this.autoPlaceKing(1);
-      this.sessions = [{ sides: [0], time: Infinity, repair: true, done: [false, true] }];
-    } else if (this.touch) {
+    if (this.touch) {
       this.sessions = [{ sides: [0, 1], time: BUILD.repairSimultaneousSeconds, repair: true, done: [false, false] }];
     } else {
       this.sessions = order.map((s) => ({ sides: [s], time: BUILD.repairTurnSeconds, repair: true, done: [s !== 0, s !== 1] as [boolean, boolean] }));
@@ -960,20 +1004,14 @@ export class Game {
       row.append(card);
     });
     o.append(row, this.cardClockEl);
-    if (!(this.mode === 'cpu' && side === 1)) this.coach.show('card', 'card', t('coach.card'), row, { side, above: false });
-    this.cpuCard = null;
-    if (this.mode === 'cpu' && side === 1) {
-      this.cardTime = 1.2;
-      const blocks = (s: Side) => this.arena.ents.filter((e) => e.alive && e.kind === 'block' && e.owner === s).length;
-      this.cpuCard = cpuPickCard(this.hand, this.cpuLevel, this.score[1] < this.score[0], blocks(1) / Math.max(1, blocks(0)));
-    }
+    this.coach.show('card', 'card', t('coach.card'), row, { side, above: false });
   }
 
   private pickCard(i: number): void {
     if (this.phase !== 'cards') return;
     const side = this.cardQueue.shift()!;
     this.sfx.click();
-    if (!(this.mode === 'cpu' && side === 1)) this.coach.learn('card');
+    this.coach.learn('card');
     this.pending[side].push(this.hand[i]);
     this.nextCardPick();
   }
@@ -983,7 +1021,7 @@ export class Game {
   // =====================================================================
 
   private startReplay(): void {
-    this.winnerOfMatch = this.score[0] >= ROUND.winsNeeded ? 0 : 1;
+    this.winnerOfMatch = this.score[0] >= this.winsNeeded ? 0 : 1;
     this.replayLoser = other(this.winnerOfMatch);
     this.hideTop();
     if (!this.arena.rewindForReplay(this.decidedAt)) return this.showResults();
@@ -1006,6 +1044,8 @@ export class Game {
       ...(this.mode === 'cpu' ? { won: this.winnerOfMatch === 0 } : {}),
     });
     this.matchesPlayed++;
+    const vsCpu = this.mode === 'cpu';
+    if (vsCpu && this.keepProgress) this.advanceCpu(this.winnerOfMatch === 0);
     this.portal.gameplay(false);
     if (this.mode === 'cpu' && this.winnerOfMatch === 0) this.portal.achievement();
     this.sfx.rate = 1;
@@ -1015,18 +1055,28 @@ export class Game {
     const o = this.overlayEl;
     o.className = `overlay p${this.winnerOfMatch}`;
     o.innerHTML = '';
-    const vsCpu = this.mode === 'cpu';
     const title = vsCpu ? t(this.winnerOfMatch === 0 ? 'end.youWin' : 'end.cpuWins', { name: t('names.cpu') }) : t('end.wins', { name: this.nameOf(this.winnerOfMatch) });
     o.append(el('h1', 'title', title));
-    o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
+    if (!vsCpu) o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
     const row = el('div', 'row menu');
-    const again = el('button', 'btn big', t('end.rematch'));
-    again.onclick = () => { this.sfx.click(); void this.begin(this.mode); };
+    // against the CPU the next match starts by itself after a short count
+    const again = el('button', 'btn big', t(vsCpu ? 'end.next' : 'end.rematch', { n: CPU.nextMatchSeconds }));
+    this.nextBtn = vsCpu ? again : null;
+    this.nextMatchIn = CPU.nextMatchSeconds;
+    again.onclick = () => { this.nextBtn = null; this.sfx.click(); void this.begin(this.mode); };
     const menu = el('button', 'btn', t('end.menu'));
-    menu.onclick = () => { this.arena.reset(); this.view.homeCamera(); this.timeScale = 1; this.showMenu(); };
+    menu.onclick = () => { this.nextBtn = null; this.arena.reset(); this.view.homeCamera(); this.timeScale = 1; this.showMenu(); };
     row.append(again, menu);
     o.append(row);
     this.overlay(true);
+  }
+
+  /** One step up Frosty's hidden ladder for a win, one down for a loss. */
+  private advanceCpu(won: boolean): void {
+    const p = this.cpuProgress;
+    p.level = Math.min(CPU.maxLevel, Math.max(1, p.level + (won ? 1 : -1)));
+    p.played++;
+    try { localStorage.setItem(CPU_KEY, JSON.stringify(p)); } catch { /* storage may be blocked */ }
   }
 
   // =====================================================================
@@ -1157,7 +1207,7 @@ export class Game {
     if (this.topEl.style.display === 'none') return;
     for (const side of [0, 1] as Side[]) {
       const info = this.pinfo[side];
-      info.pips.innerHTML = Array.from({ length: ROUND.winsNeeded }, (_, i) => `<span class="${i < this.score[side] ? 'won' : ''}"></span>`).join('');
+      info.pips.innerHTML = Array.from({ length: this.winsNeeded }, (_, i) => `<span class="${i < this.score[side] ? 'won' : ''}"></span>`).join('');
       const k = this.arena.king(side);
       const health = k ? Math.max(0, 1 - (k.impact ?? 0) / MATERIALS.king.hp) : 0;
       info.bar.style.width = `${health * 100}%`;

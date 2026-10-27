@@ -13,10 +13,7 @@ export const id: Table<typeof en> = {
   keys: { p0: 'Spasi', p1: 'Enter' },
   menu: {
     turns: '2 pemain — bergiliran',
-    cpu: 'lawan {name} · {level}',
-    easy: 'mudah',
-    normal: 'normal',
-    hard: 'sulit',
+    cpu: 'lawan {name}',
     startHere: 'BARU? MULAI DI SINI',
     helpTouch: 'Bangun: seret balok dari bakimu ke sisimu. Bertarung: tahan separuh layarmu untuk mengunci bidikan dan mengisi tenaga, lepas untuk melempar. Jatuhkan raja salju lawan dari bukitnya atau buat dia pingsan untuk memenangkan ronde. Yang pertama dapat 3 menang.',
     helpKeys: 'Bangun: seret balok dari baki ke sisimu (klik balok yang sudah ditaruh untuk mengambilnya lagi). Bertarung: {red} {space}, {blue} {enter} — tekan untuk mengunci bidikan yang berayun, tahan untuk mengisi tenaga, lepas untuk melempar. Jatuhkan raja salju lawan dari bukitnya atau buat dia pingsan untuk memenangkan ronde. Yang pertama dapat 3 menang.',
@@ -93,6 +90,7 @@ export const id: Table<typeof en> = {
     cpuWins: '{name} menang!',
     wins: '{name} menang!',
     rematch: 'Tanding ulang',
+    next: 'Pertandingan berikut ({n})',
     menu: 'Menu',
   },
   coach: {
@@ -107,6 +105,7 @@ export const id: Table<typeof en> = {
     chargeKey: 'Tahan… lepas untuk melempar!<small>makin lama ditahan, makin jauh terbangnya</small>',
     chargeTouch: 'Terus tahan… lepas untuk melempar!<small>makin lama ditahan, makin jauh terbangnya</small>',
     goal: 'Robohkan raja {name}!<small>kosongkan barnya atau dorong dari bukit · yang pertama menang 3 ronde</small>',
+    goalCpu: 'Robohkan raja {name}!<small>kosongkan barnya atau dorong dari bukit</small>',
     card: 'Pilih satu: milikmu untuk ronde berikutnya<small>amunisi, peningkatan benteng, atau jebakan untuk lawan</small>',
   },
 };

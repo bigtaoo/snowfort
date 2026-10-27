@@ -13,10 +13,7 @@ export const pt: Table<typeof en> = {
   keys: { p0: 'Espaço', p1: 'Enter' },
   menu: {
     turns: '2 jogadores — em turnos',
-    cpu: 'contra {name} · {level}',
-    easy: 'fácil',
-    normal: 'normal',
-    hard: 'difícil',
+    cpu: 'contra {name}',
     startHere: 'NOVO? COMECE AQUI',
     helpTouch: 'Construir: arraste peças da sua bandeja para o seu lado. Lutar: segure a sua metade da tela para travar a mira e carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. Vence quem chegar a 3.',
     helpKeys: 'Construir: arraste peças da bandeja para o seu lado (clique numa peça colocada para pegá-la de volta). Lutar: {red} {space}, {blue} {enter} — aperte para travar a mira que balança, segure para carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. Vence quem chegar a 3.',
@@ -93,6 +90,7 @@ export const pt: Table<typeof en> = {
     cpuWins: '{name} venceu!',
     wins: '{name} venceu!',
     rematch: 'Revanche',
+    next: 'Próxima partida ({n})',
     menu: 'Menu',
   },
   coach: {
@@ -107,6 +105,7 @@ export const pt: Table<typeof en> = {
     chargeKey: 'Segure… solte para arremessar!<small>quanto mais segurar, mais longe vai</small>',
     chargeTouch: 'Continue segurando… solte para arremessar!<small>quanto mais segurar, mais longe vai</small>',
     goal: 'Nocauteie o rei {name}!<small>esvazie a barra dele ou empurre-o do morro · vence quem chegar a 3 rodadas</small>',
+    goalCpu: 'Nocauteie o rei {name}!<small>esvazie a barra dele ou empurre-o do morro</small>',
     card: 'Escolha uma: ela é sua na próxima rodada<small>munição, uma melhoria no forte ou uma pegadinha no rival</small>',
   },
 };

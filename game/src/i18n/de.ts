@@ -13,10 +13,7 @@ export const de: Table<typeof en> = {
   keys: { p0: 'Leertaste', p1: 'Enter' },
   menu: {
     turns: '2 Spieler — abwechselnd',
-    cpu: 'gegen {name} · {level}',
-    easy: 'leicht',
-    normal: 'normal',
-    hard: 'schwer',
+    cpu: 'gegen {name}',
     startHere: 'NEU? HIER STARTEN',
     helpTouch: 'Bauen: Zieh Teile aus deiner Leiste auf deine Seite. Kampf: Halte deine Bildschirmhälfte gedrückt, um zu zielen und aufzuladen, lass los zum Werfen. Stoß den gegnerischen Schneekönig vom Hügel oder hau ihn um, um die Runde zu gewinnen. Wer zuerst 3 hat, gewinnt.',
     helpKeys: 'Bauen: Zieh Teile aus der Leiste auf deine Seite (klick ein gesetztes Teil an, um es wieder aufzunehmen). Kampf: {red} {space}, {blue} {enter} — drücken fixiert das schwingende Zielen, halten lädt auf, loslassen wirft. Stoß den gegnerischen Schneekönig vom Hügel oder hau ihn um, um die Runde zu gewinnen. Wer zuerst 3 hat, gewinnt.',
@@ -93,6 +90,7 @@ export const de: Table<typeof en> = {
     cpuWins: '{name} gewinnt!',
     wins: '{name} gewinnt!',
     rematch: 'Revanche',
+    next: 'Nächstes Spiel ({n})',
     menu: 'Menü',
   },
   coach: {
@@ -107,6 +105,7 @@ export const de: Table<typeof en> = {
     chargeKey: 'Halten… loslassen zum Werfen!<small>je länger du hältst, desto weiter fliegt er</small>',
     chargeTouch: 'Weiter halten… loslassen zum Werfen!<small>je länger du hältst, desto weiter fliegt er</small>',
     goal: 'Schalte den König von {name} aus!<small>leere seinen Balken oder stoß ihn vom Hügel · wer zuerst 3 Runden hat</small>',
+    goalCpu: 'Schalte den König von {name} aus!<small>leere seinen Balken oder stoß ihn vom Hügel</small>',
     card: 'Wähl eine: Sie gehört dir für die nächste Runde<small>Munition, ein Festungs-Upgrade oder ein Trick gegen deinen Gegner</small>',
   },
 };

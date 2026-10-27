@@ -1,9 +1,30 @@
 import { AMMO, CATAPULT, CPU, PHYSICS, type PieceId } from './config';
 import { Arena, type Side } from './arena';
 import { Launcher } from './launcher';
-import type { Card } from './cards';
 
-export type CpuLevel = keyof typeof CPU.levels;
+/** How well Frosty throws: noise on aim and power, time between throws, and how often he is fooled or throws wild. */
+export interface CpuSkill {
+  angleNoiseDeg: number;
+  speedNoise: number;
+  thinkSeconds: number;
+  decoyFooled: number;
+  wildShot: number;
+}
+
+/** The skill at a hidden level (1..CPU.maxLevel): a straight slide from the weakest to the strongest. */
+export function cpuSkill(level: number): CpuSkill {
+  const k = (Math.min(CPU.maxLevel, Math.max(1, level)) - 1) / (CPU.maxLevel - 1);
+  const w = CPU.weakest;
+  const s = CPU.strongest;
+  const lerp = (a: number, b: number, x: number) => a + (b - a) * x;
+  return {
+    angleNoiseDeg: lerp(w.angleNoiseDeg, s.angleNoiseDeg, k),
+    speedNoise: lerp(w.speedNoise, s.speedNoise, k),
+    thinkSeconds: lerp(w.thinkSeconds, s.thinkSeconds, k),
+    decoyFooled: lerp(w.decoyFooled, s.decoyFooled, k),
+    wildShot: lerp(w.wildShot, s.wildShot, Math.min(1, k / CPU.wildFadeAt)),
+  };
+}
 
 /** A placement in side-relative terms: u is the distance from the middle of the arena outwards. */
 export interface Placement {
@@ -43,9 +64,7 @@ export const PRESET_FORTS: Placement[][] = [
   ],
 ];
 
-export const REPAIR_PLAN: Placement[] = [
-  { piece: 'snow', u: 4, y: 6 }, { piece: 'snow', u: 5, y: 6 }, { piece: 'ice', u: 6, y: 6 }, { piece: 'snow', u: 3, y: 6 }, { piece: 'plankH', u: 4.5, y: 7 },
-];
+export const randomFort = (): Placement[] => PRESET_FORTS[Math.floor(Math.random() * PRESET_FORTS.length)];
 
 const deg = Math.PI / 180;
 const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
@@ -57,10 +76,14 @@ export class CpuShooter {
   private think = 0;
   private prevPower = 0;
 
-  constructor(readonly side: Side, readonly level: CpuLevel) {}
+  private readonly cfg: CpuSkill;
+
+  constructor(readonly side: Side, readonly level: number) {
+    this.cfg = cpuSkill(level);
+  }
 
   update(dt: number, l: Launcher, arena: Arena): { press?: boolean; release?: boolean } {
-    const cfg = CPU.levels[this.level];
+    const cfg = this.cfg;
     if (l.phase === 'reload' || !l.ready && l.phase !== 'charge') {
       this.wantAngle = null;
       return {};
@@ -70,7 +93,7 @@ export class CpuShooter {
         this.think -= dt;
         if (this.think > 0) return {};
         if (!this.plan(arena, l)) return {};
-        if (Math.random() < CPU.levels[this.level].wildShot) {
+        if (Math.random() < cfg.wildShot) {
           // way short or way long, so an easy CPU lands only now and then
           const off = 0.18 + Math.random() * 0.17;
           this.wantPower = Math.min(0.97, Math.max(0.03, this.wantPower + (Math.random() < 0.5 ? -off : off)));
@@ -95,7 +118,7 @@ export class CpuShooter {
   }
 
   private plan(arena: Arena, l: Launcher): boolean {
-    const cfg = CPU.levels[this.level];
+    const cfg = this.cfg;
     const enemy = (1 - this.side) as Side;
     const kings = arena.ents.filter((e) => e.alive && e.owner === enemy && (e.kind === 'king' || e.kind === 'decoy'));
     const real = kings.find((k) => k.kind === 'king');
@@ -141,24 +164,6 @@ export class CpuShooter {
   }
 }
 
-
-/**
- * The CPU's card: ammo when it is behind, fort cards when its own fort is worn down, with some noise.
- * `fortShare` is its standing blocks over the rival's. Easy picks at random.
- */
-export function cpuPickCard(hand: Card[], level: CpuLevel, behind: boolean, fortShare: number): number {
-  if (level === 'easy') return Math.floor(Math.random() * hand.length);
-  let best = 0;
-  let bestScore = -Infinity;
-  hand.forEach((c, i) => {
-    let score = Math.random() * 1.5;
-    if (c.kind === 'ammo') score += 2 + (behind ? 1.5 : 0) + (c.id === 'bigIce' ? 0.8 : 0);
-    if (c.kind === 'fort') score += 1.5 + (fortShare < 0.8 ? 2 : 0) + (c.id === 'roof' || c.id === 'spring' ? 0.5 : 0);
-    if (c.kind === 'rule') score += 1.5 + (c.id === 'triple' && behind ? 1 : 0);
-    if (score > bestScore) { bestScore = score; best = i; }
-  });
-  return best;
-}
 
 /**
  * The launch speed that brings a shot at angle `theta` down through (dx, dy), under gravity `g` and a steady

@@ -2,10 +2,10 @@
  * Dev-only self-play: CPU against CPU at full speed, for balance numbers. Never imported by the game.
  * In the dev server's console:
  *   const sp = await import('/src/dev/selfplay.ts');
- *   sp.run([['easy', 'normal']], 4);  // runs in the background
+ *   sp.run([[10, 60]], 4);            // runs in the background
  *   sp.results;                       // poll until results.done
  */
-import { CpuShooter, PRESET_FORTS, type CpuLevel } from '../cpu';
+import { CpuShooter, randomFort } from '../cpu';
 import type { Side } from '../arena';
 
 type Mode = 'turns' | 'cpu';
@@ -17,10 +17,12 @@ export const results: { done: boolean; matches: Record<string, MatchLog[]>; erro
 
 const game = () => (window as any).__sf;
 
-export async function match(l0: CpuLevel, l1: CpuLevel, mode: Mode = 'cpu'): Promise<MatchLog> {
+export async function match(l0: number, l1: number, mode: Mode = 'cpu'): Promise<MatchLog> {
   const g = game();
   g.view.render = () => {};
   g.sfx.muted = true;
+  // self-play must not move the real player's CPU level
+  g.keepProgress = false;
   const log: MatchLog = { score: [0, 0], fight: 0, rounds: [] };
   const endRound = g.endRound.bind(g);
   g.endRound = (lost: Side[]) => {
@@ -36,7 +38,7 @@ export async function match(l0: CpuLevel, l1: CpuLevel, mode: Mode = 'cpu'): Pro
       if (g.phase === 'build' && g.session) {
         for (const side of g.session.sides) {
           if (g.session.done[side]) continue;
-          if (!g.session.repair) g.loadPlan(side, PRESET_FORTS[Math.floor(Math.random() * PRESET_FORTS.length)]);
+          if (!g.session.repair) g.loadPlan(side, randomFort());
           g.session.done[side] = true;
         }
       }
@@ -61,7 +63,7 @@ export async function match(l0: CpuLevel, l1: CpuLevel, mode: Mode = 'cpu'): Pro
 }
 
 /** Plays `n` matches per pairing in the background; read `results`. */
-export function run(pairs: [CpuLevel, CpuLevel][], n = 4, mode: Mode = 'cpu'): void {
+export function run(pairs: [number, number][], n = 4, mode: Mode = 'cpu'): void {
   results.done = false;
   results.matches = {};
   results.errors = [];

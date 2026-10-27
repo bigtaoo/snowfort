@@ -13,10 +13,7 @@ export const tr: Table<typeof en> = {
   keys: { p0: 'Boşluk', p1: 'Enter' },
   menu: {
     turns: '2 oyuncu — sırayla',
-    cpu: 'rakip: {name} · {level}',
-    easy: 'kolay',
-    normal: 'normal',
-    hard: 'zor',
+    cpu: 'rakip: {name}',
     startHere: 'YENİ MİSİN? BURADAN BAŞLA',
     helpTouch: 'İnşa: parçaları tepsinden kendi tarafına sürükle. Savaş: nişanı sabitleyip güç toplamak için ekranın kendi yarını basılı tut, atmak için bırak. Rakibin kar kralını tepesinden düşür ya da nakavt et, raundu kazan. 3’e ilk ulaşan kazanır.',
     helpKeys: 'İnşa: parçaları tepsiden kendi tarafına sürükle (yerleştirdiğin parçaya tıklayıp geri alabilirsin). Savaş: {red} {space}, {blue} {enter} — sallanan nişanı sabitlemek için bas, güç toplamak için basılı tut, atmak için bırak. Rakibin kar kralını tepesinden düşür ya da nakavt et, raundu kazan. 3’e ilk ulaşan kazanır.',
@@ -93,6 +90,7 @@ export const tr: Table<typeof en> = {
     cpuWins: '{name} kazandı!',
     wins: '{name} kazandı!',
     rematch: 'Rövanş',
+    next: 'Sonraki maç ({n})',
     menu: 'Menü',
   },
   coach: {
@@ -107,6 +105,7 @@ export const tr: Table<typeof en> = {
     chargeKey: 'Basılı tut… atmak için bırak!<small>ne kadar uzun tutarsan o kadar uzağa gider</small>',
     chargeTouch: 'Basılı tutmaya devam… atmak için bırak!<small>ne kadar uzun tutarsan o kadar uzağa gider</small>',
     goal: '{name} kralını nakavt et!<small>çubuğunu boşalt ya da tepeden it · 3 raunda ilk ulaşan</small>',
+    goalCpu: '{name} kralını nakavt et!<small>çubuğunu boşalt ya da tepeden it</small>',
     card: 'Birini seç: sonraki raunt senin<small>cephane, kale güçlendirmesi ya da rakibe bir oyun</small>',
   },
 };

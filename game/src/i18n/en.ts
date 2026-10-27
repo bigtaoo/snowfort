@@ -11,10 +11,7 @@ export const en = {
   keys: { p0: 'Space', p1: 'Enter' },
   menu: {
     turns: '2 Players — take turns',
-    cpu: 'vs {name} · {level}',
-    easy: 'easy',
-    normal: 'normal',
-    hard: 'hard',
+    cpu: 'vs {name}',
     startHere: 'NEW? START HERE',
     helpTouch: 'Build: drag pieces from your tray onto your side. Fight: touch and hold your half of the screen to lock the aim and charge, let go to throw. Knock the rival snow king off his hill or pound him to win the round. First to 3.',
     helpKeys: 'Build: drag pieces from the tray onto your side (click a placed piece to pick it up again). Fight: {red} {space}, {blue} {enter} — press to lock the swinging aim, hold to charge, release to throw. Knock the rival snow king off his hill or pound him to win the round. First to 3.',
@@ -91,6 +88,7 @@ export const en = {
     cpuWins: '{name} wins!',
     wins: '{name} wins!',
     rematch: 'Rematch',
+    next: 'Next match ({n})',
     menu: 'Menu',
   },
   coach: {
@@ -105,6 +103,7 @@ export const en = {
     chargeKey: 'Hold it… let go to throw!<small>the longer you hold, the farther it flies</small>',
     chargeTouch: 'Keep holding… let go to throw!<small>the longer you hold, the farther it flies</small>',
     goal: 'Knock out {name}’s king!<small>empty his bar or push him off his hill · first to 3 rounds</small>',
+    goalCpu: 'Knock out {name}’s king!<small>empty his bar or push him off his hill</small>',
     card: 'Pick one: it is yours for the next round<small>ammo, a fort upgrade or a trick on your rival</small>',
   },
 };
