@@ -18,6 +18,7 @@ interface BridgeShape {
     showInterstitial?: (placement?: string) => unknown;
     on?: (event: string, cb: Listener) => unknown;
   };
+  analytics?: { send?: (event: string, data?: Record<string, string | number | boolean>) => unknown };
 }
 
 const INIT_WAIT_MS = 5000;
@@ -61,6 +62,11 @@ export class Bridge {
   /** game_ready, gameplay_started, gameplay_stopped, player_got_achievement. */
   send(message: string): void {
     void settle(() => this.sdk?.platform?.sendMessage?.(message));
+  }
+
+  /** One event for Playgama's own telemetry (Bridge 2.3.0 and newer; a no-op before). */
+  track(event: string, data?: Record<string, string | number | boolean>): void {
+    void settle(() => this.sdk?.analytics?.send?.(event, data));
   }
 
   /** The platform asks the game to stop (an ad, its own overlay) and to go on again. */

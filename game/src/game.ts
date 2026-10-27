@@ -7,7 +7,7 @@ import { Arena, type AmmoId, type Entity, type Side } from './arena';
 import { View } from './view';
 import { Sfx } from './audio';
 import { KingHud } from './kingHud';
-import { Coach } from './coach';
+import { Coach, STEPS } from './coach';
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
 import { CpuShooter, PRESET_FORTS, cpuPickCard, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
@@ -38,9 +38,11 @@ export interface Portal {
   achievement(): void;
   /** Between two matches: an interstitial, if the platform has one to show. */
   betweenMatches(): Promise<void>;
+  /** One event for the platform's own telemetry. */
+  track(event: string, data: Record<string, string | number | boolean>): void;
 }
 
-const NO_PORTAL: Portal = { gameplay: () => {}, achievement: () => {}, betweenMatches: async () => {} };
+const NO_PORTAL: Portal = { gameplay: () => {}, achievement: () => {}, betweenMatches: async () => {}, track: () => {} };
 
 const NAMES = ['Red', 'Blue'];
 const FIRE_KEYS = ['Space', 'Enter'];
@@ -71,6 +73,8 @@ export class Game {
   /** The platform paused the game (an ad, its own overlay): no frames run. */
   paused = false;
   private matchesPlayed = 0;
+  /** When the match under way began (performance.now), null between matches. */
+  private matchAt: number | null = null;
   private starting = false;
   launchers: [Launcher, Launcher] = [new Launcher(0), new Launcher(1)];
   cpu: CpuShooter | null = null;
@@ -226,6 +230,7 @@ export class Game {
     this.clearPalettes();
     this.overlay(true);
     this.coach.clear();
+    if (this.matchAt !== null) this.trackEnd('progression_failed', { reason: 'left' });
     const o = this.overlayEl;
     o.innerHTML = '';
     o.append(el('h1', 'title', 'Snow Fort Showdown'));
@@ -258,6 +263,7 @@ export class Game {
   private async begin(mode: Mode): Promise<void> {
     if (this.starting) return;
     this.starting = true;
+    this.mode = mode;
     this.coach.learn('menu');
     try {
       if (this.matchesPlayed > 0) await this.portal.betweenMatches();
@@ -280,6 +286,8 @@ export class Game {
     this.pending = [[], []];
     this.lastWinner = null;
     this.thrown = [false, false];
+    this.matchAt = performance.now();
+    this.portal.track('progression_started', this.matchFields());
     this.cpu = mode === 'cpu' ? new CpuShooter(1, this.cpuLevel) : null;
     this.arena.damageMul = mode === 'turns' ? CATAPULT.turnDamageMul : 1;
     this.launchers = [new Launcher(0), new Launcher(1)];
@@ -301,6 +309,20 @@ export class Game {
     }
     this.phase = 'build';
     this.nextSession();
+  }
+
+  /** What every telemetry event says about the match: its mode as the step, and the input. */
+  private matchFields(): Record<string, string | number | boolean> {
+    const step_id = this.mode === 'cpu' ? `cpu_${this.cpuLevel}` : this.mode;
+    return { step_id, mode: this.mode, touch: this.touch, match_index: this.matchesPlayed + 1, new_player: !this.coach.finished };
+  }
+
+  /** A match's end, finished or left: how long it ran and how far it got. */
+  private trackEnd(event: string, extra: Record<string, string | number | boolean>): void {
+    if (this.matchAt === null) return;
+    const duration_sec = Math.round((performance.now() - this.matchAt) / 1000);
+    this.matchAt = null;
+    this.portal.track(event, { ...this.matchFields(), duration_sec, rounds: this.round, score: `${this.score[0]}-${this.score[1]}`, ...extra });
   }
 
   // =====================================================================
@@ -916,6 +938,10 @@ export class Game {
 
   private showResults(): void {
     this.phase = 'results';
+    this.trackEnd('progression_completed', {
+      winner: NAMES[this.winnerOfMatch].toLowerCase(),
+      ...(this.mode === 'cpu' ? { won: this.winnerOfMatch === 0 } : {}),
+    });
     this.matchesPlayed++;
     this.portal.gameplay(false);
     if (this.mode === 'cpu' && this.winnerOfMatch === 0) this.portal.achievement();
@@ -1048,6 +1074,13 @@ export class Game {
     showMute();
     this.hud.append(this.topEl, this.bannerEl, this.overlayEl, ...this.keyEls, this.muteEl);
     this.coach = new Coach(this.hud);
+    // the tutorial funnel: one event per step as it is learned, then one once they all are
+    const pageAt = performance.now();
+    this.coach.onLearn = (step, learned) => {
+      const fields = { ...this.matchFields(), seconds: Math.round((performance.now() - pageAt) / 1000) };
+      this.portal.track('tutorial_step', { ...fields, step_id: step, step_index: STEPS.indexOf(step) + 1 });
+      if (learned === STEPS.length) this.portal.track('tutorial_completed', fields);
+    };
     this.kingHud = new KingHud(this.hud, this.pinfo.map((p) => p.bar.parentElement!), (_, dmg) => {
       this.sfx.kingHit(dmg / MATERIALS.king.hp);
       this.view.shake(Math.min(0.25, 0.4 * dmg / MATERIALS.king.hp));

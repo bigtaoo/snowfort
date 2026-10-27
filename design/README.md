@@ -118,12 +118,20 @@
   6. 选卡：卡牌下方"选一张，下一局归你用"。
 - 气泡不接收点击 / 触摸，不挡操作；矮屏手机字号缩小（不用 zoom，否则定位会偏）。
 
-## 数据分析
+## 数据分析（2026-10-27）
 
-- 暂不做。Holy Kicker 实测 Playgama sandbox（Bridge 平台 `playgama_sandbox`）只放行 Playgama 自己的域名，
-  连不上我们自己的服务器（见 `D:\standing\docs\retention.md`）。Bridge 自己会统计会话、时长和广告。
-- 以后要做，最省事的是 Holy Kicker 那套：用 `bridge.analytics.send` 发 Playgama 自己的 telemetry
-  （引导每一步 `tutorial_step`、一场的开始和结束），在开发者后台看漏斗，不需要我们自己的服务器。
+- 不用自己的服务器：Holy Kicker 实测 Playgama sandbox（Bridge 平台 `playgama_sandbox`）只放行 Playgama 自己的域名
+  （见 `D:\standing\docs\retention.md`）。改用 Bridge 自带的 `bridge.analytics.send`，事件进 Playgama 自己的 telemetry，
+  在开发者后台看漏斗。Bridge 自己已经统计会话、时长和广告，不重复发。只在 Playgama 版本里发，开发时是空操作。
+- 每个事件都带：`step_id`（对局模式：`simul` / `turns` / `cpu_easy` / `cpu_normal` / `cpu_hard`）、`mode`、`touch`（触屏还是键盘）、
+  `match_index`（本次打开的第几场）、`new_player`（引导还没全部学完）。
+- 对局：
+  - `progression_started`：一场开始。
+  - `progression_completed`：打完一场，加 `duration_sec`、`rounds`、`score`（如 `3-1`，红-蓝）、`winner`（`red` / `blue`），
+    对 CPU 时再加 `won`。
+  - `progression_failed`：中途回菜单，`reason: left`，同样带时长、局数和比分。
+- 引导漏斗：每学会一步发 `tutorial_step`（`step_id` 为这一步，`step_index` 按 menu、drag、king、done、aim、charge、goal、card、repair
+  记 1–9，`seconds` 为打开页面后的秒数），九步全学会再发一次 `tutorial_completed`。数每一步的人数，就能看出新玩家卡在哪一步。
 
 ## 发布到 Playgama（2026-10-27 接好 Bridge）
 

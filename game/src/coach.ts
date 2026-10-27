@@ -4,6 +4,9 @@
 
 export type Step = 'menu' | 'drag' | 'king' | 'done' | 'aim' | 'charge' | 'goal' | 'card' | 'repair';
 
+/** The steps in the order a first match meets them, for the tutorial funnel. */
+export const STEPS: readonly Step[] = ['menu', 'drag', 'king', 'done', 'aim', 'charge', 'goal', 'card', 'repair'];
+
 /** Where a bubble points: a HUD element, or a screen point worked out each frame. */
 export type Anchor = HTMLElement | (() => { x: number; y: number } | null);
 
@@ -21,6 +24,8 @@ const KEY = 'snowfort.coach';
 export class Coach {
   private learned = new Set<Step>();
   private tips = new Map<string, Tip>();
+  /** Called once per step as it is learned, with how many are learned by then. */
+  onLearn: (step: Step, learned: number) => void = () => {};
 
   constructor(private host: HTMLElement) {
     if (new URLSearchParams(location.search).has('tips')) return;
@@ -32,6 +37,11 @@ export class Coach {
   /** Whether the step is still to be learned. */
   needs(step: Step): boolean {
     return !this.learned.has(step);
+  }
+
+  /** Every step is learned (a returning player). */
+  get finished(): boolean {
+    return STEPS.every((s) => this.learned.has(s));
   }
 
   /**
@@ -66,6 +76,7 @@ export class Coach {
   private remember(step: Step): void {
     if (this.learned.has(step)) return;
     this.learned.add(step);
+    this.onLearn(step, this.learned.size);
     try { localStorage.setItem(KEY, JSON.stringify([...this.learned])); } catch { /* see above */ }
   }
 

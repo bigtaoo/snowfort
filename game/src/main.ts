@@ -26,6 +26,7 @@ async function boot(): Promise<void> {
         await bridge.interstitial();
         sound();
       },
+      track: (event, data) => bridge.track(event, data),
     };
     console.info(`[snowfort] Playgama Bridge: ${bridge.platformId}`);
   }
