@@ -165,7 +165,10 @@
   包按提交号命名（如 `snowfort-5de5efd`），线上现在是这一版（只有双人轮流，局间修补 2 分钟，电脑叫霜霜 / Frosty）；MCP 连不上时也可以在网页后台
   Update Game 里传 zip，再点 Continue → 选包 → Update in Sandbox；
   封面（方形 / 竖版 / 横版）在 `art/covers/`。同一天已把这个链接交到挑战页。
-  还要做：在社交媒体发帖并 tag Playgama（用户自己发）；改了游戏要重新打包上传。
+  社交帖（挑战第 2 步，用户自己发）：草稿和截图在 `art/social/`（X 短帖 tag @PlaygamaCom，
+  长帖给 Reddit / LinkedIn / Discord，附中文）。资格线要平均时长 ≥ 5 分钟，所以号召要说清"两人同一台设备、
+  一整场约 10 分钟、一个人也能打霜霜"，并请玩得开心的人点 ❤️；不要让人刷次数或挂机。
+  还要做：改了游戏要重新打包上传。
 
 ## 外观（lookdev 已定，见 `lookdev/README.md` 和 `lookdev/shots/`）
 
