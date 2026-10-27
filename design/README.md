@@ -155,7 +155,11 @@
 - 广告：只在两场之间（第一场之后再点开始 / 再来一局）放一次插屏，`playgama-bridge-config.json` 设两次插屏至少隔 180 秒。
   没有激励广告。存档（静音、上次的城堡）还是 localStorage。
 - 发布要用 Playgama MCP（`playgama-developer-console`，https://developer.playgama.com/api/mcp），
-  已配进本项目（`~/.claude.json` 的项目级配置，不进仓库）；新开的会话才能用。
+  配在仓库根的 `.mcp.json`（只有地址，没有密钥）；桌面版会话不读 `~/.claude.json` 里的项目级配置。
+  新开的会话才能用，第一次要在 `/mcp` 里登录。
+- 已发布（2026-10-27，沙盒）：https://playgama.ai/play/dqq7iq6dcikez6 ，包检查 PASSED（Bridge 2.3.1）；
+  封面（方形 / 竖版 / 横版）在 `art/covers/`。同一天已把这个链接交到挑战页。
+  还要做：在社交媒体发帖并 tag Playgama（用户自己发）；改了游戏要重新打包上传。
 
 ## 外观（lookdev 已定，见 `lookdev/README.md` 和 `lookdev/shots/`）
 
