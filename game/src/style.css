@@ -41,6 +41,7 @@ html, body {
 .palette { position: absolute; bottom: 10px; display: flex; gap: 6px; background: rgba(255,255,255,.8); padding: 6px; border-radius: 14px; border: 3px solid var(--pc); }
 .palette.p0 { left: 10px; }
 .palette.p1 { right: 10px; }
+.palette.drop { box-shadow: 0 0 0 4px var(--pc), 0 0 18px var(--pc); }
 .palette button, .btn {
   font: inherit; font-weight: 700; border: 2px solid #17324d22; border-radius: 10px; background: #fff; padding: 6px 9px; cursor: pointer;
   min-width: 54px; touch-action: none; color: #17324d;

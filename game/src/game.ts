@@ -28,6 +28,9 @@ interface Drag {
   piece: PieceId;
   x: number;
   y: number;
+  /** The pointer on screen, to tell when it is over the side's own tray. */
+  cx: number;
+  cy: number;
   ok: boolean;
 }
 
@@ -481,13 +484,31 @@ export class Game {
 
   private startDrag(pointerId: number, side: Side, piece: PieceId, cx: number, cy: number): void {
     const w = this.view.toWorld(cx, cy);
-    const d: Drag = { side, piece, x: w.x, y: w.y, ok: false };
+    const d: Drag = { side, piece, x: w.x, y: w.y, cx, cy, ok: false };
     this.drags.set(pointerId, d);
     this.updateDragGhost(d, pointerId);
   }
 
+  /** Whether a drag is over its side's tray, where letting go hands the piece back. */
+  private overTray(d: Drag): boolean {
+    const r = this.paletteEls[d.side]?.getBoundingClientRect();
+    return !!r && d.cx >= r.left - 8 && d.cx <= r.right + 8 && d.cy >= r.top - 8 && d.cy <= r.bottom + 8;
+  }
+
+  private markTrays(): void {
+    for (const side of [0, 1] as Side[]) {
+      this.paletteEls[side]?.classList.toggle('drop', [...this.drags.values()].some((d) => d.side === side && this.overTray(d)));
+    }
+  }
+
   private updateDragGhost(d: Drag, key?: number): void {
     const id = key ?? [...this.drags.entries()].find(([, v]) => v === d)?.[0] ?? 0;
+    this.markTrays();
+    if (this.overTray(d)) {
+      d.ok = false;
+      this.view.showGhost(id, null);
+      return;
+    }
     const onSide = d.x * -dirOf(d.side) > ARENA.edgeX - 1;
     const spot = onSide ? this.dropSpot(d.side, d.piece, d.x, d.y - PIECES[d.piece].hy) : null;
     d.ok = !!spot;
@@ -499,6 +520,9 @@ export class Game {
     if (!d) return;
     this.drags.delete(pointerId);
     this.view.showGhost(pointerId, null);
+    this.markTrays();
+    // dropped on the tray: the piece stays in the budget (one picked up off the fort was refunded already)
+    if (this.overTray(d)) return;
     if (!this.canBuild(d.side)) return;
     const key = budgetKeyOf(d.piece);
     if (this.budgets[d.side][key] <= 0) return;
@@ -517,6 +541,7 @@ export class Game {
   private cancelDrags(): void {
     for (const id of this.drags.keys()) this.view.showGhost(id, null);
     this.drags.clear();
+    this.markTrays();
   }
 
   /** Removes all of a side's own pieces, refunding them. */
@@ -1062,6 +1087,8 @@ export class Game {
       const w = this.view.toWorld(ev.clientX, ev.clientY);
       d.x = w.x;
       d.y = w.y;
+      d.cx = ev.clientX;
+      d.cy = ev.clientY;
       this.updateDragGhost(d, ev.pointerId);
     });
     const up = (ev: PointerEvent) => {

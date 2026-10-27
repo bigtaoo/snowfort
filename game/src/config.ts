@@ -92,9 +92,9 @@ export const budgetKeyOf = (p: PieceId): BudgetKey => (p === 'plankH' || p === '
 export const BUILD = {
   budget: { snow: 12, ice: 5, plank: 4, king: 1 } as Budget,
   /** Desktop: players build one after the other. */
-  turnSeconds: 30,
+  turnSeconds: 120,
   /** Touch: both build at once. */
-  simultaneousSeconds: 40,
+  simultaneousSeconds: 120,
   repairBudget: { snow: 5, ice: 2, plank: 1, king: 0 } as Budget,
   repairTurnSeconds: 15,
   repairSimultaneousSeconds: 18,
