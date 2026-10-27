@@ -162,7 +162,7 @@
   配在仓库根的 `.mcp.json`（只有地址，没有密钥）；桌面版会话不读 `~/.claude.json` 里的项目级配置。
   新开的会话才能用，第一次要在 `/mcp` 里登录。
 - 已发布（2026-10-27，沙盒）：https://playgama.ai/play/dqq7iq6dcikez6 ，包检查 PASSED（Bridge 2.3.1）；
-  包按提交号命名（如 `snowfort-85995e5`），线上现在是这一版（只有双人轮流，HUD 收进框里露出的那一段）；MCP 连不上时也可以在网页后台
+  包按提交号命名（如 `snowfort-5de5efd`），线上现在是这一版（只有双人轮流，局间修补 2 分钟，电脑叫霜霜 / Frosty）；MCP 连不上时也可以在网页后台
   Update Game 里传 zip，再点 Continue → 选包 → Update in Sandbox；
   封面（方形 / 竖版 / 横版）在 `art/covers/`。同一天已把这个链接交到挑战页。
   还要做：在社交媒体发帖并 tag Playgama（用户自己发）；改了游戏要重新打包上传。
