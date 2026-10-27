@@ -10,7 +10,6 @@ export const en = {
   names: { p0: 'Red', p1: 'Blue' },
   keys: { p0: 'Space', p1: 'Enter' },
   menu: {
-    simul: '2 Players — fire at will',
     turns: '2 Players — take turns',
     cpu: 'vs CPU · {level}',
     easy: 'easy',

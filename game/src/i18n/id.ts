@@ -12,7 +12,6 @@ export const id: Table<typeof en> = {
   names: { p0: 'Merah', p1: 'Biru' },
   keys: { p0: 'Spasi', p1: 'Enter' },
   menu: {
-    simul: '2 pemain — tembak sesukanya',
     turns: '2 pemain — bergiliran',
     cpu: 'lawan CPU · {level}',
     easy: 'mudah',

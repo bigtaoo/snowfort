@@ -12,7 +12,6 @@ export const tr: Table<typeof en> = {
   names: { p0: 'Kırmızı', p1: 'Mavi' },
   keys: { p0: 'Boşluk', p1: 'Enter' },
   menu: {
-    simul: '2 oyuncu — serbest atış',
     turns: '2 oyuncu — sırayla',
     cpu: 'bilgisayara karşı · {level}',
     easy: 'kolay',

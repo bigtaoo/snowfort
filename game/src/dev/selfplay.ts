@@ -8,7 +8,7 @@
 import { CpuShooter, PRESET_FORTS, type CpuLevel } from '../cpu';
 import type { Side } from '../arena';
 
-type Mode = 'simul' | 'turns' | 'cpu';
+type Mode = 'turns' | 'cpu';
 
 export interface RoundLog { time: number; shots: number; loser: Side }
 export interface MatchLog { score: [number, number]; fight: number; rounds: RoundLog[] }
@@ -17,7 +17,7 @@ export const results: { done: boolean; matches: Record<string, MatchLog[]>; erro
 
 const game = () => (window as any).__sf;
 
-export async function match(l0: CpuLevel, l1: CpuLevel, mode: Mode = 'simul'): Promise<MatchLog> {
+export async function match(l0: CpuLevel, l1: CpuLevel, mode: Mode = 'cpu'): Promise<MatchLog> {
   const g = game();
   g.view.render = () => {};
   g.sfx.muted = true;
@@ -61,7 +61,7 @@ export async function match(l0: CpuLevel, l1: CpuLevel, mode: Mode = 'simul'): P
 }
 
 /** Plays `n` matches per pairing in the background; read `results`. */
-export function run(pairs: [CpuLevel, CpuLevel][], n = 4, mode: Mode = 'simul'): void {
+export function run(pairs: [CpuLevel, CpuLevel][], n = 4, mode: Mode = 'cpu'): void {
   results.done = false;
   results.matches = {};
   results.errors = [];

@@ -12,7 +12,6 @@ export const zh: Table<typeof en> = {
   names: { p0: '红方', p1: '蓝方' },
   keys: { p0: '空格', p1: '回车' },
   menu: {
-    simul: '双人 — 同时开火',
     turns: '双人 — 轮流出手',
     cpu: '对战电脑 · {level}',
     easy: '简单',

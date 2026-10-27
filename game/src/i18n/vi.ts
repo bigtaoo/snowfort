@@ -12,7 +12,6 @@ export const vi: Table<typeof en> = {
   names: { p0: 'Đỏ', p1: 'Xanh' },
   keys: { p0: 'Space', p1: 'Enter' },
   menu: {
-    simul: '2 người — bắn tự do',
     turns: '2 người — lần lượt',
     cpu: 'đấu với máy · {level}',
     easy: 'dễ',

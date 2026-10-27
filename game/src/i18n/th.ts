@@ -12,7 +12,6 @@ export const th: Table<typeof en> = {
   names: { p0: 'แดง', p1: 'น้ำเงิน' },
   keys: { p0: 'Space', p1: 'Enter' },
   menu: {
-    simul: '2 คน — ยิงอิสระ',
     turns: '2 คน — สลับกัน',
     cpu: 'เล่นกับ CPU · {level}',
     easy: 'ง่าย',

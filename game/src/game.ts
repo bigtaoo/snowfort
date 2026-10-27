@@ -13,7 +13,7 @@ import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
 import { CpuShooter, PRESET_FORTS, cpuPickCard, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
 
-type Mode = 'simul' | 'turns' | 'cpu';
+type Mode = 'turns' | 'cpu';
 type Phase = 'menu' | 'build' | 'fight' | 'roundEnd' | 'cards' | 'replay' | 'results';
 
 interface BuildSession {
@@ -73,7 +73,7 @@ export class Game {
   readonly arena: Arena;
   readonly sfx = new Sfx();
   readonly touch: boolean;
-  mode: Mode = 'simul';
+  mode: Mode = 'turns';
   cpuLevel: CpuLevel = 'normal';
   phase: Phase = 'menu';
   portal: Portal = NO_PORTAL;
@@ -247,8 +247,7 @@ export class Game {
       b.onclick = () => { this.sfx.click(); fn(); };
       return b;
     };
-    menu.append(add(t('menu.simul'), () => this.begin('simul'), 'btn big'));
-    menu.append(add(t('menu.turns'), () => this.begin('turns')));
+    menu.append(add(t('menu.turns'), () => this.begin('turns'), 'btn big'));
     const row = el('div', 'row');
     for (const lv of Object.keys(CPU.levels) as CpuLevel[]) {
       const b = add(t('menu.cpu', { level: t(`menu.${lv}`) }), () => { this.cpuLevel = lv; this.begin('cpu'); });

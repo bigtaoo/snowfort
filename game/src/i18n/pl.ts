@@ -12,7 +12,6 @@ export const pl: Table<typeof en> = {
   names: { p0: 'Czerwony', p1: 'Niebieski' },
   keys: { p0: 'Spacja', p1: 'Enter' },
   menu: {
-    simul: '2 graczy — ogień do woli',
     turns: '2 graczy — na zmianę',
     cpu: 'z komputerem · {level}',
     easy: 'łatwy',

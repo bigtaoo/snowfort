@@ -4,7 +4,7 @@ import { zh } from './zh';
 
 // String tables, after Holy Kicker's (D:\standing\client\src\i18n). English is the source: every
 // other table is typed as Table<typeof en>, so a missing or extra key is a compile error. Keys are
-// dotted paths checked at compile time: t('menu.simul'). English and Chinese ship in the main
+// dotted paths checked at compile time: t('menu.turns'). English and Chinese ship in the main
 // chunk; the other languages are fetched when picked (more.ts).
 
 export type Locale = 'en' | 'zh' | 'de' | 'fr' | 'es' | 'it' | 'pt' | 'pl' | 'ru' | 'ja' | 'ko' | 'vi' | 'tr' | 'th' | 'id';

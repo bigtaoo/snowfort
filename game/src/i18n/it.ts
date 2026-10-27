@@ -12,7 +12,6 @@ export const it: Table<typeof en> = {
   names: { p0: 'Rosso', p1: 'Blu' },
   keys: { p0: 'Spazio', p1: 'Invio' },
   menu: {
-    simul: '2 giocatori — fuoco libero',
     turns: '2 giocatori — a turni',
     cpu: 'contro la CPU · {level}',
     easy: 'facile',

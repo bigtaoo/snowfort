@@ -12,7 +12,6 @@ export const ko: Table<typeof en> = {
   names: { p0: '빨강', p1: '파랑' },
   keys: { p0: '스페이스', p1: 'Enter' },
   menu: {
-    simul: '2인 — 자유 사격',
     turns: '2인 — 번갈아',
     cpu: 'CPU 대전 · {level}',
     easy: '쉬움',

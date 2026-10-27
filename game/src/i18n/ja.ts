@@ -12,7 +12,6 @@ export const ja: Table<typeof en> = {
   names: { p0: '赤', p1: '青' },
   keys: { p0: 'スペース', p1: 'Enter' },
   menu: {
-    simul: '2人 — 撃ち放題',
     turns: '2人 — 交代で',
     cpu: 'CPU と対戦 · {level}',
     easy: 'かんたん',

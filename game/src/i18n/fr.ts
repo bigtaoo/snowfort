@@ -12,7 +12,6 @@ export const fr: Table<typeof en> = {
   names: { p0: 'Rouge', p1: 'Bleu' },
   keys: { p0: 'Espace', p1: 'Entrée' },
   menu: {
-    simul: '2 joueurs — feu à volonté',
     turns: '2 joueurs — chacun son tour',
     cpu: 'contre l’IA · {level}',
     easy: 'facile',

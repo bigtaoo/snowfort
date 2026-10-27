@@ -12,7 +12,6 @@ export const ru: Table<typeof en> = {
   names: { p0: 'Красные', p1: 'Синие' },
   keys: { p0: 'Пробел', p1: 'Enter' },
   menu: {
-    simul: '2 игрока — огонь по готовности',
     turns: '2 игрока — по очереди',
     cpu: 'против компьютера · {level}',
     easy: 'легко',
