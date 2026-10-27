@@ -3,6 +3,7 @@ import { Game } from './game';
 import { Bridge } from './platform/bridge';
 import { DEFAULT_LOCALE, detectLocale, loadLocale, setLocale } from './i18n';
 import { LANG_KEY } from './game';
+import { keepHudOnScreen } from './viewClip';
 
 async function boot(): Promise<void> {
   // Bridge only exists in the Playgama build; elsewhere init() is false at once and nothing changes
@@ -14,6 +15,7 @@ async function boot(): Promise<void> {
   const locale = detectLocale([saved, bridge.language, ...navigator.languages]);
   setLocale((await loadLocale(locale)) ? locale : DEFAULT_LOCALE);
   const game = new Game(document.getElementById('app')!);
+  keepHudOnScreen(document.getElementById('app')!, document.getElementById('hud')!);
   if (onPortal) {
     let hostMuted = false;
     let paused = false;
