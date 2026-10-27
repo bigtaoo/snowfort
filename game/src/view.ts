@@ -31,6 +31,7 @@ export class View {
   private homePos = new THREE.Vector3();
   private homeTarget = new THREE.Vector3();
   private inset = 0;
+  private shakeAmt = 0;
   private raycaster = new THREE.Raycaster();
   private plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
   private zoneMarks: THREE.Mesh[] = [];
@@ -287,8 +288,23 @@ export class View {
     pos.needsUpdate = true;
   }
 
-  render(): void {
+  /** Shakes the camera; strength in metres, it dies down by itself. */
+  shake(strength: number): void {
+    this.shakeAmt = Math.max(this.shakeAmt, strength);
+  }
+
+  render(dt = 0): void {
+    if (this.shakeAmt < 0.005) {
+      this.renderer.render(this.scene, this.camera);
+      return;
+    }
+    const p = this.camera.position.clone();
+    const a = this.shakeAmt;
+    this.camera.position.x += (Math.random() - 0.5) * 2 * a;
+    this.camera.position.y += (Math.random() - 0.5) * 2 * a;
     this.renderer.render(this.scene, this.camera);
+    this.camera.position.copy(p);
+    this.shakeAmt *= Math.exp(-dt * 9);
   }
 }
 

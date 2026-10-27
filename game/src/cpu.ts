@@ -33,12 +33,12 @@ export const PRESET_FORTS: Placement[][] = [
   ],
   // perch: king up on a pedestal behind a tall ice-and-snow wall
   [
-    { piece: 'ice', u: 3.2 }, { piece: 'ice', u: 3.2 }, { piece: 'ice', u: 3.2 }, { piece: 'snow', u: 3.2 },
-    { piece: 'snow', u: 4.2 }, { piece: 'snow', u: 4.2 }, { piece: 'snow', u: 4.2 }, { piece: 'snow', u: 4.2 },
+    { piece: 'ice', u: 3.35 }, { piece: 'ice', u: 3.35 }, { piece: 'ice', u: 3.35 }, { piece: 'snow', u: 3.35 },
+    { piece: 'snow', u: 4.35 }, { piece: 'snow', u: 4.35 }, { piece: 'snow', u: 4.35 }, { piece: 'snow', u: 4.35 },
     { piece: 'plankV', u: 5.4 },
     { piece: 'snow', u: 6.7 }, { piece: 'snow', u: 6.7 }, { piece: 'snow', u: 7.7 }, { piece: 'snow', u: 7.7 },
     { piece: 'plankH', u: 7.2, y: 2 }, { piece: 'king', u: 7.2, y: 2.3 },
-    { piece: 'snow', u: 2.2 }, { piece: 'ice', u: 2.2 },
+    { piece: 'snow', u: 2.35 }, { piece: 'ice', u: 2.35 },
   ],
 ];
 

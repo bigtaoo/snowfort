@@ -29,6 +29,8 @@ export class Launcher {
   /** Rule card: the first shot of the round fires three balls. */
   tripleNext = false;
   shots = 0;
+  /** Frost shot: the reload that is running is a freeze. */
+  frozen = false;
   private sweepT: number;
   private chargeT = 0;
 
@@ -45,6 +47,15 @@ export class Launcher {
     this.reloadLeft = 0;
     this.power = 0;
     this.shots = 0;
+    this.frozen = false;
+  }
+
+  /** Frost shot: drops any charge and locks the catapult for at least `seconds`. */
+  freeze(seconds: number): void {
+    this.phase = 'reload';
+    this.power = 0;
+    this.reloadLeft = Math.max(this.reloadLeft, seconds);
+    this.frozen = true;
   }
 
   update(dt: number): void {
@@ -56,7 +67,10 @@ export class Launcher {
       this.power = tri(this.chargeT);
     } else if (this.phase === 'reload') {
       this.reloadLeft -= dt;
-      if (this.reloadLeft <= 0) this.phase = 'sweep';
+      if (this.reloadLeft <= 0) {
+        this.phase = 'sweep';
+        this.frozen = false;
+      }
     }
   }
 

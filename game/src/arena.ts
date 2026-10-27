@@ -2,12 +2,12 @@ import RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
 import { blockMesh, debrisMesh, hurtBlock, kingMesh, projectileMesh } from './look/meshes';
 import {
-  AMMO, ARENA, BLOCK_HALF_DEPTH, CATAPULT, MATERIALS, PHYSICS, PIECES, PROJECTILE, REPLAY,
+  AMMO, ARENA, BLOCK_HALF_DEPTH, CARDS, CATAPULT, MATERIALS, PHYSICS, PIECES, PROJECTILE, REPLAY,
   type MaterialId, type PieceId,
 } from './config';
 
 export type Side = 0 | 1;
-export type AmmoId = 'snowball' | 'bigIce' | 'split' | 'cocoa' | 'firework';
+export type AmmoId = 'snowball' | 'bigIce' | 'split' | 'cocoa' | 'firework' | 'frost';
 type Kind = 'block' | 'king' | 'decoy' | 'projectile' | 'debris';
 
 /** Plain data of an entity: what a snapshot keeps so meshes can be rebuilt after a restore. */
@@ -28,6 +28,8 @@ export interface EntityData {
   spent?: boolean;
   /** Debris and broken blocks vanish at this sim time. */
   dieAt?: number;
+  /** Bouncy fence card: a springy plank. */
+  spring?: boolean;
   /** Damage taken by a king this round (impulse units). */
   impact?: number;
   /** The king's current hit: when it started and how much it has done so far. */
@@ -163,22 +165,26 @@ export class Arena {
     return e;
   }
 
-  addPiece(piece: PieceId, owner: Side, x: number, y: number, decoy = false): Entity {
+  addPiece(piece: PieceId, owner: Side, x: number, y: number, decoy = false, spring = false): Entity {
     const spec = PIECES[piece];
     const mat = MATERIALS[spec.material];
     const body = this.world.createRigidBody(this.bodyDesc(x, y).setLinearDamping(PHYSICS.blockDamping).setAngularDamping(PHYSICS.blockDamping));
+    const desc = RAPIER.ColliderDesc.cuboid(spec.hx, spec.hy, BLOCK_HALF_DEPTH);
+    // a springy plank is heavy so it stands its ground, and its bounce wins over the ball's
+    if (spring) desc.setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max);
     const col = this.world.createCollider(
-      RAPIER.ColliderDesc.cuboid(spec.hx, spec.hy, BLOCK_HALF_DEPTH)
-        .setDensity(mat.density)
+      desc
+        .setDensity(spring ? CARDS.springDensity : mat.density)
         .setFriction(mat.friction)
-        .setRestitution(mat.restitution)
+        .setRestitution(spring ? CARDS.springRestitution : mat.restitution)
         .setCollisionGroups(blockGroups(owner))
         .setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS)
         .setContactForceEventThreshold(mat.armor / PHYSICS.dt),
       body,
     );
     const kind: Kind = piece === 'king' ? (decoy ? 'decoy' : 'king') : 'block';
-    return this.register({ kind, owner, piece, hp: mat.hp, maxHp: mat.hp, impact: 0 }, body, col);
+    const hp = spring ? mat.hp * CARDS.springHpMul : mat.hp;
+    return this.register({ kind, owner, piece, hp, maxHp: hp, impact: 0, spring }, body, col);
   }
 
   addProjectile(owner: Side, ammo: AmmoId, x: number, y: number, vx: number, vy: number, massMul: number): Entity {
@@ -450,7 +456,7 @@ function makeMesh(d: Omit<EntityData, 'id' | 'bodyHandle' | 'colliderHandle' | '
   if (d.kind === 'king' || d.kind === 'decoy') return kingMesh(d.owner);
   if (d.kind === 'projectile') return projectileMesh(d.ammo, d.radius ?? PROJECTILE.radius);
   if (d.kind === 'debris') return debrisMesh(0xffffff);
-  return blockMesh(d.piece!, seed);
+  return blockMesh(d.piece!, seed, d.spring);
 }
 
 function syncMesh(e: Entity): void {

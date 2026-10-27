@@ -27,8 +27,9 @@ export const ARENA = {
   outerX: 24,
   ravineY: -7,
   depth: 8,
-  /** Each player builds in |x| from zoneNear to zoneFar on their own side. */
-  zoneNear: 1.7,
+  /** Each player builds in |x| from zoneNear to zoneFar on their own side. The strip between the cliff
+   * and zoneNear is where the bouncy fence card stands. */
+  zoneNear: 1.85,
   /** Short of the catapult, so a ball never leaves from inside its own fort. */
   zoneFar: 8.7,
   buildCeiling: 9,
@@ -139,6 +140,8 @@ export const AMMO = {
   split: { count: 3, spreadSpeed: 4 },
   cocoa: { meltRadius: 2.6, snowDamage: 8 },
   firework: { speedMul: 1.45, gravityScale: 0.18, radius: 0.25, densityMul: 1.6 },
+  /** Lands on the rival's hill: their catapult freezes this long. */
+  frost: { freezeSeconds: 3 },
   /** Ammo cards give this many special shots next round. */
   shotsPerCard: 3,
 };
@@ -157,6 +160,10 @@ export const ROUND = {
 
 export const CARDS = {
   windForce: 9,
+  /** Bouncy fence: a heavy springy upright plank at the front edge. */
+  springRestitution: 1.25,
+  springDensity: 14,
+  springHpMul: 5,
   slowReloadMul: 1.3,
   tripleSpreadDeg: 6,
 };

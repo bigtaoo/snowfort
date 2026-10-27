@@ -135,7 +135,7 @@ export class Game {
     this.view.puff.update(dt * this.timeScale);
     this.update(dt);
     this.view.updateSnow(dt, this.phase === 'fight' && this.roundTime > ROUND.blizzardAfter ? 1 : 0);
-    this.view.render();
+    this.view.render(dt);
   }
 
   private update(dt: number): void {
@@ -518,6 +518,11 @@ export class Game {
         if (k) { const p = k.body.translation(); this.arena.addPiece('plankH', side, p.x, Math.max(p.y + 3, this.dropSpot(side, 'plankH', p.x, p.y + 1.2)?.y ?? p.y + 3)); }
         break;
       }
+      case 'spring': {
+        // on the strip between the cliff and the build zone, which nothing else uses
+        this.arena.addPiece('plankV', side, xOf(side, ARENA.edgeX + PIECES.plankV.hx - 0.01), ARENA.groundY + PIECES.plankV.hy + 0.02, false, true);
+        break;
+      }
       case 'decoy': {
         const k = this.arena.king(side);
         const ku = k ? -dirOf(side) * k.body.translation().x : 10;
@@ -560,7 +565,9 @@ export class Game {
       if ((landed && since > 0.5) || since > CATAPULT.turnSettleSeconds) {
         this.turn = other(this.turn);
         this.turnFiredAt = null;
-        this.launchers[this.turn].phase = 'sweep';
+        const next = this.launchers[this.turn];
+        // a frozen catapult stays frozen into its turn
+        if (!next.frozen) next.phase = 'sweep';
         this.setArmed();
       }
     }
@@ -595,7 +602,15 @@ export class Game {
 
   /** After each physics step: special ammo effects and the round's end. */
   private afterStep(): void {
-    for (const imp of this.arena.impacts) if (imp.ammo === 'cocoa') this.melt(imp.x, imp.y);
+    for (const imp of this.arena.impacts) {
+      if (imp.ammo === 'cocoa') this.melt(imp.x, imp.y);
+      if (imp.ammo === 'bigIce') this.view.shake(0.18);
+      const rival = other(imp.owner);
+      if (imp.ammo === 'frost' && imp.x * -dirOf(rival) > ARENA.edgeX) {
+        this.launchers[rival].freeze(AMMO.frost.freezeSeconds);
+        this.sfx.crunch('ice');
+      }
+    }
     const lost = ([0, 1] as Side[]).filter((s) => this.kingDown(s));
     if (lost.length) this.endRound(lost);
   }
@@ -667,13 +682,14 @@ export class Game {
     this.nextSession();
   }
 
-  /** Clears shots and debris, and takes away kings and blocks that fell off their hill. */
+  /** Clears shots and debris, and takes away blocks that fell off their hill and kings out of their zone. */
   private cleanupBetweenRounds(): void {
     for (const e of [...this.arena.ents]) {
       if (!e.alive) continue;
       const p = e.body.translation();
       const u = p.x * -dirOf(e.owner);
-      const fallen = p.y < ARENA.fallY || u < ARENA.edgeX || (e.kind === 'king' && u > ARENA.yardEnd);
+      // a king shoved out of his build zone goes back to the tray, so next round does not start one bump from losing
+      const fallen = p.y < ARENA.fallY || u < ARENA.edgeX || (e.kind === 'king' && (u < ARENA.zoneNear || u > ARENA.zoneFar));
       if (e.kind === 'projectile' || e.kind === 'debris' || e.kind === 'decoy' || fallen) this.arena.remove(e);
       else if (e.kind === 'king' && (e.impact ?? 0) >= MATERIALS.king.hp) this.arena.remove(e);
     }
@@ -875,7 +891,10 @@ export class Game {
     this.muteEl.onclick = () => { this.sfx.setMuted(!this.sfx.muted); showMute(); this.sfx.click(); };
     showMute();
     this.hud.append(this.topEl, this.bannerEl, this.overlayEl, ...this.keyEls, this.muteEl);
-    this.kingHud = new KingHud(this.hud, this.pinfo.map((p) => p.bar.parentElement!), (_, dmg) => this.sfx.kingHit(dmg / MATERIALS.king.hp));
+    this.kingHud = new KingHud(this.hud, this.pinfo.map((p) => p.bar.parentElement!), (_, dmg) => {
+      this.sfx.kingHit(dmg / MATERIALS.king.hp);
+      this.view.shake(Math.min(0.25, 0.4 * dmg / MATERIALS.king.hp));
+    });
     this.hideTop();
   }
 
@@ -896,6 +915,7 @@ export class Game {
           : (this.mode === 'cpu' && side === 1 ? 'CPU builds…' : 'waiting');
       } else if (this.phase === 'fight') {
         if (!l.armed) status = 'waiting for turn';
+        else if (l.frozen) status = `❄ frozen ${l.reloadLeft.toFixed(1)}s`;
         else if (l.phase === 'reload') status = `reloading ${l.reloadLeft.toFixed(1)}s`;
         else if (l.phase === 'charge') status = `power ${Math.round(l.power * 100)}%`;
         else status = 'aiming…';
@@ -950,4 +970,4 @@ export class Game {
   }
 }
 
-const ammoName = (a: AmmoId) => ({ snowball: 'snowball', bigIce: 'ice boulder', split: 'split shot', cocoa: 'cocoa', firework: 'firework' })[a];
+const ammoName = (a: AmmoId) => ({ snowball: 'snowball', bigIce: 'ice boulder', split: 'split shot', cocoa: 'cocoa', firework: 'firework', frost: 'frost shot' })[a];

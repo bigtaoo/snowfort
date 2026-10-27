@@ -61,7 +61,9 @@ function withHull(g: BufferGeometry, body: Material, line: Material): Mesh {
   return m;
 }
 
-export function blockMesh(piece: PieceId, seed: number): Mesh {
+const SPRING = 0x8be36b;
+
+export function blockMesh(piece: PieceId, seed: number, spring = false): Mesh {
   const spec = PIECES[piece];
   const kind = spec.material as 'snow' | 'ice' | 'wood';
   // a vertical plank is the horizontal one turned on its side, so the wood grain runs along it
@@ -76,7 +78,7 @@ export function blockMesh(piece: PieceId, seed: number): Mesh {
     mat.stencilFunc = AlwaysStencilFunc;
     mat.stencilZPass = ReplaceStencilOp;
   }
-  mat.color.copy(jitter(BASE[kind], SPREAD[kind], seed));
+  mat.color.copy(spring ? new Color(SPRING) : jitter(BASE[kind], SPREAD[kind], seed));
   mat.userData.base = mat.color.clone();
   const body = withHull(g, mat, ice ? iceLine : blockLine);
   if (ice) body.renderOrder = 1;
@@ -107,7 +109,7 @@ export function kingMesh(owner: 0 | 1): Object3D {
   return wrap;
 }
 
-const AMMO_COLOR: Record<string, number> = { bigIce: 0x9fdcff, cocoa: 0x7a4a2a, firework: 0xffc23d, split: 0xd8f0ff };
+const AMMO_COLOR: Record<string, number> = { bigIce: 0x9fdcff, cocoa: 0x7a4a2a, firework: 0xffc23d, split: 0xd8f0ff, frost: 0x5fd8ff };
 const ballMats = new Map<string, MeshToonMaterial>();
 
 export function projectileMesh(ammo: string | undefined, radius: number): Mesh {
