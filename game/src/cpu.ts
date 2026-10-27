@@ -1,6 +1,7 @@
 import { CATAPULT, CPU, PHYSICS, type PieceId } from './config';
 import { Arena, type Side } from './arena';
 import { Launcher } from './launcher';
+import type { Card } from './cards';
 
 export type CpuLevel = keyof typeof CPU.levels;
 
@@ -136,3 +137,21 @@ export class CpuShooter {
   }
 }
 
+
+/**
+ * The CPU's card: ammo when it is behind, fort cards when its own fort is worn down, with some noise.
+ * `fortShare` is its standing blocks over the rival's. Easy picks at random.
+ */
+export function cpuPickCard(hand: Card[], level: CpuLevel, behind: boolean, fortShare: number): number {
+  if (level === 'easy') return Math.floor(Math.random() * hand.length);
+  let best = 0;
+  let bestScore = -Infinity;
+  hand.forEach((c, i) => {
+    let score = Math.random() * 1.5;
+    if (c.kind === 'ammo') score += 2 + (behind ? 1.5 : 0) + (c.id === 'bigIce' ? 0.8 : 0);
+    if (c.kind === 'fort') score += 1.5 + (fortShare < 0.8 ? 2 : 0) + (c.id === 'roof' || c.id === 'spring' ? 0.5 : 0);
+    if (c.kind === 'rule') score += 1.5 + (c.id === 'triple' && behind ? 1 : 0);
+    if (score > bestScore) { bestScore = score; best = i; }
+  });
+  return best;
+}

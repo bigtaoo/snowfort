@@ -9,7 +9,7 @@ import { Sfx } from './audio';
 import { KingHud } from './kingHud';
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
-import { CpuShooter, PRESET_FORTS, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
+import { CpuShooter, PRESET_FORTS, cpuPickCard, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
 
 type Mode = 'simul' | 'turns' | 'cpu';
 type Phase = 'menu' | 'build' | 'fight' | 'roundEnd' | 'cards' | 'replay' | 'results';
@@ -71,6 +71,8 @@ export class Game {
   private firePointers = new Map<number, Side>();
   private cpuBuildQueue: Placement[] = [];
   private cpuBuildTimer = 0;
+  /** The card the CPU will take when its pick time runs out. */
+  private cpuCard: number | null = null;
   private bannerTimer = 0;
   private cardQueue: Side[] = [];
   private hand: Card[] = [];
@@ -79,6 +81,9 @@ export class Game {
   /** Alternate-turn mode: whose shot it is, and how long since they fired. */
   private turn: Side = 0;
   private turnFiredAt: number | null = null;
+  /** Each side's latest shot, traced until it first touches something. */
+  private trailBall: (Entity | null)[] = [null, null];
+  private trailNext = [0, 0];
   private replayT = 0;
   private replayLoser: Side = 0;
   private winnerOfMatch: Side = 0;
@@ -149,7 +154,7 @@ export class Game {
         break;
       case 'cards':
         this.cardTime -= dt;
-        if (this.cardTime <= 0) this.pickCard(Math.floor(Math.random() * 3));
+        if (this.cardTime <= 0) this.pickCard(this.cpuCard ?? Math.floor(Math.random() * 3));
         break;
       case 'replay': {
         this.replayT += dt;
@@ -162,6 +167,17 @@ export class Game {
     if (this.bannerTimer > 0 && this.phase !== 'roundEnd') {
       this.bannerTimer -= dt;
       if (this.bannerTimer <= 0) this.bannerEl.innerHTML = '';
+    }
+    const fighting = this.phase === 'fight' || this.phase === 'roundEnd';
+    this.view.showTrails(fighting);
+    for (const s of [0, 1] as Side[]) {
+      const b = this.trailBall[s];
+      if (!fighting || !b) continue;
+      if (!b.alive || b.hitAt !== undefined) { this.trailBall[s] = null; continue; }
+      if (this.arena.time < this.trailNext[s]) continue;
+      const p = b.body.translation();
+      this.view.addTrailDot(s, p.x, p.y);
+      this.trailNext[s] = this.arena.time + 0.05;
     }
     for (const s of [0, 1] as Side[]) {
       const l = this.launchers[s];
@@ -495,6 +511,8 @@ export class Game {
     for (const e of this.arena.ents) if (e.kind === 'king') e.impact = 0;
     this.turn = this.lastWinner === null ? 0 : other(this.lastWinner);
     this.turnFiredAt = null;
+    this.trailBall = [null, null];
+    this.view.clearTrail();
     this.setArmed();
     this.phase = 'fight';
     this.firePointers.clear();
@@ -590,10 +608,13 @@ export class Game {
       : 1;
     const angles = shot.triple ? [-1, 0, 1].map((k) => shot.angle + k * CARDS.tripleSpreadDeg * Math.PI / 180) : [shot.angle];
     const speed = shot.ammo === 'firework' ? shot.speed * AMMO.firework.speedMul : shot.speed;
-    for (const a of angles) {
+    const balls = angles.map((a) => {
       const m = Arena.muzzle(shot.side, a);
-      this.arena.addProjectile(shot.side, shot.ammo, m.x, m.y, dir * Math.cos(a) * speed, Math.sin(a) * speed, massMul);
-    }
+      return this.arena.addProjectile(shot.side, shot.ammo, m.x, m.y, dir * Math.cos(a) * speed, Math.sin(a) * speed, massMul);
+    });
+    this.trailBall[shot.side] = balls[Math.floor(balls.length / 2)];
+    this.trailNext[shot.side] = 0;
+    this.view.clearTrail(shot.side);
     if (this.mode === 'turns') {
       this.turnFiredAt = this.arena.time;
       this.launchers[shot.side].armed = false;
@@ -727,8 +748,11 @@ export class Game {
       row.append(card);
     });
     o.append(row);
+    this.cpuCard = null;
     if (this.mode === 'cpu' && side === 1) {
       this.cardTime = 1.2;
+      const blocks = (s: Side) => this.arena.ents.filter((e) => e.alive && e.kind === 'block' && e.owner === s).length;
+      this.cpuCard = cpuPickCard(this.hand, this.cpuLevel, this.score[1] < this.score[0], blocks(1) / Math.max(1, blocks(0)));
     }
   }
 

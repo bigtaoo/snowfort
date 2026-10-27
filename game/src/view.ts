@@ -10,6 +10,8 @@ import { outlineMaterial, toonMaterial } from './look/toon';
 const BASE_SCALE = 1.6;
 const ARM_SCALE = CATAPULT.barrelLength / Math.hypot(ARM_REACH, 0.12 + BALL_R);
 const AIM_DOTS = 7;
+/** Dots in a last-shot trail. */
+const TRAIL_MAX = 48;
 /** The ball sits above the arm's beam; tilt the arm back so the ball, not the beam, aims. */
 const BALL_TILT = Math.atan2(0.12 + BALL_R, ARM_REACH);
 
@@ -23,6 +25,8 @@ export class View {
   private powerBars: THREE.Mesh[] = [];
   private gaugeBacks: THREE.Mesh[] = [];
   private aims: THREE.Group[] = [];
+  private trails: THREE.InstancedMesh[] = [];
+  private trailMatrix = new THREE.Matrix4();
   private ghosts = new Map<number, THREE.Mesh>();
   private flakes: THREE.Points;
   private snow: THREE.Points;
@@ -149,6 +153,18 @@ export class View {
     aim.position.set(px, CATAPULT.pivotY, 0.9);
     this.scene.add(aim);
     this.aims.push(aim);
+
+    // the last shot's path: faint dots in the side's colour, so the next shot can be corrected
+    const trail = new THREE.InstancedMesh(
+      new THREE.SphereGeometry(0.09, 8, 6),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, depthTest: false }),
+      TRAIL_MAX,
+    );
+    trail.count = 0;
+    trail.renderOrder = 9;
+    trail.frustumCulled = false;
+    this.scene.add(trail);
+    this.trails.push(trail);
   }
 
   /** Points catapult `side` at `angle` (radians above horizontal, towards the enemy) and sets the gauge. */
@@ -165,6 +181,22 @@ export class View {
     aim.visible = ready;
     aim.rotation.z = side === 0 ? angle : Math.PI - angle;
     aim.children.forEach((d, i) => { d.visible = locked || i < AIM_DOTS - 2; });
+  }
+
+  /** Empties one side's trail (or both). */
+  clearTrail(side?: Side): void {
+    for (const s of side === undefined ? [0, 1] : [side]) this.trails[s].count = 0;
+  }
+
+  addTrailDot(side: Side, x: number, y: number): void {
+    const t = this.trails[side];
+    if (t.count >= TRAIL_MAX) return;
+    t.setMatrixAt(t.count++, this.trailMatrix.makeTranslation(x, y, 0.9));
+    t.instanceMatrix.needsUpdate = true;
+  }
+
+  showTrails(on: boolean): void {
+    for (const t of this.trails) t.visible = on;
   }
 
   // ---------- build ghost ----------
