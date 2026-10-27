@@ -49,7 +49,6 @@ export interface Portal {
 const NO_PORTAL: Portal = { gameplay: () => {}, achievement: () => {}, betweenMatches: async () => {}, track: () => {} };
 
 /** A player's name and fire key in the current language. */
-const nameOf = (s: Side) => t(s === 0 ? 'names.p0' : 'names.p1');
 const keyOf = (s: Side) => t(s === 0 ? 'keys.p0' : 'keys.p1');
 const FIRE_KEYS = ['Space', 'Enter'];
 /** Where the player's own language choice is kept (else the platform's or the browser's). */
@@ -250,7 +249,7 @@ export class Game {
     menu.append(add(t('menu.turns'), () => this.begin('turns'), 'btn big'));
     const row = el('div', 'row');
     for (const lv of Object.keys(CPU.levels) as CpuLevel[]) {
-      const b = add(t('menu.cpu', { level: t(`menu.${lv}`) }), () => { this.cpuLevel = lv; this.begin('cpu'); });
+      const b = add(t('menu.cpu', { name: t('names.cpu'), level: t(`menu.${lv}`) }), () => { this.cpuLevel = lv; this.begin('cpu'); });
       // a first-timer is pointed at the gentlest way in
       if (lv === 'easy' && this.coach.needs('menu')) {
         b.classList.add('coachMark');
@@ -262,7 +261,7 @@ export class Game {
     o.append(menu);
     o.append(el('div', 'help', this.touch
       ? t('menu.helpTouch')
-      : t('menu.helpKeys', { red: `<b>${nameOf(0)}</b>`, space: `<kbd>${keyOf(0)}</kbd>`, blue: `<b>${nameOf(1)}</b>`, enter: `<kbd>${keyOf(1)}</kbd>` })));
+      : t('menu.helpKeys', { red: `<b>${this.nameOf(0)}</b>`, space: `<kbd>${keyOf(0)}</kbd>`, blue: `<b>${this.nameOf(1)}</b>`, enter: `<kbd>${keyOf(1)}</kbd>` })));
     o.append(this.languagePicker());
   }
 
@@ -289,7 +288,7 @@ export class Game {
 
   /** The HUD text that is set once, again in the current language. */
   private relabel(): void {
-    this.pinfo.forEach((info, side) => { info.label.textContent = nameOf(side as Side); });
+    this.pinfo.forEach((info, side) => { info.label.textContent = this.nameOf(side as Side); });
     this.muteEl.title = t('common.sound');
     const rotate = document.getElementById('rotate');
     if (rotate) rotate.textContent = t('common.rotate');
@@ -312,6 +311,8 @@ export class Game {
   startMatch(mode: Mode): void {
     this.portal.gameplay(true);
     this.mode = mode;
+    // Blue's name plate reads the CPU's name only in a CPU match
+    this.relabel();
     this.arena.reset();
     this.view.puff.clear();
     this.kingHud.clear();
@@ -372,7 +373,7 @@ export class Game {
     this.session = s;
     this.view.highlightZones(s.sides);
     this.makePalettes(s);
-    const who = s.sides.length === 2 ? t('build.both') : nameOf(s.sides[0]);
+    const who = s.sides.length === 2 ? t('build.both') : this.nameOf(s.sides[0]);
     this.banner(t(s.repair ? 'build.repair' : 'build.build', { who }), t(s.sides.length === 2 ? 'build.dragOwn' : 'build.dragTray'), 2);
     this.buildTips();
   }
@@ -638,6 +639,11 @@ export class Game {
     }
   }
 
+  /** A side's name on screen; against the CPU, Blue is the CPU's own name. */
+  private nameOf(s: Side): string {
+    return t(s === 0 ? 'names.p0' : this.mode === 'cpu' ? 'names.cpu' : 'names.p1');
+  }
+
   /** Screen pixels the build trays (and their timers) take at the bottom, which the camera keeps clear. */
   private trayStrip(): number {
     let top = window.innerHeight;
@@ -680,7 +686,7 @@ export class Game {
     this.firePointers.clear();
     this.showKeys(true);
     this.sfx.bell();
-    this.banner(t('fight.round', { n: this.round }), this.mode === 'turns' ? t('fight.firstTurn', { name: nameOf(this.turn) }) : t('fight.fireAtWill'), 1.6);
+    this.banner(t('fight.round', { n: this.round }), this.mode === 'turns' ? t('fight.firstTurn', { name: this.nameOf(this.turn) }) : t('fight.fireAtWill'), 1.6);
   }
 
   private setArmed(): void {
@@ -784,7 +790,7 @@ export class Game {
       this.coach.learn('charge');
     }
     const rival = other(side);
-    this.coach.show('goal', 'goal', t('coach.goal', { name: nameOf(rival) }), () => {
+    this.coach.show('goal', 'goal', t('coach.goal', { name: this.nameOf(rival) }), () => {
       const k = this.arena.king(rival);
       if (!k) return null;
       const p = k.body.translation();
@@ -878,7 +884,7 @@ export class Game {
     const kp = k?.body.translation();
     const how: Key = !kp || kp.y < ARENA.fallY ? 'fight.offHill'
       : kp.x * -dirOf(lost[0]) > ARENA.yardEnd ? 'fight.pushedOut' : 'fight.knockedOut';
-    this.bannerEl.innerHTML = `${t('fight.takes', { name: nameOf(winner) })}<small>${t(how, { name: nameOf(lost[0]) })}</small>`;
+    this.bannerEl.innerHTML = `${t('fight.takes', { name: this.nameOf(winner) })}<small>${t(how, { name: this.nameOf(lost[0]) })}</small>`;
   }
 
   private afterRoundBanner(): void {
@@ -945,7 +951,7 @@ export class Game {
     o.innerHTML = '';
     o.className = `overlay p${side}`;
     this.overlay(true);
-    o.append(el('div', 'who', t(this.lastWinner === other(side) ? 'cards.pickLoser' : 'cards.pick', { name: nameOf(side) })));
+    o.append(el('div', 'who', t(this.lastWinner === other(side) ? 'cards.pickLoser' : 'cards.pick', { name: this.nameOf(side) })));
     this.cardClockEl = el('div', 'cardClock', '');
     const row = el('div', 'cards');
     this.hand.forEach((c, i) => {
@@ -1010,7 +1016,7 @@ export class Game {
     o.className = `overlay p${this.winnerOfMatch}`;
     o.innerHTML = '';
     const vsCpu = this.mode === 'cpu';
-    const title = vsCpu ? t(this.winnerOfMatch === 0 ? 'end.youWin' : 'end.cpuWins') : t('end.wins', { name: nameOf(this.winnerOfMatch) });
+    const title = vsCpu ? t(this.winnerOfMatch === 0 ? 'end.youWin' : 'end.cpuWins', { name: t('names.cpu') }) : t('end.wins', { name: this.nameOf(this.winnerOfMatch) });
     o.append(el('h1', 'title', title));
     o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
     const row = el('div', 'row menu');
@@ -1110,7 +1116,7 @@ export class Game {
     for (const side of [0, 1] as Side[]) {
       const root = el('div', `pinfo p${side}`);
       const name = el('div', 'name');
-      const label = el('span', '', nameOf(side));
+      const label = el('span', '', this.nameOf(side));
       const pips = el('span', 'pips');
       name.append(label, pips);
       const bar = el('i');
@@ -1161,7 +1167,7 @@ export class Game {
         const b = this.budgets[side];
         status = this.session.sides.includes(side)
           ? (this.session.done[side] ? t('build.ready') : `${t('build.left', b)}${b.king ? ` · ${t('build.king')}` : ''}`)
-          : t(this.mode === 'cpu' && side === 1 ? 'build.cpuBuilds' : 'build.waiting');
+          : t(this.mode === 'cpu' && side === 1 ? 'build.cpuBuilds' : 'build.waiting', { name: t('names.cpu') });
       } else if (this.phase === 'fight') {
         if (!l.armed) status = t('fight.waitTurn');
         else if (l.frozen) status = t('fight.frozen', { s: l.reloadLeft.toFixed(1) });
@@ -1186,7 +1192,7 @@ export class Game {
       const left = ROUND.blizzardAfter - this.roundTime;
       this.clockEl.textContent = left > 0 ? `${Math.ceil(left)}` : '❄';
       this.subEl.innerHTML = left > 0 ? t('fight.roundSmall', { n: this.round }) : `<span class="blizzard">${t('fight.blizzard')}</span>`;
-      if (this.mode === 'turns' && this.phase === 'fight') this.subEl.innerHTML += `<br>${t('fight.turnOf', { name: nameOf(this.turn) })}`;
+      if (this.mode === 'turns' && this.phase === 'fight') this.subEl.innerHTML += `<br>${t('fight.turnOf', { name: this.nameOf(this.turn) })}`;
     }
   }
 

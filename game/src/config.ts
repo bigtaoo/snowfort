@@ -96,8 +96,8 @@ export const BUILD = {
   /** Touch: both build at once. */
   simultaneousSeconds: 120,
   repairBudget: { snow: 5, ice: 2, plank: 1, king: 0 } as Budget,
-  repairTurnSeconds: 15,
-  repairSimultaneousSeconds: 18,
+  repairTurnSeconds: 120,
+  repairSimultaneousSeconds: 120,
   /** Pieces dropped this high above the pointer drop onto whatever is below. */
   liftStep: 0.05,
 };
