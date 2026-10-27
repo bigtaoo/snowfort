@@ -12,6 +12,8 @@ export const PHYSICS = {
   blockDamping: 0.5,
   /** No single hit takes more than this share of a king's health, so even a boulder needs a second hit. */
   kingMaxHitShare: 0.6,
+  /** Damage a king takes within this many seconds of a hit's first contact belongs to that hit. */
+  kingHitWindow: 0.8,
   debrisLife: 2.2,
   debrisSize: 0.35,
   debrisPerBreak: 4,
@@ -114,8 +116,12 @@ export const CATAPULT = {
   /** Seconds for power to go 0 -> 1 -> 0 while held. */
   chargePeriod: 1.8,
   reloadSeconds: 2.5,
-  /** Alternate-turn mode: wait this long after a shot (or until it settles) before handing over. */
-  turnSettleSeconds: 3.5,
+  /** Alternate-turn mode: hand over this long after the shot lands... */
+  turnAfterLanding: 0.5,
+  /** ...or this long after it was fired, whichever comes first. */
+  turnSettleSeconds: 3.2,
+  /** Alternate-turn mode: every hit does this much more damage, so a round takes fewer shots. */
+  turnDamageMul: 1.4,
 };
 
 export const PROJECTILE = {

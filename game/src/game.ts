@@ -214,6 +214,7 @@ export class Game {
     this.pending = [[], []];
     this.lastWinner = null;
     this.cpu = mode === 'cpu' ? new CpuShooter(1, this.cpuLevel) : null;
+    this.arena.damageMul = mode === 'turns' ? CATAPULT.turnDamageMul : 1;
     this.launchers = [new Launcher(0), new Launcher(1)];
     this.budgets = [{ ...BUILD.budget }, { ...BUILD.budget }];
     this.overlay(false);
@@ -552,9 +553,11 @@ export class Game {
       if (act.release) this.fire(l.release());
     }
     if (this.mode === 'turns' && this.turnFiredAt !== null) {
-      const mine = this.arena.ents.some((e) => e.kind === 'projectile' && e.owner === this.turn);
+      // hand over as soon as the shot has landed (split and triple shots: all of it)
+      const mine = this.arena.ents.filter((e) => e.kind === 'projectile' && e.owner === this.turn);
+      const landed = mine.every((e) => e.hitAt !== undefined && this.arena.time - e.hitAt > CATAPULT.turnAfterLanding);
       const since = this.arena.time - this.turnFiredAt;
-      if ((!mine && since > 1.2) || since > CATAPULT.turnSettleSeconds) {
+      if ((landed && since > 0.5) || since > CATAPULT.turnSettleSeconds) {
         this.turn = other(this.turn);
         this.turnFiredAt = null;
         this.launchers[this.turn].phase = 'sweep';

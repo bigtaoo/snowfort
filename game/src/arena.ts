@@ -30,6 +30,9 @@ export interface EntityData {
   dieAt?: number;
   /** Damage taken by a king this round (impulse units). */
   impact?: number;
+  /** The king's current hit: when it started and how much it has done so far. */
+  hitStart?: number;
+  hitDmg?: number;
 }
 
 export interface Entity extends EntityData {
@@ -84,6 +87,8 @@ export class Arena {
   wind: [number, number] = [0, 0];
   /** Off while building: blocks dropped into place should not crack. */
   damageOn = false;
+  /** Every hit counts this many times (turn mode makes each shot matter more). */
+  damageMul = 1;
 
   constructor(scene: THREE.Scene) {
     scene.add(this.group);
@@ -283,13 +288,20 @@ export class Arena {
         if (other?.kind === 'debris') continue;
         const mat = MATERIALS[PIECES[e.piece!].material];
         const direct = other?.kind === 'projectile';
-        const dmg = (impulse - mat.armor) * (direct ? 1 : PHYSICS.knockOnDamage);
+        const dmg = (impulse - mat.armor) * (direct ? 1 : PHYSICS.knockOnDamage) * this.damageMul;
         if (dmg <= 0) continue;
         if (this.freed && other?.kind === 'projectile') {
           e.body.applyImpulse({ x: 0, y: 0, z: (Math.random() - 0.5) * REPLAY.hitZImpulse * impulse }, true);
         }
         if (e.kind === 'king') {
-          const hit = Math.min(dmg, MATERIALS.king.hp * PHYSICS.kingMaxHitShare);
+          // one shot lands over several steps (and knocks blocks into him): it all counts as one hit
+          if (e.hitStart === undefined || this.time - e.hitStart > PHYSICS.kingHitWindow) {
+            e.hitStart = this.time;
+            e.hitDmg = 0;
+          }
+          const hit = Math.min(dmg, MATERIALS.king.hp * PHYSICS.kingMaxHitShare - e.hitDmg!);
+          if (hit <= 0) continue;
+          e.hitDmg! += hit;
           e.impact = (e.impact ?? 0) + hit;
           this.kingHits.push({ owner: e.owner, dmg: hit });
         }
