@@ -21,6 +21,7 @@ export class View {
   readonly puff: Puff;
   private catapults: Catapult[] = [];
   private powerBars: THREE.Mesh[] = [];
+  private gaugeBacks: THREE.Mesh[] = [];
   private aims: THREE.Group[] = [];
   private ghosts = new Map<number, THREE.Mesh>();
   private flakes: THREE.Points;
@@ -112,24 +113,36 @@ export class View {
     child.traverse((o) => { if ((o as THREE.Mesh).isMesh) o.castShadow = true; });
     this.scene.add(child);
 
-    // power gauge: a bar that grows beside the catapult
-    const gaugeBack = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.2, 0.05), new THREE.MeshBasicMaterial({ color: 0x334455, transparent: true, opacity: 0.4 }));
-    gaugeBack.position.set(px - dir * 1.2, 2.4, 1.2);
-    const gauge = new THREE.Mesh(new THREE.BoxGeometry(0.25, 2.2, 0.06), new THREE.MeshBasicMaterial({ color: 0xffd23d }));
-    gauge.geometry.translate(0, 1.1, 0);
-    gauge.position.set(gaugeBack.position.x, 1.3, 1.22);
+    // power gauge: a bar that grows beside the catapult, drawn over everything so the fort never hides it
+    const overlay = (m: THREE.Mesh) => { m.renderOrder = 10; (m.material as THREE.Material).depthTest = false; return m; };
+    const gaugeBack = overlay(new THREE.Mesh(new THREE.BoxGeometry(0.62, 3.1, 0.05), new THREE.MeshBasicMaterial({ color: 0x1d2a44, transparent: true, opacity: 0.55 })));
+    // above the kid's head, inboard enough that the screen edge never cuts it
+    gaugeBack.position.set(px - dir * 0.75, 3.85, 1.2);
+    // transparent too, so it draws in the same pass as the backing and after it
+    const gauge = overlay(new THREE.Mesh(new THREE.BoxGeometry(0.42, 2.9, 0.06), new THREE.MeshBasicMaterial({ color: 0xffd23d, transparent: true })));
+    gauge.renderOrder = 11;
+    gauge.geometry.translate(0, 1.45, 0);
+    gauge.position.set(gaugeBack.position.x, 2.4, 1.22);
     gauge.scale.y = 0.001;
     this.scene.add(gaugeBack, gauge);
     this.powerBars.push(gauge);
+    this.gaugeBacks.push(gaugeBack);
 
-    // the aim: a row of dots from the pivot along the launch angle
+    // the aim: a row of white-rimmed dots from the pivot along the launch angle, also drawn on top
     const aim = new THREE.Group();
-    const dotGeo = new THREE.SphereGeometry(0.09, 10, 6);
-    const dotMat = new THREE.MeshBasicMaterial({ color });
+    const rimGeo = new THREE.SphereGeometry(0.2, 12, 8);
+    const dotGeo = new THREE.SphereGeometry(0.14, 12, 8);
+    const rimMat = new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false });
+    const dotMat = new THREE.MeshBasicMaterial({ color, depthTest: false });
     for (let i = 0; i < AIM_DOTS; i++) {
-      const d = new THREE.Mesh(dotGeo, dotMat);
-      d.position.x = 0.6 + i * 0.55;
-      d.scale.setScalar(1 - i * 0.08);
+      const d = new THREE.Group();
+      const rim = new THREE.Mesh(rimGeo, rimMat);
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      rim.renderOrder = 10;
+      dot.renderOrder = 11;
+      d.add(rim, dot);
+      d.position.x = 0.7 + i * 0.6;
+      d.scale.setScalar(1 - i * 0.07);
       aim.add(d);
     }
     aim.position.set(px, CATAPULT.pivotY, 0.9);
@@ -144,6 +157,7 @@ export class View {
     c.ball.visible = ready;
     const bar = this.powerBars[side];
     bar.visible = power !== null;
+    this.gaugeBacks[side].visible = ready || power !== null;
     bar.scale.y = Math.max(0.001, power ?? 0);
     (bar.material as THREE.MeshBasicMaterial).color.setHSL(0.15 - (power ?? 0) * 0.15, 1, 0.55);
     const aim = this.aims[side];

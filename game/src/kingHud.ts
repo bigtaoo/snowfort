@@ -14,7 +14,8 @@ export class KingHud {
   private pending = [0, 0];
   private sinceLast = [POP_EVERY, POP_EVERY];
 
-  constructor(private host: HTMLElement, private topBars: HTMLElement[]) {
+  /** `onPop` hears each gathered hit as it is shown (for the sound). */
+  constructor(private host: HTMLElement, private topBars: HTMLElement[], private onPop: (side: Side, dmg: number) => void = () => {}) {
     for (const side of [0, 1] as Side[]) {
       const bar = document.createElement('div');
       bar.className = `kingBar p${side}`;
@@ -66,6 +67,7 @@ export class KingHud {
     el.style.left = `${x + (Math.random() - 0.5) * 30}px`;
     el.style.top = `${y - 10}px`;
     el.addEventListener('animationend', () => el.remove());
+    this.onPop(side, dmg);
     this.host.append(el);
     for (const b of [this.bars[side], this.topBars[side]]) {
       b.classList.remove('hurt');

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { blockMesh, debrisMesh, hurtBlock, kingMesh, projectileMesh } from './look/meshes';
 import {
   AMMO, ARENA, BLOCK_HALF_DEPTH, CATAPULT, MATERIALS, PHYSICS, PIECES, PROJECTILE, REPLAY,
-  type PieceId,
+  type MaterialId, type PieceId,
 } from './config';
 
 export type Side = 0 | 1;
@@ -78,6 +78,8 @@ export class Arena {
   impacts: ImpactEvent[] = [];
   /** Damage each king took this step, for the HUD. */
   kingHits: { owner: Side; dmg: number }[] = [];
+  /** Blocks shattered since the last step began, for sounds. */
+  breaks: MaterialId[] = [];
   /** Extra force on each side's shots (wind card), set at round start. */
   wind: [number, number] = [0, 0];
   /** Off while building: blocks dropped into place should not crack. */
@@ -224,6 +226,8 @@ export class Arena {
     const p = e.body.translation();
     const v = e.body.linvel();
     const color = e.piece ? MATERIALS[PIECES[e.piece].material].color : 0xffffff;
+    const mat = e.piece ? PIECES[e.piece].material : 'snow';
+    if (mat !== 'king') this.breaks.push(mat);
     this.remove(e);
     for (let i = 0; i < PHYSICS.debrisPerBreak; i++) {
       this.addDebris(
@@ -256,6 +260,7 @@ export class Arena {
   step(): void {
     this.impacts = [];
     this.kingHits = [];
+    this.breaks = [];
     this.world.step(this.events);
     this.time += PHYSICS.dt;
     const dt = PHYSICS.dt;

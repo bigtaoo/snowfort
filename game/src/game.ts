@@ -5,6 +5,7 @@ import {
 } from './config';
 import { Arena, type AmmoId, type Entity, type Side } from './arena';
 import { View } from './view';
+import { Sfx } from './audio';
 import { KingHud } from './kingHud';
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
@@ -48,6 +49,7 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls = '', html = '') 
 export class Game {
   readonly view: View;
   readonly arena: Arena;
+  readonly sfx = new Sfx();
   readonly touch: boolean;
   mode: Mode = 'simul';
   cpuLevel: CpuLevel = 'normal';
@@ -93,6 +95,7 @@ export class Game {
   private paletteEls: HTMLElement[] = [];
   private timerChips: HTMLElement[] = [];
   private keyEls: HTMLElement[] = [];
+  private muteEl = el('button', 'mute on');
 
   constructor(host: HTMLElement) {
     this.view = new View(host);
@@ -117,9 +120,14 @@ export class Game {
       n++;
       if (this.phase === 'fight') this.fightStep(PHYSICS.dt);
       this.arena.step();
-      for (const imp of this.arena.impacts) this.view.puff.burst(new Vector3(imp.x, imp.y, 0), 24);
+      this.sfx.rate = this.phase === 'replay' ? this.timeScale : 1;
+      for (const imp of this.arena.impacts) {
+        this.view.puff.burst(new Vector3(imp.x, imp.y, 0), 24);
+        this.sfx.impact(imp.ammo);
+      }
       for (const h of this.arena.kingHits) this.kingHud.hit(h.owner, h.dmg);
       if (this.phase === 'fight') this.afterStep();
+      for (const m of this.arena.breaks) this.sfx.crunch(m);
       if (this.phase === 'replay' && this.arena.time - this.decidedAt > REPLAY.simSeconds - REPLAY.leadSeconds) this.endReplay();
     }
     if (n === PHYSICS.maxSubSteps) this.acc = 0;
@@ -178,7 +186,7 @@ export class Game {
     const menu = el('div', 'menu');
     const add = (label: string, fn: () => void, cls = 'btn') => {
       const b = el('button', cls, label);
-      b.onclick = fn;
+      b.onclick = () => { this.sfx.click(); fn(); };
       return b;
     };
     menu.append(add('2 Players — fire at will', () => this.startMatch('simul'), 'btn big'));
@@ -356,6 +364,7 @@ export class Game {
     if (!spot) return;
     this.budgets[d.side][key]--;
     this.arena.addPiece(d.piece, d.side, spot.x, spot.y);
+    this.sfx.place();
     this.refreshPalettes();
   }
 
@@ -489,6 +498,7 @@ export class Game {
     this.phase = 'fight';
     this.firePointers.clear();
     this.showKeys(true);
+    this.sfx.bell();
     this.banner(`Round ${this.round}`, this.mode === 'turns' ? `${NAMES[this.turn]} throws first` : 'Fire at will!', 1.6);
   }
 
@@ -538,7 +548,7 @@ export class Game {
     if (this.cpu) {
       const l = this.launchers[1];
       const act = this.cpu.update(dt, l, this.arena);
-      if (act.press) l.press();
+      if (act.press) this.press(1);
       if (act.release) this.fire(l.release());
     }
     if (this.mode === 'turns' && this.turnFiredAt !== null) {
@@ -553,8 +563,17 @@ export class Game {
     }
   }
 
+  /** Locks a launcher's aim, with a click if it took. */
+  private press(side: Side): void {
+    const l = this.launchers[side];
+    const was = l.phase;
+    l.press();
+    if (was !== 'charge' && l.phase === 'charge') this.sfx.lock();
+  }
+
   private fire(shot: Shot | null): void {
     if (!shot) return;
+    this.sfx.launch((shot.speed - CATAPULT.minSpeed) / (CATAPULT.maxSpeed - CATAPULT.minSpeed));
     const dir = dirOf(shot.side);
     const massMul = this.roundTime > ROUND.blizzardAfter
       ? Math.min(ROUND.blizzardMaxMass, 1 + (this.roundTime - ROUND.blizzardAfter) * ROUND.blizzardMassPerSecond)
@@ -603,6 +622,7 @@ export class Game {
     this.showKeys(false);
     for (const l of this.launchers) { if (l.phase === 'charge') l.phase = 'sweep'; }
     this.bannerTimer = ROUND.endBannerSeconds;
+    this.sfx.ko();
     if (lost.length === 2) {
       this.lastWinner = null;
       this.bannerEl.innerHTML = 'Both kings down!<small>Replay the round</small>';
@@ -611,6 +631,7 @@ export class Game {
     const winner = other(lost[0]);
     this.lastWinner = winner;
     this.score[winner]++;
+    this.sfx.jingle(1);
     const k = this.arena.king(lost[0]);
     const kp = k?.body.translation();
     const how = !kp || kp.y < ARENA.fallY ? 'king off the hill'
@@ -695,6 +716,7 @@ export class Game {
   private pickCard(i: number): void {
     if (this.phase !== 'cards') return;
     const side = this.cardQueue.shift()!;
+    this.sfx.click();
     this.pending[side].push(this.hand[i]);
     this.nextCardPick();
   }
@@ -722,6 +744,8 @@ export class Game {
 
   private showResults(): void {
     this.phase = 'results';
+    this.sfx.rate = 1;
+    this.sfx.fanfare();
     this.timeScale = 0.6;
     this.bannerEl.innerHTML = '';
     const o = this.overlayEl;
@@ -733,7 +757,7 @@ export class Game {
     o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
     const row = el('div', 'row menu');
     const again = el('button', 'btn big', 'Rematch');
-    again.onclick = () => this.startMatch(this.mode);
+    again.onclick = () => { this.sfx.click(); this.startMatch(this.mode); };
     const menu = el('button', 'btn', 'Menu');
     menu.onclick = () => { this.arena.reset(); this.view.homeCamera(); this.timeScale = 1; this.showMenu(); };
     row.append(again, menu);
@@ -748,12 +772,13 @@ export class Game {
   private bindInput(): void {
     window.addEventListener('keydown', (ev) => {
       if (ev.repeat) return;
+      this.sfx.unlock();
       if (this.phase === 'replay') { this.endReplay(); return; }
       if (this.phase === 'fight') {
         const side = FIRE_KEYS.indexOf(ev.code);
         if ((side === 0 || side === 1) && !(this.cpu && side === 1)) {
           ev.preventDefault();
-          this.launchers[side].press();
+          this.press(side);
         }
       } else if (this.phase === 'cards') {
         const side = this.cardQueue[0];
@@ -769,6 +794,8 @@ export class Game {
       const side = FIRE_KEYS.indexOf(ev.code);
       if ((side === 0 || side === 1) && !(this.cpu && side === 1)) this.fire(this.launchers[side].release());
     });
+    // the HUD's buttons sit above the canvas, so unlock audio on any touch or click in the window
+    window.addEventListener('pointerdown', () => this.sfx.unlock(), true);
     const canvas = this.view.renderer.domElement;
     canvas.addEventListener('pointerdown', (ev) => {
       ev.preventDefault();
@@ -777,7 +804,7 @@ export class Game {
         let side: Side = ev.clientX < window.innerWidth / 2 ? 0 : 1;
         if (this.cpu) side = 0;
         this.firePointers.set(ev.pointerId, side);
-        this.launchers[side].press();
+        this.press(side);
         return;
       }
       if (this.phase === 'build') {
@@ -840,8 +867,12 @@ export class Game {
       const k = el('div', `keys p${side}`);
       this.keyEls.push(k);
     }
-    this.hud.append(this.topEl, this.bannerEl, this.overlayEl, ...this.keyEls);
-    this.kingHud = new KingHud(this.hud, this.pinfo.map((p) => p.bar.parentElement!));
+    const showMute = () => { this.muteEl.textContent = this.sfx.muted ? '🔇' : '🔊'; };
+    this.muteEl.title = 'Sound on/off';
+    this.muteEl.onclick = () => { this.sfx.setMuted(!this.sfx.muted); showMute(); this.sfx.click(); };
+    showMute();
+    this.hud.append(this.topEl, this.bannerEl, this.overlayEl, ...this.keyEls, this.muteEl);
+    this.kingHud = new KingHud(this.hud, this.pinfo.map((p) => p.bar.parentElement!), (_, dmg) => this.sfx.kingHit(dmg / MATERIALS.king.hp));
     this.hideTop();
   }
 
