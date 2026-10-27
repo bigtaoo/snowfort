@@ -15,8 +15,8 @@ export const de: Table<typeof en> = {
     turns: '2 Spieler — abwechselnd',
     cpu: 'gegen {name}',
     startHere: 'NEU? HIER STARTEN',
-    helpTouch: 'Bauen: Zieh Teile aus deiner Leiste auf deine Seite. Kampf: Halte deine Bildschirmhälfte gedrückt, um zu zielen und aufzuladen, lass los zum Werfen. Stoß den gegnerischen Schneekönig vom Hügel oder hau ihn um, um die Runde zu gewinnen. Wer zuerst 3 hat, gewinnt.',
-    helpKeys: 'Bauen: Zieh Teile aus der Leiste auf deine Seite (klick ein gesetztes Teil an, um es wieder aufzunehmen). Kampf: {red} {space}, {blue} {enter} — drücken fixiert das schwingende Zielen, halten lädt auf, loslassen wirft. Stoß den gegnerischen Schneekönig vom Hügel oder hau ihn um, um die Runde zu gewinnen. Wer zuerst 3 hat, gewinnt.',
+    helpTouch: 'Bauen: Zieh Teile aus deiner Leiste auf deine Seite. Kampf: Halte deine Bildschirmhälfte gedrückt, um zu zielen und aufzuladen, lass los zum Werfen. Stoß den gegnerischen Schneekönig vom Hügel oder hau ihn um, um die Runde zu gewinnen. Zu zweit: wer zuerst 3 Runden hat, gewinnt. Gegen {cpu}: eine Runde entscheidet.',
+    helpKeys: 'Bauen: Zieh Teile aus der Leiste auf deine Seite (klick ein gesetztes Teil an, um es wieder aufzunehmen). Kampf: {red} {space}, {blue} {enter} — drücken fixiert das schwingende Zielen, halten lädt auf, loslassen wirft. Stoß den gegnerischen Schneekönig vom Hügel oder hau ihn um, um die Runde zu gewinnen. Zu zweit: wer zuerst 3 Runden hat, gewinnt. Gegen {cpu}: eine Runde entscheidet.',
   },
   pieces: { snow: 'Schnee', ice: 'Eis', plankH: 'Brett —', plankV: 'Brett |', king: 'König' },
   build: {

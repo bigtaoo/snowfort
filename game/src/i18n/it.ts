@@ -15,8 +15,8 @@ export const it: Table<typeof en> = {
     turns: '2 giocatori — a turni',
     cpu: 'contro {name}',
     startHere: 'NUOVO? INIZIA QUI',
-    helpTouch: 'Costruisci: trascina i pezzi dal tuo vassoio nella tua metà. Combatti: tieni premuta la tua metà dello schermo per bloccare la mira e caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. Vince chi arriva a 3.',
-    helpKeys: 'Costruisci: trascina i pezzi dal vassoio nella tua metà (clicca un pezzo piazzato per riprenderlo). Combatti: {red} {space}, {blue} {enter} — premi per bloccare la mira che oscilla, tieni premuto per caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. Vince chi arriva a 3.',
+    helpTouch: 'Costruisci: trascina i pezzi dal tuo vassoio nella tua metà. Combatti: tieni premuta la tua metà dello schermo per bloccare la mira e caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. In due: vince chi arriva a 3 round. Contro {cpu}: un solo round.',
+    helpKeys: 'Costruisci: trascina i pezzi dal vassoio nella tua metà (clicca un pezzo piazzato per riprenderlo). Combatti: {red} {space}, {blue} {enter} — premi per bloccare la mira che oscilla, tieni premuto per caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. In due: vince chi arriva a 3 round. Contro {cpu}: un solo round.',
   },
   pieces: { snow: 'Neve', ice: 'Ghiaccio', plankH: 'Asse —', plankV: 'Asse |', king: 'Re' },
   build: {

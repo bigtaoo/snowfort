@@ -13,8 +13,8 @@ export const en = {
     turns: '2 Players — take turns',
     cpu: 'vs {name}',
     startHere: 'NEW? START HERE',
-    helpTouch: 'Build: drag pieces from your tray onto your side. Fight: touch and hold your half of the screen to lock the aim and charge, let go to throw. Knock the rival snow king off his hill or pound him to win the round. First to 3.',
-    helpKeys: 'Build: drag pieces from the tray onto your side (click a placed piece to pick it up again). Fight: {red} {space}, {blue} {enter} — press to lock the swinging aim, hold to charge, release to throw. Knock the rival snow king off his hill or pound him to win the round. First to 3.',
+    helpTouch: 'Build: drag pieces from your tray onto your side. Fight: touch and hold your half of the screen to lock the aim and charge, let go to throw. Knock the rival snow king off his hill or pound him to win the round. 2 players: first to 3 rounds. vs {cpu}: one round.',
+    helpKeys: 'Build: drag pieces from the tray onto your side (click a placed piece to pick it up again). Fight: {red} {space}, {blue} {enter} — press to lock the swinging aim, hold to charge, release to throw. Knock the rival snow king off his hill or pound him to win the round. 2 players: first to 3 rounds. vs {cpu}: one round.',
   },
   pieces: { snow: 'Snow', ice: 'Ice', plankH: 'Plank —', plankV: 'Plank |', king: 'King' },
   build: {

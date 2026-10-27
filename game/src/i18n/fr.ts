@@ -15,8 +15,8 @@ export const fr: Table<typeof en> = {
     turns: '2 joueurs — chacun son tour',
     cpu: 'contre {name}',
     startHere: 'NOUVEAU ? COMMENCE ICI',
-    helpTouch: 'Construction : fais glisser les pièces de ton plateau vers ton camp. Combat : maintiens ta moitié d’écran pour bloquer la visée et charger, relâche pour lancer. Fais tomber le roi des neiges adverse de sa colline ou assomme-le pour gagner la manche. Le premier à 3 gagne.',
-    helpKeys: 'Construction : fais glisser les pièces du plateau vers ton camp (clique une pièce posée pour la reprendre). Combat : {red} {space}, {blue} {enter} — appuie pour bloquer la visée qui oscille, maintiens pour charger, relâche pour lancer. Fais tomber le roi des neiges adverse de sa colline ou assomme-le pour gagner la manche. Le premier à 3 gagne.',
+    helpTouch: 'Construction : fais glisser les pièces de ton plateau vers ton camp. Combat : maintiens ta moitié d’écran pour bloquer la visée et charger, relâche pour lancer. Fais tomber le roi des neiges adverse de sa colline ou assomme-le pour gagner la manche. À deux : le premier à 3 manches gagne. Contre {cpu} : une seule manche.',
+    helpKeys: 'Construction : fais glisser les pièces du plateau vers ton camp (clique une pièce posée pour la reprendre). Combat : {red} {space}, {blue} {enter} — appuie pour bloquer la visée qui oscille, maintiens pour charger, relâche pour lancer. Fais tomber le roi des neiges adverse de sa colline ou assomme-le pour gagner la manche. À deux : le premier à 3 manches gagne. Contre {cpu} : une seule manche.',
   },
   pieces: { snow: 'Neige', ice: 'Glace', plankH: 'Planche —', plankV: 'Planche |', king: 'Roi' },
   build: {

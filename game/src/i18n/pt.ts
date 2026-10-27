@@ -15,8 +15,8 @@ export const pt: Table<typeof en> = {
     turns: '2 jogadores — em turnos',
     cpu: 'contra {name}',
     startHere: 'NOVO? COMECE AQUI',
-    helpTouch: 'Construir: arraste peças da sua bandeja para o seu lado. Lutar: segure a sua metade da tela para travar a mira e carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. Vence quem chegar a 3.',
-    helpKeys: 'Construir: arraste peças da bandeja para o seu lado (clique numa peça colocada para pegá-la de volta). Lutar: {red} {space}, {blue} {enter} — aperte para travar a mira que balança, segure para carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. Vence quem chegar a 3.',
+    helpTouch: 'Construir: arraste peças da sua bandeja para o seu lado. Lutar: segure a sua metade da tela para travar a mira e carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. 2 jogadores: vence quem chegar a 3 rodadas. Contra {cpu}: uma rodada só.',
+    helpKeys: 'Construir: arraste peças da bandeja para o seu lado (clique numa peça colocada para pegá-la de volta). Lutar: {red} {space}, {blue} {enter} — aperte para travar a mira que balança, segure para carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. 2 jogadores: vence quem chegar a 3 rodadas. Contra {cpu}: uma rodada só.',
   },
   pieces: { snow: 'Neve', ice: 'Gelo', plankH: 'Tábua —', plankV: 'Tábua |', king: 'Rei' },
   build: {

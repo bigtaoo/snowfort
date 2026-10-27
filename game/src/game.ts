@@ -282,8 +282,8 @@ export class Game {
     menu.append(vsCpu);
     o.append(menu);
     o.append(el('div', 'help', this.touch
-      ? t('menu.helpTouch')
-      : t('menu.helpKeys', { red: `<b>${this.nameOf(0)}</b>`, space: `<kbd>${keyOf(0)}</kbd>`, blue: `<b>${this.nameOf(1)}</b>`, enter: `<kbd>${keyOf(1)}</kbd>` })));
+      ? t('menu.helpTouch', { cpu: t('names.cpu') })
+      : t('menu.helpKeys', { cpu: t('names.cpu'), red: `<b>${this.nameOf(0)}</b>`, space: `<kbd>${keyOf(0)}</kbd>`, blue: `<b>${this.nameOf(1)}</b>`, enter: `<kbd>${keyOf(1)}</kbd>` })));
     o.append(this.languagePicker());
   }
 
