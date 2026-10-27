@@ -80,6 +80,7 @@ export function blockMesh(piece: PieceId, seed: number, spring = false): Mesh {
   }
   mat.color.copy(spring ? new Color(SPRING) : jitter(BASE[kind], SPREAD[kind], seed));
   mat.userData.base = mat.color.clone();
+  mat.userData.own = true;
   const body = withHull(g, mat, ice ? iceLine : blockLine);
   if (ice) body.renderOrder = 1;
   if (!upright) return body;
@@ -97,8 +98,16 @@ export function hurtBlock(obj: Object3D, t: number): void {
   mat.color.copy(mat.userData.base as Color).lerp(HURT, (1 - Math.max(0, t)) * 0.6);
 }
 
-/** The snowman king wearing his side's cape, feet at the bottom of his collider. */
+const kings: Object3D[] = [];
+
+/** The snowman king wearing his side's cape, feet at the bottom of his collider. Built once per side;
+ *  every king after that is a clone sharing its geometry, so rebuilding kings leaks no GPU buffers. */
 export function kingMesh(owner: 0 | 1): Object3D {
+  kings[owner] ??= buildKing(owner);
+  return kings[owner].clone();
+}
+
+function buildKing(owner: 0 | 1): Object3D {
   const wrap = new Group();
   const king = snowmanKing(SIDE_COLOR[owner], charBody, charLine);
   king.position.y = -PIECES.king.hy;
@@ -121,7 +130,17 @@ export function projectileMesh(ammo: string | undefined, radius: number): Mesh {
 
 export function debrisMesh(color: number): Mesh {
   const s = PHYSICS.debrisSize;
-  const m = new Mesh(geo('debris', () => new BoxGeometry(s, s, s)), toonMaterial({ color }));
+  const mat = toonMaterial({ color });
+  mat.userData.own = true;
+  const m = new Mesh(geo('debris', () => new BoxGeometry(s, s, s)), mat);
   m.castShadow = true;
   return m;
+}
+
+/** Frees the materials an entity's mesh owns alone (blocks and debris tint their own); shared ones stay. */
+export function releaseMesh(obj: Object3D): void {
+  obj.traverse((o) => {
+    const mat = (o as Mesh).material as Material | undefined;
+    if (mat?.userData.own) mat.dispose();
+  });
 }

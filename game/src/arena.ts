@@ -1,6 +1,6 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import * as THREE from 'three';
-import { blockMesh, debrisMesh, hurtBlock, kingMesh, projectileMesh } from './look/meshes';
+import { blockMesh, debrisMesh, hurtBlock, kingMesh, projectileMesh, releaseMesh } from './look/meshes';
 import {
   AMMO, ARENA, BLOCK_HALF_DEPTH, CARDS, CATAPULT, MATERIALS, PHYSICS, PIECES, PROJECTILE, REPLAY,
   type MaterialId, type PieceId,
@@ -127,7 +127,7 @@ export class Arena {
 
   /** Clears all bodies (new match). */
   reset(): void {
-    for (const e of this.ents) this.group.remove(e.mesh);
+    for (const e of this.ents) this.dropMesh(e);
     this.ents = [];
     this.byCollider.clear();
     this.world.free();
@@ -230,7 +230,12 @@ export class Arena {
     e.alive = false;
     this.byCollider.delete(e.colliderHandle);
     this.world.removeRigidBody(e.body);
+    this.dropMesh(e);
+  }
+
+  private dropMesh(e: Entity): void {
     this.group.remove(e.mesh);
+    releaseMesh(e.mesh);
   }
 
   /** Shatters a block into debris. */
@@ -372,7 +377,7 @@ export class Arena {
   rewindForReplay(decidedAt: number): boolean {
     const snap = [...this.snapshots].reverse().find((s) => s.time <= decidedAt - REPLAY.leadSeconds) ?? this.snapshots[0];
     if (!snap) return false;
-    for (const e of this.ents) this.group.remove(e.mesh);
+    for (const e of this.ents) this.dropMesh(e);
     this.world.free();
     this.world = RAPIER.World.restoreSnapshot(snap.bytes);
     this.time = snap.time;
