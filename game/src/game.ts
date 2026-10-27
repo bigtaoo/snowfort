@@ -3,11 +3,12 @@ import {
   AMMO, ARENA, BUILD, CARDS, CATAPULT, CPU, MATERIALS, PHYSICS, PIECES, REPLAY, ROUND,
   budgetKeyOf, type Budget, type PieceId,
 } from './config';
-import { Arena, type AmmoId, type Entity, type Side } from './arena';
+import { Arena, type Entity, type Side } from './arena';
 import { View } from './view';
 import { Sfx } from './audio';
 import { KingHud } from './kingHud';
 import { Coach, STEPS } from './coach';
+import { LOCALES, getLocale, loadLocale, localeName, setLocale, t, type Key, type Locale } from './i18n';
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
 import { CpuShooter, PRESET_FORTS, cpuPickCard, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
@@ -44,9 +45,12 @@ export interface Portal {
 
 const NO_PORTAL: Portal = { gameplay: () => {}, achievement: () => {}, betweenMatches: async () => {}, track: () => {} };
 
-const NAMES = ['Red', 'Blue'];
+/** A player's name and fire key in the current language. */
+const nameOf = (s: Side) => t(s === 0 ? 'names.p0' : 'names.p1');
+const keyOf = (s: Side) => t(s === 0 ? 'keys.p0' : 'keys.p1');
 const FIRE_KEYS = ['Space', 'Enter'];
-const FIRE_LABEL = ['Space', 'Enter'];
+/** Where the player's own language choice is kept (else the platform's or the browser's). */
+export const LANG_KEY = 'snowfort.lang';
 const CARD_KEYS: string[][] = [['KeyA', 'KeyS', 'KeyD'], ['KeyJ', 'KeyK', 'KeyL']];
 const CARD_LABEL = [['A', 'S', 'D'], ['J', 'K', 'L']];
 const PALETTE: PieceId[] = ['snow', 'ice', 'plankH', 'plankV', 'king'];
@@ -114,7 +118,7 @@ export class Game {
   // HUD
   private hud = document.getElementById('hud')!;
   private topEl = el('div', 'top');
-  private pinfo: { root: HTMLElement; pips: HTMLElement; bar: HTMLElement; status: HTMLElement }[] = [];
+  private pinfo: { root: HTMLElement; label: HTMLElement; pips: HTMLElement; bar: HTMLElement; status: HTMLElement }[] = [];
   private kingHud!: KingHud;
   private coach!: Coach;
   /** Who has thrown in this match: the aiming tips stay until each player has. */
@@ -183,7 +187,7 @@ export class Game {
         this.cardTime -= dt;
         // the last few seconds count down, so a random pick never comes as a surprise
         this.cardClockEl.textContent = this.cardTime < 6 && !(this.mode === 'cpu' && this.cardQueue[0] === 1)
-          ? `random pick in ${Math.ceil(this.cardTime)}…` : '';
+          ? t('cards.randomIn', { n: Math.ceil(this.cardTime) }) : '';
         if (this.cardTime <= 0) this.pickCard(this.cpuCard ?? Math.floor(Math.random() * 3));
         break;
       case 'replay': {
@@ -240,23 +244,53 @@ export class Game {
       b.onclick = () => { this.sfx.click(); fn(); };
       return b;
     };
-    menu.append(add('2 Players — fire at will', () => this.begin('simul'), 'btn big'));
-    menu.append(add('2 Players — take turns', () => this.begin('turns')));
+    menu.append(add(t('menu.simul'), () => this.begin('simul'), 'btn big'));
+    menu.append(add(t('menu.turns'), () => this.begin('turns')));
     const row = el('div', 'row');
     for (const lv of Object.keys(CPU.levels) as CpuLevel[]) {
-      const b = add(`vs CPU · ${lv}`, () => { this.cpuLevel = lv; this.begin('cpu'); });
+      const b = add(t('menu.cpu', { level: t(`menu.${lv}`) }), () => { this.cpuLevel = lv; this.begin('cpu'); });
       // a first-timer is pointed at the gentlest way in
       if (lv === 'easy' && this.coach.needs('menu')) {
         b.classList.add('coachMark');
-        b.prepend(el('span', 'startHere', 'NEW? START HERE'));
+        b.prepend(el('span', 'startHere', t('menu.startHere')));
       }
       row.append(b);
     }
     menu.append(row);
     o.append(menu);
     o.append(el('div', 'help', this.touch
-      ? 'Build: drag pieces from your tray onto your side. Fight: touch and hold your half of the screen to lock the aim and charge, let go to throw. Knock the rival snow king off his hill or pound him to win the round. First to 3.'
-      : `Build: drag pieces from the tray onto your side (click a placed piece to pick it up again). Fight: <b>${NAMES[0]}</b> <kbd>Space</kbd>, <b>${NAMES[1]}</b> <kbd>Enter</kbd> — press to lock the swinging aim, hold to charge, release to throw. Knock the rival snow king off his hill or pound him to win the round. First to 3.`));
+      ? t('menu.helpTouch')
+      : t('menu.helpKeys', { red: `<b>${nameOf(0)}</b>`, space: `<kbd>${keyOf(0)}</kbd>`, blue: `<b>${nameOf(1)}</b>`, enter: `<kbd>${keyOf(1)}</kbd>` })));
+    o.append(this.languagePicker());
+  }
+
+  /** The language list on the menu; a pick is kept and the screen redrawn in it. */
+  private languagePicker(): HTMLElement {
+    const pick = el('select', 'lang');
+    pick.title = t('common.language');
+    for (const l of LOCALES) {
+      const opt = el('option', '', localeName(l));
+      opt.value = l;
+      opt.selected = l === getLocale();
+      pick.append(opt);
+    }
+    pick.onchange = async () => {
+      const l = pick.value as Locale;
+      if (!(await loadLocale(l))) return void (pick.value = getLocale());
+      setLocale(l);
+      try { localStorage.setItem(LANG_KEY, l); } catch { /* storage may be blocked */ }
+      this.relabel();
+      this.showMenu();
+    };
+    return pick;
+  }
+
+  /** The HUD text that is set once, again in the current language. */
+  private relabel(): void {
+    this.pinfo.forEach((info, side) => { info.label.textContent = nameOf(side as Side); });
+    this.muteEl.title = t('common.sound');
+    const rotate = document.getElementById('rotate');
+    if (rotate) rotate.textContent = t('common.rotate');
   }
 
   /** A match from a button: after the first one the platform may show an ad in between. */
@@ -336,8 +370,8 @@ export class Game {
     this.session = s;
     this.view.highlightZones(s.sides);
     this.makePalettes(s);
-    const who = s.sides.length === 2 ? 'Both players' : NAMES[s.sides[0]];
-    this.banner(s.repair ? `${who}: repair!` : `${who}: build your fort!`, s.sides.length === 2 ? 'Drag pieces onto your own side' : 'Drag pieces from the tray', 2);
+    const who = s.sides.length === 2 ? t('build.both') : nameOf(s.sides[0]);
+    this.banner(t(s.repair ? 'build.repair' : 'build.build', { who }), t(s.sides.length === 2 ? 'build.dragOwn' : 'build.dragTray'), 2);
     this.buildTips();
   }
 
@@ -351,10 +385,10 @@ export class Game {
       if (!pal || s.done[side]) { this.coach.hide(key); continue; }
       const button = (sel: string) => pal.querySelector<HTMLElement>(sel)!;
       const opts = { side };
-      if (s.repair) this.coach.show(key, 'repair', 'Patch the holes with a few spare blocks<small>then press Done</small>', button('.done'), opts);
-      else if (this.coach.needs('drag')) this.coach.show(key, 'drag', 'Drag a block onto your yard<small>the glowing patch of snow</small>', button('[data-piece="snow"]'), opts);
-      else if (this.budgets[side].king > 0) this.coach.show(key, 'king', 'Now place your snow king<small>hide him behind your walls</small>', button('[data-piece="king"]'), opts);
-      else this.coach.show(key, 'done', 'Fort ready? Press Done<small>or keep building, no hurry</small>', button('.done'), opts);
+      if (s.repair) this.coach.show(key, 'repair', t('coach.repair'), button('.done'), opts);
+      else if (this.coach.needs('drag')) this.coach.show(key, 'drag', t('coach.drag'), button('[data-piece="snow"]'), opts);
+      else if (this.budgets[side].king > 0) this.coach.show(key, 'king', t('coach.king'), button('[data-piece="king"]'), opts);
+      else this.coach.show(key, 'done', t('coach.done'), button('.done'), opts);
     }
   }
 
@@ -530,7 +564,7 @@ export class Game {
       const pal = el('div', `palette on p${side}`);
       for (const piece of PALETTE) {
         const spec = PIECES[piece];
-        const b = el('button', '', `<span class="sw" style="background:#${(spec.material === 'king' ? 0xffffff : MATERIALS[spec.material].color).toString(16).padStart(6, '0')};${piece === 'plankV' ? 'width:8px;height:22px' : piece === 'plankH' ? 'height:7px;width:30px' : ''}"></span>${spec.label}<span class="n"></span>`);
+        const b = el('button', '', `<span class="sw" style="background:#${(spec.material === 'king' ? 0xffffff : MATERIALS[spec.material].color).toString(16).padStart(6, '0')};${piece === 'plankV' ? 'width:8px;height:22px' : piece === 'plankH' ? 'height:7px;width:30px' : ''}"></span>${t(`pieces.${piece}`)}<span class="n"></span>`);
         b.dataset.piece = piece;
         b.onpointerdown = (ev) => {
           ev.preventDefault();
@@ -542,15 +576,15 @@ export class Game {
       if (!s.repair) {
         const bp = this.loadBlueprint(side);
         if (bp) {
-          const b = el('button', '', 'Last<br>fort');
+          const b = el('button', '', t('build.lastFort'));
           b.onclick = () => this.loadPlan(side, bp);
           pal.append(b);
         }
-        const r = el('button', '', 'Random<br>fort');
+        const r = el('button', '', t('build.randomFort'));
         r.onclick = () => this.loadPlan(side, PRESET_FORTS[Math.floor(Math.random() * PRESET_FORTS.length)]);
         pal.append(r);
       }
-      const done = el('button', 'done', 'Done');
+      const done = el('button', 'done', t('build.done'));
       done.onclick = () => {
         if (!this.session) return;
         this.session.done[side] = true;
@@ -622,7 +656,7 @@ export class Game {
     this.firePointers.clear();
     this.showKeys(true);
     this.sfx.bell();
-    this.banner(`Round ${this.round}`, this.mode === 'turns' ? `${NAMES[this.turn]} throws first` : 'Fire at will!', 1.6);
+    this.banner(t('fight.round', { n: this.round }), this.mode === 'turns' ? t('fight.firstTurn', { name: nameOf(this.turn) }) : t('fight.fireAtWill'), 1.6);
   }
 
   private setArmed(): void {
@@ -707,12 +741,11 @@ export class Game {
       const at = () => this.view.toScreen(xOf(side, CATAPULT.x), CATAPULT.pivotY + 2.4);
       const opts = { side };
       if (l.phase === 'charge') {
-        this.coach.show(key, 'charge', `${this.touch ? 'Keep holding' : 'Hold it'}… let go to throw!<small>the longer you hold, the farther it flies</small>`, at, opts);
+        this.coach.show(key, 'charge', t(this.touch ? 'coach.chargeTouch' : 'coach.chargeKey'), at, opts);
       } else {
-        const how = this.touch
-          ? `Touch and hold ${this.cpu ? 'the screen' : `the ${side === 0 ? 'left' : 'right'} half`}`
-          : `Press <kbd>${FIRE_LABEL[side]}</kbd>`;
-        this.coach.show(key, 'aim', `${how} to stop the swinging aim<small>when the dots point at the rival fort</small>`, at, opts);
+        const text = !this.touch ? t('coach.aimKey', { key: `<kbd>${keyOf(side)}</kbd>` })
+          : t(this.cpu ? 'coach.aimTouch' : side === 0 ? 'coach.aimLeft' : 'coach.aimRight');
+        this.coach.show(key, 'aim', text, at, opts);
       }
     }
   }
@@ -727,7 +760,7 @@ export class Game {
       this.coach.learn('charge');
     }
     const rival = other(side);
-    this.coach.show('goal', 'goal', `Knock out the ${NAMES[rival]} king!<small>empty his bar or push him off his hill · first to 3 rounds</small>`, () => {
+    this.coach.show('goal', 'goal', t('coach.goal', { name: nameOf(rival) }), () => {
       const k = this.arena.king(rival);
       if (!k) return null;
       const p = k.body.translation();
@@ -810,7 +843,7 @@ export class Game {
     this.sfx.ko();
     if (lost.length === 2) {
       this.lastWinner = null;
-      this.bannerEl.innerHTML = 'Both kings down!<small>Replay the round</small>';
+      this.bannerEl.innerHTML = `${t('fight.bothDown')}<small>${t('fight.replayRound')}</small>`;
       return;
     }
     const winner = other(lost[0]);
@@ -819,9 +852,9 @@ export class Game {
     this.sfx.jingle(1);
     const k = this.arena.king(lost[0]);
     const kp = k?.body.translation();
-    const how = !kp || kp.y < ARENA.fallY ? 'king off the hill'
-      : kp.x * -dirOf(lost[0]) > ARENA.yardEnd ? 'king pushed out of the yard' : 'king knocked out';
-    this.bannerEl.innerHTML = `${NAMES[winner]} takes the round!<small>${NAMES[lost[0]]}'s ${how}</small>`;
+    const how: Key = !kp || kp.y < ARENA.fallY ? 'fight.offHill'
+      : kp.x * -dirOf(lost[0]) > ARENA.yardEnd ? 'fight.pushedOut' : 'fight.knockedOut';
+    this.bannerEl.innerHTML = `${t('fight.takes', { name: nameOf(winner) })}<small>${t(how, { name: nameOf(lost[0]) })}</small>`;
   }
 
   private afterRoundBanner(): void {
@@ -888,16 +921,16 @@ export class Game {
     o.innerHTML = '';
     o.className = `overlay p${side}`;
     this.overlay(true);
-    o.append(el('div', 'who', `${NAMES[side]}, pick a card${this.lastWinner === other(side) ? ' (loser picks first)' : ''}`));
+    o.append(el('div', 'who', t(this.lastWinner === other(side) ? 'cards.pickLoser' : 'cards.pick', { name: nameOf(side) })));
     this.cardClockEl = el('div', 'cardClock', '');
     const row = el('div', 'cards');
     this.hand.forEach((c, i) => {
-      const card = el('div', 'card', `<div class="ic">${c.icon}</div><div class="kd">${c.kind}</div><div class="nm">${c.name}</div><div class="tx">${c.text}</div>${this.touch ? '' : `<kbd>${CARD_LABEL[side][i]}</kbd>`}`);
+      const card = el('div', 'card', `<div class="ic">${c.icon}</div><div class="kd">${t(`cards.${c.kind}`)}</div><div class="nm">${t(`cards.${c.id}.name`)}</div><div class="tx">${t(`cards.${c.id}.text`)}</div>${this.touch ? '' : `<kbd>${CARD_LABEL[side][i]}</kbd>`}`);
       card.onclick = () => this.pickCard(i);
       row.append(card);
     });
     o.append(row, this.cardClockEl);
-    if (!(this.mode === 'cpu' && side === 1)) this.coach.show('card', 'card', 'Pick one: it is yours for the next round<small>ammo, a fort upgrade or a trick on your rival</small>', row, { side, above: false });
+    if (!(this.mode === 'cpu' && side === 1)) this.coach.show('card', 'card', t('coach.card'), row, { side, above: false });
     this.cpuCard = null;
     if (this.mode === 'cpu' && side === 1) {
       this.cardTime = 1.2;
@@ -927,7 +960,7 @@ export class Game {
     this.phase = 'replay';
     this.replayT = 0;
     this.timeScale = REPLAY.timeScale;
-    this.bannerEl.innerHTML = `<small>Replay — tap or press any key to skip</small>`;
+    this.bannerEl.innerHTML = `<small>${t('end.replaySkip')}</small>`;
   }
 
   private endReplay(): void {
@@ -939,7 +972,7 @@ export class Game {
   private showResults(): void {
     this.phase = 'results';
     this.trackEnd('progression_completed', {
-      winner: NAMES[this.winnerOfMatch].toLowerCase(),
+      winner: this.winnerOfMatch === 0 ? 'red' : 'blue',
       ...(this.mode === 'cpu' ? { won: this.winnerOfMatch === 0 } : {}),
     });
     this.matchesPlayed++;
@@ -953,13 +986,13 @@ export class Game {
     o.className = `overlay p${this.winnerOfMatch}`;
     o.innerHTML = '';
     const vsCpu = this.mode === 'cpu';
-    const title = vsCpu ? (this.winnerOfMatch === 0 ? 'You beat the CPU!' : 'The CPU wins!') : `${NAMES[this.winnerOfMatch]} wins!`;
+    const title = vsCpu ? t(this.winnerOfMatch === 0 ? 'end.youWin' : 'end.cpuWins') : t('end.wins', { name: nameOf(this.winnerOfMatch) });
     o.append(el('h1', 'title', title));
     o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
     const row = el('div', 'row menu');
-    const again = el('button', 'btn big', 'Rematch');
+    const again = el('button', 'btn big', t('end.rematch'));
     again.onclick = () => { this.sfx.click(); void this.begin(this.mode); };
-    const menu = el('button', 'btn', 'Menu');
+    const menu = el('button', 'btn', t('end.menu'));
     menu.onclick = () => { this.arena.reset(); this.view.homeCamera(); this.timeScale = 1; this.showMenu(); };
     row.append(again, menu);
     o.append(row);
@@ -1051,7 +1084,7 @@ export class Game {
     for (const side of [0, 1] as Side[]) {
       const root = el('div', `pinfo p${side}`);
       const name = el('div', 'name');
-      const label = el('span', '', NAMES[side]);
+      const label = el('span', '', nameOf(side));
       const pips = el('span', 'pips');
       name.append(label, pips);
       const bar = el('i');
@@ -1059,7 +1092,7 @@ export class Game {
       barWrap.append(bar);
       const status = el('div', 'status');
       root.append(name, barWrap, status);
-      this.pinfo.push({ root, pips, bar, status });
+      this.pinfo.push({ root, label, pips, bar, status });
     }
     const center = el('div', 'center');
     center.append(this.clockEl, this.subEl);
@@ -1069,11 +1102,11 @@ export class Game {
       this.keyEls.push(k);
     }
     const showMute = () => { this.muteEl.textContent = this.sfx.muted ? '🔇' : '🔊'; };
-    this.muteEl.title = 'Sound on/off';
     this.muteEl.onclick = () => { this.sfx.setMuted(!this.sfx.muted); showMute(); this.sfx.click(); };
     showMute();
     this.hud.append(this.topEl, this.bannerEl, this.overlayEl, ...this.keyEls, this.muteEl);
     this.coach = new Coach(this.hud);
+    this.relabel();
     // the tutorial funnel: one event per step as it is learned, then one once they all are
     const pageAt = performance.now();
     this.coach.onLearn = (step, learned) => {
@@ -1101,19 +1134,19 @@ export class Game {
       if (this.phase === 'build' && this.session) {
         const b = this.budgets[side];
         status = this.session.sides.includes(side)
-          ? (this.session.done[side] ? 'done' : `${b.snow} snow · ${b.ice} ice · ${b.plank} planks${b.king ? ' · king!' : ''}`)
-          : (this.mode === 'cpu' && side === 1 ? 'CPU builds…' : 'waiting');
+          ? (this.session.done[side] ? t('build.ready') : `${t('build.left', b)}${b.king ? ` · ${t('build.king')}` : ''}`)
+          : t(this.mode === 'cpu' && side === 1 ? 'build.cpuBuilds' : 'build.waiting');
       } else if (this.phase === 'fight') {
-        if (!l.armed) status = 'waiting for turn';
-        else if (l.frozen) status = `❄ frozen ${l.reloadLeft.toFixed(1)}s`;
-        else if (l.phase === 'reload') status = `reloading ${l.reloadLeft.toFixed(1)}s`;
-        else if (l.phase === 'charge') status = `power ${Math.round(l.power * 100)}%`;
-        else status = 'aiming…';
+        if (!l.armed) status = t('fight.waitTurn');
+        else if (l.frozen) status = t('fight.frozen', { s: l.reloadLeft.toFixed(1) });
+        else if (l.phase === 'reload') status = t('fight.reloading', { s: l.reloadLeft.toFixed(1) });
+        else if (l.phase === 'charge') status = t('fight.power', { n: Math.round(l.power * 100) });
+        else status = t('fight.aiming');
         const extras: string[] = [];
-        if (l.ammo.length) extras.push(`${l.ammo.length}× ${ammoName(l.ammo[0])}`);
-        if (l.tripleNext) extras.push('volley');
-        if (l.reloadMul > 1) extras.push('slow gears');
-        if (this.arena.wind[side]) extras.push('headwind');
+        if (l.ammo.length) extras.push(t('fight.ammoLeft', { n: l.ammo.length, ammo: t(`ammo.${l.ammo[0]}`) }));
+        if (l.tripleNext) extras.push(t('fight.volley'));
+        if (l.reloadMul > 1) extras.push(t('fight.slowGears'));
+        if (this.arena.wind[side]) extras.push(t('fight.headwind'));
         if (extras.length) status += ` · ${extras.join(' · ')}`;
       }
       info.status.textContent = status;
@@ -1122,12 +1155,12 @@ export class Game {
     }
     if (this.phase === 'build' && this.session) {
       this.clockEl.textContent = Number.isFinite(this.session.time) ? `${Math.max(0, Math.ceil(this.session.time))}` : '';
-      this.subEl.textContent = this.session.repair ? 'repair' : 'build';
+      this.subEl.textContent = t(this.session.repair ? 'build.phaseRepair' : 'build.phaseBuild');
     } else if (this.phase === 'fight' || this.phase === 'roundEnd') {
       const left = ROUND.blizzardAfter - this.roundTime;
       this.clockEl.textContent = left > 0 ? `${Math.ceil(left)}` : '❄';
-      this.subEl.innerHTML = left > 0 ? `round ${this.round}` : '<span class="blizzard">BLIZZARD</span>';
-      if (this.mode === 'turns' && this.phase === 'fight') this.subEl.innerHTML += `<br>${NAMES[this.turn]}'s turn`;
+      this.subEl.innerHTML = left > 0 ? t('fight.roundSmall', { n: this.round }) : `<span class="blizzard">${t('fight.blizzard')}</span>`;
+      if (this.mode === 'turns' && this.phase === 'fight') this.subEl.innerHTML += `<br>${t('fight.turnOf', { name: nameOf(this.turn) })}`;
     }
   }
 
@@ -1137,8 +1170,8 @@ export class Game {
       if (!on || (this.cpu && side === 1)) { k.style.display = 'none'; continue; }
       k.style.display = '';
       k.innerHTML = this.touch
-        ? (this.cpu ? 'Hold anywhere: lock aim + charge, release: throw' : `Hold the ${side === 0 ? 'left' : 'right'} half`)
-        : `<kbd>${FIRE_LABEL[side]}</kbd> press: lock aim · hold: charge · release: throw`;
+        ? t(this.cpu ? 'fight.keysTouchCpu' : side === 0 ? 'fight.keysTouchLeft' : 'fight.keysTouchRight')
+        : t('fight.keysKey', { key: `<kbd>${keyOf(side)}</kbd>` });
     }
   }
 
@@ -1160,4 +1193,3 @@ export class Game {
   }
 }
 
-const ammoName = (a: AmmoId) => ({ snowball: 'snowball', bigIce: 'ice boulder', split: 'split shot', cocoa: 'cocoa', firework: 'firework', frost: 'frost shot' })[a];

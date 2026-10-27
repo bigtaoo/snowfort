@@ -1,11 +1,18 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import { Game } from './game';
 import { Bridge } from './platform/bridge';
+import { DEFAULT_LOCALE, detectLocale, loadLocale, setLocale } from './i18n';
+import { LANG_KEY } from './game';
 
 async function boot(): Promise<void> {
   // Bridge only exists in the Playgama build; elsewhere init() is false at once and nothing changes
   const bridge = new Bridge();
   const [, onPortal] = await Promise.all([RAPIER.init(), bridge.init()]);
+  // the player's own pick, else the portal's language, else the browser's; English if a table fails to load
+  let saved: string | null = null;
+  try { saved = localStorage.getItem(LANG_KEY); } catch { /* storage may be blocked */ }
+  const locale = detectLocale([saved, bridge.language, ...navigator.languages]);
+  setLocale((await loadLocale(locale)) ? locale : DEFAULT_LOCALE);
   const game = new Game(document.getElementById('app')!);
   if (onPortal) {
     let hostMuted = false;

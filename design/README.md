@@ -62,7 +62,8 @@
   - 对电脑：电脑解弹道再加误差，分易/中/难三档，城堡用预设。
     选卡：易随机；中、难偏好弹药，落后时更偏好，自家积木明显比对方少时偏好城堡卡。
     瞄准：按所选角度二分求速度，算上重力和逆风；烟花太快落不到国王身上，改成随机挑速度、二分求一条穿过国王的角度。
-    各档只差角度/力度噪声和思考时间。
+    各档只差角度/力度噪声和思考时间；易档另外有 60% 的投掷故意大幅偏近或偏远（`wildShot`），思考 3.2 秒，
+    整体威胁约为原先易档的五分之一（2026-10-27，玩家反馈原易档几下就输）。
     以前的"按落点修正"去掉了：它把撞墙当成"打近了"，越修越远，导致简单档反而赢中档，强逆风下双方几百秒打不中。
 - 搭建：
   - 预算 12 雪、5 冰、4 木板（横竖共用）、1 国王。
@@ -132,6 +133,14 @@
   - `progression_failed`：中途回菜单，`reason: left`，同样带时长、局数和比分。
 - 引导漏斗：每学会一步发 `tutorial_step`（`step_id` 为这一步，`step_index` 按 menu、drag、king、done、aim、charge、goal、card、repair
   记 1–9，`seconds` 为打开页面后的秒数），九步全学会再发一次 `tutorial_completed`。数每一步的人数，就能看出新玩家卡在哪一步。
+
+## 多语言（2026-10-27，仿 standing）
+
+- `game/src/i18n/`：`en.ts` 是源表，其余表类型为 `Table<typeof en>`，少键或多键都过不了类型检查；`t('a.b', { name })` 取文案并替换 `{name}`。
+- 15 种：en、zh 打进主包；de、fr、es、it、pt、pl、ru、ja、ko、vi、tr、th、id 由 `more.ts` 按需加载。
+- 选语言顺序：玩家在菜单左上角下拉框选过的（localStorage `snowfort.lang`）→ Bridge `platform.language` → 浏览器语言 → 英语。
+- 卡牌名和说明、积木名都移进了语言表（`cards.<id>`、`pieces.<id>`），`cards.ts` / `config.ts` 只留数据。
+- 标题 Snow Fort Showdown 不翻译。
 
 ## 发布到 Playgama（2026-10-27 接好 Bridge）
 

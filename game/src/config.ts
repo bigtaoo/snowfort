@@ -72,17 +72,16 @@ export interface PieceSpec {
   /** Half extents (x, y); depth is always BLOCK_HALF_DEPTH. */
   hx: number;
   hy: number;
-  label: string;
 }
 
 export const BLOCK_HALF_DEPTH = 0.5;
 
 export const PIECES: Record<PieceId, PieceSpec> = {
-  snow: { material: 'snow', hx: 0.5, hy: 0.5, label: 'Snow' },
-  ice: { material: 'ice', hx: 0.5, hy: 0.5, label: 'Ice' },
-  plankH: { material: 'wood', hx: 1.5, hy: 0.15, label: 'Plank —' },
-  plankV: { material: 'wood', hx: 0.15, hy: 1.5, label: 'Plank |' },
-  king: { material: 'king', hx: 0.45, hy: 0.8, label: 'King' },
+  snow: { material: 'snow', hx: 0.5, hy: 0.5 },
+  ice: { material: 'ice', hx: 0.5, hy: 0.5 },
+  plankH: { material: 'wood', hx: 1.5, hy: 0.15 },
+  plankV: { material: 'wood', hx: 0.15, hy: 1.5 },
+  king: { material: 'king', hx: 0.45, hy: 0.8 },
 };
 
 /** Budget pools: planks are shared between both orientations. */
@@ -186,9 +185,10 @@ export const REPLAY = {
 
 export const CPU = {
   levels: {
-    easy: { angleNoiseDeg: 5, speedNoise: 1.6, thinkSeconds: 1.2, decoyFooled: 0.6 },
-    normal: { angleNoiseDeg: 2.5, speedNoise: 0.8, thinkSeconds: 0.7, decoyFooled: 0.4 },
-    hard: { angleNoiseDeg: 1.2, speedNoise: 0.35, thinkSeconds: 0.35, decoyFooled: 0.2 },
+    // wildShot: share of throws given a big deliberate over/undershoot
+    easy: { angleNoiseDeg: 7, speedNoise: 2.2, thinkSeconds: 3.2, decoyFooled: 0.8, wildShot: 0.6 },
+    normal: { angleNoiseDeg: 2.5, speedNoise: 0.8, thinkSeconds: 0.7, decoyFooled: 0.4, wildShot: 0 },
+    hard: { angleNoiseDeg: 1.2, speedNoise: 0.35, thinkSeconds: 0.35, decoyFooled: 0.2, wildShot: 0 },
   },
   /** Angles the CPU likes to throw at (it waits for the sweep to pass one). */
   preferredAnglesDeg: [55, 40, 30, 62],

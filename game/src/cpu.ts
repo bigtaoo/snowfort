@@ -70,6 +70,11 @@ export class CpuShooter {
         this.think -= dt;
         if (this.think > 0) return {};
         if (!this.plan(arena, l)) return {};
+        if (Math.random() < CPU.levels[this.level].wildShot) {
+          // way short or way long, so an easy CPU lands only now and then
+          const off = 0.18 + Math.random() * 0.17;
+          this.wantPower = Math.min(0.97, Math.max(0.03, this.wantPower + (Math.random() < 0.5 ? -off : off)));
+        }
       }
       if (Math.abs(l.angle - this.wantAngle!) < 1.6 * deg) {
         this.prevPower = 0;

@@ -9,6 +9,7 @@ interface BridgeShape {
   initialize?: () => unknown;
   platform?: {
     id?: string;
+    language?: string;
     isAudioEnabled?: boolean;
     sendMessage?: (message: string) => unknown;
     on?: (event: string, cb: Listener) => unknown;
@@ -57,6 +58,12 @@ export class Bridge {
 
   get platformId(): string | null {
     return this.sdk?.platform?.id ?? null;
+  }
+
+  /** The player's language as the platform reports it (ISO 639-1), null without it. */
+  get language(): string | null {
+    const v = this.sdk?.platform?.language;
+    return typeof v === 'string' && v ? v : null;
   }
 
   /** game_ready, gameplay_started, gameplay_stopped, player_got_achievement. */
