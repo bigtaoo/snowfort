@@ -29,6 +29,18 @@ interface Drag {
   ok: boolean;
 }
 
+/** What the game tells its host portal (Playgama Bridge); no-ops anywhere else. */
+export interface Portal {
+  /** A match started (true) or ended or was left (false). */
+  gameplay(on: boolean): void;
+  /** The player beat the CPU. */
+  achievement(): void;
+  /** Between two matches: an interstitial, if the platform has one to show. */
+  betweenMatches(): Promise<void>;
+}
+
+const NO_PORTAL: Portal = { gameplay: () => {}, achievement: () => {}, betweenMatches: async () => {} };
+
 const NAMES = ['Red', 'Blue'];
 const FIRE_KEYS = ['Space', 'Enter'];
 const FIRE_LABEL = ['Space', 'Enter'];
@@ -54,6 +66,11 @@ export class Game {
   mode: Mode = 'simul';
   cpuLevel: CpuLevel = 'normal';
   phase: Phase = 'menu';
+  portal: Portal = NO_PORTAL;
+  /** The platform paused the game (an ad, its own overlay): no frames run. */
+  paused = false;
+  private matchesPlayed = 0;
+  private starting = false;
   launchers: [Launcher, Launcher] = [new Launcher(0), new Launcher(1)];
   cpu: CpuShooter | null = null;
   score: [number, number] = [0, 0];
@@ -198,6 +215,7 @@ export class Game {
 
   private showMenu(): void {
     this.phase = 'menu';
+    this.portal.gameplay(false);
     this.hideTop();
     this.clearPalettes();
     this.overlay(true);
@@ -210,11 +228,11 @@ export class Game {
       b.onclick = () => { this.sfx.click(); fn(); };
       return b;
     };
-    menu.append(add('2 Players — fire at will', () => this.startMatch('simul'), 'btn big'));
-    menu.append(add('2 Players — take turns', () => this.startMatch('turns')));
+    menu.append(add('2 Players — fire at will', () => this.begin('simul'), 'btn big'));
+    menu.append(add('2 Players — take turns', () => this.begin('turns')));
     const row = el('div', 'row');
     for (const lv of Object.keys(CPU.levels) as CpuLevel[]) {
-      row.append(add(`vs CPU · ${lv}`, () => { this.cpuLevel = lv; this.startMatch('cpu'); }));
+      row.append(add(`vs CPU · ${lv}`, () => { this.cpuLevel = lv; this.begin('cpu'); }));
     }
     menu.append(row);
     o.append(menu);
@@ -223,7 +241,20 @@ export class Game {
       : `Build: drag pieces from the tray onto your side (click a placed piece to pick it up again). Fight: <b>${NAMES[0]}</b> <kbd>Space</kbd>, <b>${NAMES[1]}</b> <kbd>Enter</kbd> — press to lock the swinging aim, hold to charge, release to throw. Knock the rival snow king off his hill or pound him to win the round. First to 3.`));
   }
 
+  /** A match from a button: after the first one the platform may show an ad in between. */
+  private async begin(mode: Mode): Promise<void> {
+    if (this.starting) return;
+    this.starting = true;
+    try {
+      if (this.matchesPlayed > 0) await this.portal.betweenMatches();
+    } finally {
+      this.starting = false;
+    }
+    this.startMatch(mode);
+  }
+
   startMatch(mode: Mode): void {
+    this.portal.gameplay(true);
     this.mode = mode;
     this.arena.reset();
     this.view.puff.clear();
@@ -798,6 +829,9 @@ export class Game {
 
   private showResults(): void {
     this.phase = 'results';
+    this.matchesPlayed++;
+    this.portal.gameplay(false);
+    if (this.mode === 'cpu' && this.winnerOfMatch === 0) this.portal.achievement();
     this.sfx.rate = 1;
     this.sfx.fanfare();
     this.timeScale = 0.6;
@@ -811,7 +845,7 @@ export class Game {
     o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
     const row = el('div', 'row menu');
     const again = el('button', 'btn big', 'Rematch');
-    again.onclick = () => { this.sfx.click(); this.startMatch(this.mode); };
+    again.onclick = () => { this.sfx.click(); void this.begin(this.mode); };
     const menu = el('button', 'btn', 'Menu');
     menu.onclick = () => { this.arena.reset(); this.view.homeCamera(); this.timeScale = 1; this.showMenu(); };
     row.append(again, menu);

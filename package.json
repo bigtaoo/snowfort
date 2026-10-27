@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "npm --prefix game run dev",
     "typecheck": "npm --prefix game run typecheck",
-    "build": "npm --prefix game run build"
+    "build": "npm --prefix game run build",
+    "pack": "npm run build && python tools/pack_playgama.py"
   }
 }

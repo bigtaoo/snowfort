@@ -1,7 +1,38 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "lookdev", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "lookdev", "run", "dev"], "port": 5181 },
-    { "name": "game", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "game", "run", "dev"], "port": 5173 }
+    {
+      "name": "lookdev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "lookdev",
+        "run",
+        "dev"
+      ],
+      "port": 5181
+    },
+    {
+      "name": "game",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "game",
+        "run",
+        "dev"
+      ],
+      "port": 5173
+    },
+    {
+      "name": "build",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "game",
+        "run",
+        "preview"
+      ],
+      "port": 4173
+    }
   ]
 }

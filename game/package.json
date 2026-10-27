@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build"
+    "build": "tsc --noEmit && vite build",
+    "pack": "npm run build && python ../tools/pack_playgama.py",
+    "preview": "vite preview --port 4173 --strictPort"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.21.0",

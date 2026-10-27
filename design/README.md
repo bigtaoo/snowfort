@@ -46,7 +46,7 @@
 
 - 运行：根目录或 `game/` 下 `npm run dev`。所有可调数值只在 `game/src/config.ts`。
 - 画面已接上 lookdev 的外观（`game/src/look/`）：toon 积木按块微调亮度、受伤变粉，雪人国王、小孩、投石车（臂随角度转、装好弹时球在勺里）、
-  雪球命中扬雪，院子背景和回放都用同一套。没接 Playgama Bridge。
+  雪球命中扬雪，院子背景和回放都用同一套。
 - 镜头：横向只看到 ±12.8、底边钉在 y −1.2，镜头略高往下看（天空少、院子多）。场地整体压紧：峡谷 ±1.5、
   建造区 1.85–8.7（悬崖和建造区之间留一条放弹簧围栏）（在投石车前约 2 格截止，雪球不会从自家城堡里射出）、最高 9，投石车在 ±10.8，小孩站在投石车前侧。16:9 下城堡和地面约占下半屏；
   5:4、4:3 受宽度限制，约占四成（要看到两边投石车，没法再大）。手机横屏（高度 ≤ 520 px）由高度决定取景，
@@ -102,6 +102,19 @@
   - 自动对局工具：`game/src/dev/selfplay.ts`（游戏不引用它），开发服务器控制台里 import 后 `run([['easy','normal']], 4)`，看 `summary()`。
 - 已知问题：
   - 加上搭建、修补、选卡，一场两人对战约 5–7 分钟；比赛要求平均 ≥ 5 分钟，正好够。
+
+## 发布到 Playgama（2026-10-27 接好 Bridge）
+
+- `npm run pack`（根目录或 `game/`）：构建并用 Python zipfile 打成 `release/snowfort-playgama.zip`（index.html 在根，只有文件条目）。
+  `npm --prefix game run preview` 在 4173 端口看构建版，那里 Bridge 是 `mock` 平台。
+- 只有构建版带 Bridge 脚本（`game/vite.config.ts` 插进去，漏了就构建失败），开发服务器没有，所有调用都变成空操作；
+  Bridge 5 秒内没初始化好也照常开游戏。包装在 `game/src/platform/bridge.ts`（从 Holy Kicker 精简）。
+- 接了：`game_ready`（加载完）、`gameplay_started/stopped`（一场开始 / 结束或回菜单）、
+  `player_got_achievement`（打赢电脑）、平台暂停（停帧 + 静音）、平台声音开关（叠在自己的静音按钮上）。
+- 广告：只在两场之间（第一场之后再点开始 / 再来一局）放一次插屏，`playgama-bridge-config.json` 设两次插屏至少隔 180 秒。
+  没有激励广告。存档（静音、上次的城堡）还是 localStorage。
+- 发布要用 Playgama MCP（`playgama-developer-console`，https://developer.playgama.com/api/mcp），
+  目前只在 `D:\standing` 项目里配了，雪堡项目还要加上。
 
 ## 外观（lookdev 已定，见 `lookdev/README.md` 和 `lookdev/shots/`）
 

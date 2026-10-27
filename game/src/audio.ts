@@ -15,6 +15,7 @@ export class Sfx {
   private noise!: AudioBuffer;
   private last = new Map<string, number>();
   muted: boolean;
+  private hostMuted = false;
   /** Playback rate: the slow-motion replay pitches everything down. */
   rate = 1;
 
@@ -44,7 +45,7 @@ export class Sfx {
     comp.ratio.value = 6;
     comp.connect(ctx.destination);
     this.master = ctx.createGain();
-    this.master.gain.value = this.muted ? 0 : 0.7;
+    this.master.gain.value = this.muted || this.hostMuted ? 0 : 0.7;
     this.master.connect(comp);
     const n = ctx.sampleRate;
     this.noise = ctx.createBuffer(1, n, n);
@@ -55,7 +56,17 @@ export class Sfx {
   setMuted(m: boolean): void {
     this.muted = m;
     try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch { /* storage may be blocked */ }
-    if (this.ctx) this.master.gain.setTargetAtTime(m ? 0 : 0.7, this.ctx.currentTime, 0.02);
+    this.applyVolume();
+  }
+
+  /** The host's own switch (the portal's sound toggle, an ad, a pause), on top of the player's. */
+  setHostMuted(m: boolean): void {
+    this.hostMuted = m;
+    this.applyVolume();
+  }
+
+  private applyVolume(): void {
+    if (this.ctx) this.master.gain.setTargetAtTime(this.muted || this.hostMuted ? 0 : 0.7, this.ctx.currentTime, 0.02);
   }
 
   // ---------- the game's sounds ----------
