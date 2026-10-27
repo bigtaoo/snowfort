@@ -172,6 +172,8 @@
 - 已发布（2026-10-27，沙盒）：https://playgama.ai/play/dqq7iq6dcikez6 ，包检查 PASSED（Bridge 2.3.1）；
   包按提交号命名（如 `snowfort-bc5fb5c`），线上现在是这一版（菜单只有双人 / 人机两个模式；人机一局定胜负、预设雪堡、隐藏 100 级难度）；MCP 连不上时也可以在网页后台
   Update Game 里传 zip，再点 Continue → 选包 → Update in Sandbox；
+  商店文案（Game description / How to play）也在 Update Game 页，改完点 Save Changes。2026-10-27 已改成
+  "双人先赢 3 局、对战 Frosty 一局定胜负"，并去掉了"三个难度""每局都修补选卡"的旧说法；规则再变要一起改。
   封面（方形 / 竖版 / 横版）在 `art/covers/`。同一天已把这个链接交到挑战页。
   社交帖（挑战第 2 步，用户自己发）：草稿和截图在 `art/social/`（X 短帖 tag @PlaygamaCom，
   长帖给 Reddit / LinkedIn / Discord，附中文）。资格线要平均时长 ≥ 5 分钟，所以号召要说清"两人同一台设备、
