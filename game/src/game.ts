@@ -130,6 +130,7 @@ export class Game {
       for (const imp of this.arena.impacts) {
         this.view.puff.burst(new Vector3(imp.x, imp.y, 0), 24);
         this.sfx.impact(imp.ammo);
+        if (imp.spring) this.sfx.boing();
       }
       for (const h of this.arena.kingHits) this.kingHud.hit(h.owner, h.dmg);
       if (this.phase === 'fight') this.afterStep();

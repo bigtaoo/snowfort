@@ -139,7 +139,8 @@ export const AMMO = {
   bigIce: { radius: 0.55, densityMul: 2.2, lingerAfterHit: 3 },
   split: { count: 3, spreadSpeed: 4 },
   cocoa: { meltRadius: 2.6, snowDamage: 8 },
-  firework: { speedMul: 1.45, gravityScale: 0.18, radius: 0.25, densityMul: 1.6 },
+  /** Flies nearly straight, so with one loaded the barrel sweeps a lower range and aims right at a king. */
+  firework: { speedMul: 1.45, gravityScale: 0.18, radius: 0.25, densityMul: 1.6, minAngleDeg: -4, maxAngleDeg: 24 },
   /** Lands on the rival's hill: their catapult freezes this long. */
   frost: { freezeSeconds: 3 },
   /** Ammo cards give this many special shots next round. */

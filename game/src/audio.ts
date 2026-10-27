@@ -113,6 +113,12 @@ export class Sfx {
     }
   }
 
+  /** A shot bounces off the springy fence: a wobbling "boing". */
+  boing(): void {
+    if (!this.go('boing')) return;
+    [[160, 420], [420, 300], [300, 380], [380, 330]].forEach(([a, b], i) => this.tone(a, b, 0.09, 'sine', 0.4 - i * 0.07, i * 0.07));
+  }
+
   /** The snow king takes a hit: a cartoon "bonk", deeper for a big one. */
   kingHit(share: number): void {
     if (!this.go('king')) return;

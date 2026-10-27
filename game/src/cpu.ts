@@ -103,9 +103,17 @@ export class CpuShooter {
     const g = -PHYSICS.gravity * (firework ? AMMO.firework.gravityScale : 1);
     const wind = arena.wind[this.side] * dir;
     const speedMul = firework ? AMMO.firework.speedMul : 1;
-    // fireworks fly flat, so they also try the low angles
+    if (firework) {
+      // too fast to land on him: pick a speed and aim the near-straight line through him
+      const v = (CATAPULT.minSpeed + Math.random() * 0.5 * (CATAPULT.maxSpeed - CATAPULT.minSpeed)) * speedMul;
+      const theta = solveAngle(this.side, v, tp.x, tp.y + 0.3, g, wind);
+      if (theta !== null) {
+        this.wantAngle = Math.min(AMMO.firework.maxAngleDeg * deg, Math.max(AMMO.firework.minAngleDeg * deg, theta + gauss() * cfg.angleNoiseDeg * deg));
+        this.wantPower = Math.min(0.97, Math.max(0.03, Launcher.powerFor(v / speedMul + gauss() * cfg.speedNoise)));
+        return true;
+      }
+    }
     const angles = [...CPU.preferredAnglesDeg].sort(() => Math.random() - 0.5);
-    if (firework) angles.unshift(CATAPULT.minAngleDeg + 2, 20);
     for (const a of angles) {
       const theta = (a + gauss() * cfg.angleNoiseDeg) * deg;
       if (theta < CATAPULT.minAngleDeg * deg || theta > CATAPULT.maxAngleDeg * deg) continue;
@@ -121,9 +129,9 @@ export class CpuShooter {
       this.wantPower = power;
       return true;
     }
-    // nothing fits: a firework skims in low and soft; anything else lobs
-    this.wantAngle = firework ? (CATAPULT.minAngleDeg + 1) * deg : 45 * deg;
-    this.wantPower = firework ? 0.08 : 0.7;
+    // nothing fits: a firework goes straight at him; anything else lobs
+    this.wantAngle = firework ? 4 * deg : 45 * deg;
+    this.wantPower = firework ? 0.3 : 0.7;
     return true;
   }
 }
@@ -151,6 +159,31 @@ export function cpuPickCard(hand: Card[], level: CpuLevel, behind: boolean, fort
  * The launch speed that brings a shot at angle `theta` down through (dx, dy), under gravity `g` and a steady
  * horizontal acceleration `ax` (wind), by bisection: the landing distance grows with speed. Null if out of reach.
  */
+/**
+ * Barrel angle whose arc at speed `v` passes through (tx, ty) on the way, rising or falling, or null.
+ * For shots too fast to land on the target (fireworks), over the firework's sweep, where height there grows with angle.
+ */
+export function solveAngle(side: Side, v: number, tx: number, ty: number, g: number, ax: number): number | null {
+  const dir = side === 0 ? 1 : -1;
+  const miss = (theta: number): number => {
+    const m = Arena.muzzle(side, theta);
+    const dx = (tx - m.x) * dir;
+    const vx = v * Math.cos(theta);
+    const disc = vx * vx + 2 * ax * dx;
+    if (disc < 0) return -Infinity; // blown back before getting there
+    const t = Math.abs(ax) < 1e-6 ? dx / vx : (Math.sqrt(disc) - vx) / ax;
+    return m.y + v * Math.sin(theta) * t - 0.5 * g * t * t - ty;
+  };
+  let lo = AMMO.firework.minAngleDeg * deg;
+  let hi = AMMO.firework.maxAngleDeg * deg;
+  if (miss(lo) > 0 || miss(hi) < 0) return null;
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2;
+    if (miss(mid) < 0) lo = mid; else hi = mid;
+  }
+  return (lo + hi) / 2;
+}
+
 export function solveSpeed(theta: number, dx: number, dy: number, g: number, ax: number, vMin: number, vMax: number): number | null {
   const reach = (v: number): number => {
     const vy = v * Math.sin(theta);

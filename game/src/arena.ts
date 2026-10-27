@@ -64,6 +64,8 @@ export interface ImpactEvent {
   y: number;
   owner: Side;
   ammo: AmmoId;
+  /** The shot's first contact was a bouncy fence. */
+  spring?: boolean;
 }
 
 /** The physics world plus the meshes that mirror its bodies. */
@@ -285,7 +287,7 @@ export class Arena {
           if (e.hitAt === undefined) {
             e.hitAt = this.time;
             const p = e.body.translation();
-            this.impacts.push({ x: p.x, y: p.y, owner: e.owner, ammo: e.ammo ?? 'snowball' });
+            this.impacts.push({ x: p.x, y: p.y, owner: e.owner, ammo: e.ammo ?? 'snowball', spring: !!other?.spring });
           }
           continue;
         }

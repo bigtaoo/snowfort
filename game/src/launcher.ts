@@ -1,4 +1,4 @@
-import { CATAPULT } from './config';
+import { AMMO, CATAPULT } from './config';
 import type { AmmoId, Side } from './arena';
 
 const deg = Math.PI / 180;
@@ -61,7 +61,8 @@ export class Launcher {
   update(dt: number): void {
     if (this.phase === 'sweep') {
       if (this.armed) this.sweepT += dt / CATAPULT.sweepPeriod;
-      this.angle = (CATAPULT.minAngleDeg + (CATAPULT.maxAngleDeg - CATAPULT.minAngleDeg) * tri(this.sweepT)) * deg;
+      const [lo, hi] = Launcher.sweepRange(this.ammo[0]);
+      this.angle = (lo + (hi - lo) * tri(this.sweepT)) * deg;
     } else if (this.phase === 'charge') {
       this.chargeT += dt / CATAPULT.chargePeriod;
       this.power = tri(this.chargeT);
@@ -96,6 +97,11 @@ export class Launcher {
     this.power = 0;
     this.shots++;
     return shot;
+  }
+
+  /** The barrel's sweep in degrees with `ammo` loaded. */
+  static sweepRange(ammo: AmmoId | undefined): [number, number] {
+    return ammo === 'firework' ? [AMMO.firework.minAngleDeg, AMMO.firework.maxAngleDeg] : [CATAPULT.minAngleDeg, CATAPULT.maxAngleDeg];
   }
 
   /** CPU helper: the speed a given power gives, and back. */
