@@ -170,7 +170,7 @@
   配在仓库根的 `.mcp.json`（只有地址，没有密钥）；桌面版会话不读 `~/.claude.json` 里的项目级配置。
   新开的会话才能用，第一次要在 `/mcp` 里登录。
 - 已发布（2026-10-27，沙盒）：https://playgama.ai/play/dqq7iq6dcikez6 ，包检查 PASSED（Bridge 2.3.1）；
-  包按提交号命名（如 `snowfort-5de5efd`），线上现在是这一版（只有双人轮流，局间修补 2 分钟，电脑叫霜霜 / Frosty）；MCP 连不上时也可以在网页后台
+  包按提交号命名（如 `snowfort-bc5fb5c`），线上现在是这一版（菜单只有双人 / 人机两个模式；人机一局定胜负、预设雪堡、隐藏 100 级难度）；MCP 连不上时也可以在网页后台
   Update Game 里传 zip，再点 Continue → 选包 → Update in Sandbox；
   封面（方形 / 竖版 / 横版）在 `art/covers/`。同一天已把这个链接交到挑战页。
   社交帖（挑战第 2 步，用户自己发）：草稿和截图在 `art/social/`（X 短帖 tag @PlaygamaCom，
