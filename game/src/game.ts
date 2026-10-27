@@ -7,6 +7,7 @@ import { Arena, type AmmoId, type Entity, type Side } from './arena';
 import { View } from './view';
 import { Sfx } from './audio';
 import { KingHud } from './kingHud';
+import { Coach } from './coach';
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
 import { CpuShooter, PRESET_FORTS, cpuPickCard, REPAIR_PLAN, type CpuLevel, type Placement } from './cpu';
@@ -111,6 +112,9 @@ export class Game {
   private topEl = el('div', 'top');
   private pinfo: { root: HTMLElement; pips: HTMLElement; bar: HTMLElement; status: HTMLElement }[] = [];
   private kingHud!: KingHud;
+  private coach!: Coach;
+  /** Who has thrown in this match: the aiming tips stay until each player has. */
+  private thrown = [false, false];
   private clockEl = el('div', 'clock');
   private subEl = el('div', 'sub');
   private bannerEl = el('div', 'banner');
@@ -206,6 +210,8 @@ export class Game {
       const showAim = this.phase === 'fight';
       this.view.setCatapult(s, l.angle, l.phase === 'charge' ? l.power : null, l.phase === 'charge', showAim && l.ready);
     }
+    if (this.phase === 'fight') this.fightTips();
+    this.coach.update(dt);
     this.updateHud();
   }
 
@@ -219,6 +225,7 @@ export class Game {
     this.hideTop();
     this.clearPalettes();
     this.overlay(true);
+    this.coach.clear();
     const o = this.overlayEl;
     o.innerHTML = '';
     o.append(el('h1', 'title', 'Snow Fort Showdown'));
@@ -232,7 +239,13 @@ export class Game {
     menu.append(add('2 Players — take turns', () => this.begin('turns')));
     const row = el('div', 'row');
     for (const lv of Object.keys(CPU.levels) as CpuLevel[]) {
-      row.append(add(`vs CPU · ${lv}`, () => { this.cpuLevel = lv; this.begin('cpu'); }));
+      const b = add(`vs CPU · ${lv}`, () => { this.cpuLevel = lv; this.begin('cpu'); });
+      // a first-timer is pointed at the gentlest way in
+      if (lv === 'easy' && this.coach.needs('menu')) {
+        b.classList.add('coachMark');
+        b.prepend(el('span', 'startHere', 'NEW? START HERE'));
+      }
+      row.append(b);
     }
     menu.append(row);
     o.append(menu);
@@ -245,6 +258,7 @@ export class Game {
   private async begin(mode: Mode): Promise<void> {
     if (this.starting) return;
     this.starting = true;
+    this.coach.learn('menu');
     try {
       if (this.matchesPlayed > 0) await this.portal.betweenMatches();
     } finally {
@@ -265,6 +279,7 @@ export class Game {
     this.round = 0;
     this.pending = [[], []];
     this.lastWinner = null;
+    this.thrown = [false, false];
     this.cpu = mode === 'cpu' ? new CpuShooter(1, this.cpuLevel) : null;
     this.arena.damageMul = mode === 'turns' ? CATAPULT.turnDamageMul : 1;
     this.launchers = [new Launcher(0), new Launcher(1)];
@@ -301,9 +316,28 @@ export class Game {
     this.makePalettes(s);
     const who = s.sides.length === 2 ? 'Both players' : NAMES[s.sides[0]];
     this.banner(s.repair ? `${who}: repair!` : `${who}: build your fort!`, s.sides.length === 2 ? 'Drag pieces onto your own side' : 'Drag pieces from the tray', 2);
+    this.buildTips();
+  }
+
+  /** The next thing to learn in building, pointed at on each builder's tray. */
+  private buildTips(): void {
+    const s = this.session;
+    if (!s) return;
+    for (const side of s.sides) {
+      const pal = this.paletteEls[side];
+      const key = `build${side}`;
+      if (!pal || s.done[side]) { this.coach.hide(key); continue; }
+      const button = (sel: string) => pal.querySelector<HTMLElement>(sel)!;
+      const opts = { side };
+      if (s.repair) this.coach.show(key, 'repair', 'Patch the holes with a few spare blocks<small>then press Done</small>', button('.done'), opts);
+      else if (this.coach.needs('drag')) this.coach.show(key, 'drag', 'Drag a block onto your yard<small>the glowing patch of snow</small>', button('[data-piece="snow"]'), opts);
+      else if (this.budgets[side].king > 0) this.coach.show(key, 'king', 'Now place your snow king<small>hide him behind your walls</small>', button('[data-piece="king"]'), opts);
+      else this.coach.show(key, 'done', 'Fort ready? Press Done<small>or keep building, no hurry</small>', button('.done'), opts);
+    }
   }
 
   private endSession(): void {
+    this.coach.clear();
     // whoever never placed their king gets one dropped in for them
     for (const side of this.session?.sides ?? []) if (this.budgets[side].king > 0) this.autoPlaceKing(side);
     this.session = null;
@@ -419,6 +453,9 @@ export class Game {
     this.arena.addPiece(d.piece, d.side, spot.x, spot.y);
     this.sfx.place();
     this.refreshPalettes();
+    this.coach.learn('drag');
+    if (d.piece === 'king') this.coach.learn('king');
+    this.buildTips();
   }
 
   private cancelDrags(): void {
@@ -441,6 +478,9 @@ export class Game {
     this.clearFort(side);
     for (const p of plan) this.placeFromPlan(side, p);
     this.refreshPalettes();
+    this.coach.learn('drag');
+    this.coach.learn('king');
+    this.buildTips();
   }
 
   private saveBlueprints(): void {
@@ -489,7 +529,12 @@ export class Game {
         pal.append(r);
       }
       const done = el('button', 'done', 'Done');
-      done.onclick = () => { if (this.session) this.session.done[side] = true; };
+      done.onclick = () => {
+        if (!this.session) return;
+        this.session.done[side] = true;
+        this.coach.learn(s.repair ? 'repair' : 'done');
+        this.buildTips();
+      };
       pal.append(done);
       this.hud.append(pal);
       this.paletteEls[side] = pal;
@@ -630,6 +675,44 @@ export class Game {
     }
   }
 
+  /** Each player's aiming tip over their catapult, until they have thrown once. */
+  private fightTips(): void {
+    for (const side of [0, 1] as Side[]) {
+      if (this.cpu && side === 1) continue;
+      const key = `fight${side}`;
+      const l = this.launchers[side];
+      if (this.thrown[side] || !l.ready) { this.coach.hide(key); continue; }
+      const at = () => this.view.toScreen(xOf(side, CATAPULT.x), CATAPULT.pivotY + 2.4);
+      const opts = { side };
+      if (l.phase === 'charge') {
+        this.coach.show(key, 'charge', `${this.touch ? 'Keep holding' : 'Hold it'}… let go to throw!<small>the longer you hold, the farther it flies</small>`, at, opts);
+      } else {
+        const how = this.touch
+          ? `Touch and hold ${this.cpu ? 'the screen' : `the ${side === 0 ? 'left' : 'right'} half`}`
+          : `Press <kbd>${FIRE_LABEL[side]}</kbd>`;
+        this.coach.show(key, 'aim', `${how} to stop the swinging aim<small>when the dots point at the rival fort</small>`, at, opts);
+      }
+    }
+  }
+
+  /** A player's first throw of the match: once everyone has thrown, aiming is learned; then the goal. */
+  private afterFirstThrow(side: Side): void {
+    if (this.thrown[side]) return;
+    this.thrown[side] = true;
+    const humans: Side[] = this.cpu ? [0] : [0, 1];
+    if (humans.every((h) => this.thrown[h])) {
+      this.coach.learn('aim');
+      this.coach.learn('charge');
+    }
+    const rival = other(side);
+    this.coach.show('goal', 'goal', `Knock out the ${NAMES[rival]} king!<small>empty his bar or push him off his hill · first to 3 rounds</small>`, () => {
+      const k = this.arena.king(rival);
+      if (!k) return null;
+      const p = k.body.translation();
+      return this.view.toScreen(p.x, p.y + 1.7);
+    }, { side, ttl: 6 });
+  }
+
   /** Locks a launcher's aim, with a click if it took. */
   private press(side: Side): void {
     const l = this.launchers[side];
@@ -652,6 +735,7 @@ export class Game {
       return this.arena.addProjectile(shot.side, shot.ammo, m.x, m.y, dir * Math.cos(a) * speed, Math.sin(a) * speed, massMul);
     });
     this.trailBall[shot.side] = balls[Math.floor(balls.length / 2)];
+    if (!(this.cpu && shot.side === 1)) this.afterFirstThrow(shot.side);
     this.trailNext[shot.side] = 0;
     this.view.clearTrail(shot.side);
     if (this.mode === 'turns') {
@@ -696,6 +780,7 @@ export class Game {
 
   private endRound(lost: Side[]): void {
     this.phase = 'roundEnd';
+    this.coach.clear();
     this.decidedAt = this.arena.time;
     this.showKeys(false);
     for (const l of this.launchers) { if (l.phase === 'charge') l.phase = 'sweep'; }
@@ -790,6 +875,7 @@ export class Game {
       row.append(card);
     });
     o.append(row, this.cardClockEl);
+    if (!(this.mode === 'cpu' && side === 1)) this.coach.show('card', 'card', 'Pick one: it is yours for the next round<small>ammo, a fort upgrade or a trick on your rival</small>', row, { side, above: false });
     this.cpuCard = null;
     if (this.mode === 'cpu' && side === 1) {
       this.cardTime = 1.2;
@@ -802,6 +888,7 @@ export class Game {
     if (this.phase !== 'cards') return;
     const side = this.cardQueue.shift()!;
     this.sfx.click();
+    if (!(this.mode === 'cpu' && side === 1)) this.coach.learn('card');
     this.pending[side].push(this.hand[i]);
     this.nextCardPick();
   }
@@ -960,6 +1047,7 @@ export class Game {
     this.muteEl.onclick = () => { this.sfx.setMuted(!this.sfx.muted); showMute(); this.sfx.click(); };
     showMute();
     this.hud.append(this.topEl, this.bannerEl, this.overlayEl, ...this.keyEls, this.muteEl);
+    this.coach = new Coach(this.hud);
     this.kingHud = new KingHud(this.hud, this.pinfo.map((p) => p.bar.parentElement!), (_, dmg) => {
       this.sfx.kingHit(dmg / MATERIALS.king.hp);
       this.view.shake(Math.min(0.25, 0.4 * dmg / MATERIALS.king.hp));

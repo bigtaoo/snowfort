@@ -103,6 +103,28 @@
 - 已知问题：
   - 加上搭建、修补、选卡，一场两人对战约 5–7 分钟；比赛要求平均 ≥ 5 分钟，正好够。
 
+## 新手引导（2026-10-27）
+
+- 没有单独的教学关，第一次遇到每一步时，在要操作的地方冒一个带箭头的提示气泡（`game/src/coach.ts`），
+  做到了就消失，并记在 localStorage `snowfort.coach` 里，以后不再出现。URL 加 `?tips` 从头再看一遍（会重写记录）。
+- 顺序：
+  1. 菜单：「vs CPU · easy」按钮发光，标着 NEW? START HERE；开始任意一场就算学会。
+  2. 搭建：指着雪块按钮"把一块拖到你的院子里" → 指着国王按钮"放上雪人国王" → 指着 Done"城堡好了就点 Done"。
+     点"随机城堡 / 上次的城堡"也算学会了拖和放国王。两人同时搭建时两边托盘各指一个。
+  3. 局间修补：指着 Done"用几块备用材料补洞"。
+  4. 对战（第一局）：每个真人玩家的投石车上方，按键盘 / 触屏分别写"按空格（回车）/ 按住左（右）半屏，锁定摆动的瞄准"，
+     锁定后变成"按住蓄力，松开发射"；这一方扔出第一发就消失。所有真人都扔过以后才算学会，两人对战两个人都会看到。
+  5. 第一发扔出后，指着对方国王 6 秒："打倒对方国王！把血条打空或推下山 · 先赢 3 局"。只出现一次。
+  6. 选卡：卡牌下方"选一张，下一局归你用"。
+- 气泡不接收点击 / 触摸，不挡操作；矮屏手机字号缩小（不用 zoom，否则定位会偏）。
+
+## 数据分析
+
+- 暂不做。Holy Kicker 实测 Playgama sandbox（Bridge 平台 `playgama_sandbox`）只放行 Playgama 自己的域名，
+  连不上我们自己的服务器（见 `D:\standing\docs\retention.md`）。Bridge 自己会统计会话、时长和广告。
+- 以后要做，最省事的是 Holy Kicker 那套：用 `bridge.analytics.send` 发 Playgama 自己的 telemetry
+  （引导每一步 `tutorial_step`、一场的开始和结束），在开发者后台看漏斗，不需要我们自己的服务器。
+
 ## 发布到 Playgama（2026-10-27 接好 Bridge）
 
 - `npm run pack`（根目录或 `game/`）：构建并用 Python zipfile 打成 `release/snowfort-playgama.zip`（index.html 在根，只有文件条目）。
@@ -114,7 +136,7 @@
 - 广告：只在两场之间（第一场之后再点开始 / 再来一局）放一次插屏，`playgama-bridge-config.json` 设两次插屏至少隔 180 秒。
   没有激励广告。存档（静音、上次的城堡）还是 localStorage。
 - 发布要用 Playgama MCP（`playgama-developer-console`，https://developer.playgama.com/api/mcp），
-  目前只在 `D:\standing` 项目里配了，雪堡项目还要加上。
+  已配进本项目（`~/.claude.json` 的项目级配置，不进仓库）；新开的会话才能用。
 
 ## 外观（lookdev 已定，见 `lookdev/README.md` 和 `lookdev/shots/`）
 
