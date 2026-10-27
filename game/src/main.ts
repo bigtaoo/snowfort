@@ -19,8 +19,12 @@ async function boot(): Promise<void> {
     let paused = false;
     let playing = false;
     const sound = () => game.sfx.setHostMuted(hostMuted || paused);
+    const pause = (p: boolean) => { paused = p; game.paused = p; sound(); };
     bridge.onMute((m) => { hostMuted = m; sound(); });
-    bridge.onPause((p) => { paused = p; game.paused = p; sound(); });
+    bridge.onPause(pause);
+    // a pause whose resume never came (seen after an interstitial) would freeze the game for good:
+    // a player touching or typing in it is playing, so it runs again
+    for (const type of ['pointerdown', 'keydown']) window.addEventListener(type, () => { if (paused) pause(false); }, true);
     game.portal = {
       gameplay: (on) => {
         if (on !== playing) bridge.send(on ? 'gameplay_started' : 'gameplay_stopped');
@@ -31,17 +35,29 @@ async function boot(): Promise<void> {
         // the ad has the screen and the sound; Bridge also sends its own pause around it
         game.sfx.setHostMuted(true);
         await bridge.interstitial();
-        sound();
+        // the ad is over, whether or not Bridge sends its resume
+        pause(false);
       },
       track: (event, data) => bridge.track(event, data),
     };
     console.info(`[snowfort] Playgama Bridge: ${bridge.platformId}`);
   }
   let last = performance.now();
+  let reported = false;
   const tick = (now: number) => {
-    if (!game.paused) game.frame((now - last) / 1000);
-    last = now;
+    // the next frame is booked first: a throw in this one must not stop the game for good
     requestAnimationFrame(tick);
+    const dt = (now - last) / 1000;
+    last = now;
+    if (game.paused) return;
+    try {
+      game.frame(dt);
+    } catch (e) {
+      if (reported) return;
+      reported = true;
+      console.error('[snowfort] frame failed', e);
+      bridge.track('frame_error', { message: String(e).slice(0, 200), phase: game.phase });
+    }
   };
   requestAnimationFrame(tick);
   bridge.send('game_ready');
