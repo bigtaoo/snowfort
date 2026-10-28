@@ -19,6 +19,10 @@ interface BridgeShape {
     showInterstitial?: (placement?: string) => unknown;
     on?: (event: string, cb: Listener) => unknown;
   };
+  storage?: {
+    get?: (keys: string[], tryParseJson?: boolean) => unknown;
+    set?: (keys: string[], values: string[]) => unknown;
+  };
   analytics?: { send?: (event: string, data?: Record<string, string | number | boolean>) => unknown };
 }
 
@@ -74,6 +78,23 @@ export class Bridge {
   /** One event for Playgama's own telemetry (Bridge 2.3.0 and newer; a no-op before). */
   track(event: string, data?: Record<string, string | number | boolean>): void {
     void settle(() => this.sdk?.analytics?.send?.(event, data));
+  }
+
+  /** Reads `keys` from Bridge storage in one call; values come back as strings, missing keys absent. */
+  async load(keys: string[]): Promise<Map<string, string>> {
+    const out = new Map<string, string>();
+    const got = await settle(() => this.sdk?.storage?.get?.(keys, false));
+    if (!Array.isArray(got)) return out;
+    keys.forEach((key, i) => {
+      const v: unknown = got[i];
+      if (typeof v === 'string') out.set(key, v);
+      else if (v !== null && v !== undefined) out.set(key, JSON.stringify(v));
+    });
+    return out;
+  }
+
+  save(key: string, value: string): void {
+    void settle(() => this.sdk?.storage?.set?.([key], [value]));
   }
 
   /** The platform asks the game to stop (an ad, its own overlay) and to go on again. */

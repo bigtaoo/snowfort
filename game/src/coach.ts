@@ -1,6 +1,8 @@
 // First-time hints: a speech bubble pointing at the thing to do next (a tray button, a catapult, the
-// rival king), shown until the player does it. Each step is learned once, kept in localStorage, so a
+// rival king), shown until the player does it. Each step is learned once, kept in the saves, so a
 // returning player never sees it again; `?tips` in the URL shows them all again.
+
+import { loadSave, writeSave } from './platform/saves';
 
 export type Step = 'menu' | 'drag' | 'king' | 'done' | 'aim' | 'charge' | 'goal' | 'card' | 'repair';
 
@@ -30,8 +32,8 @@ export class Coach {
   constructor(private host: HTMLElement) {
     if (new URLSearchParams(location.search).has('tips')) return;
     try {
-      for (const s of JSON.parse(localStorage.getItem(KEY) ?? '[]') as Step[]) this.learned.add(s);
-    } catch { /* storage may be blocked: every tip then shows each session */ }
+      for (const s of JSON.parse(loadSave(KEY) ?? '[]') as Step[]) this.learned.add(s);
+    } catch { /* a broken save: every tip then shows again */ }
   }
 
   /** Whether the step is still to be learned. */
@@ -77,7 +79,7 @@ export class Coach {
     if (this.learned.has(step)) return;
     this.learned.add(step);
     this.onLearn(step, this.learned.size);
-    try { localStorage.setItem(KEY, JSON.stringify([...this.learned])); } catch { /* see above */ }
+    writeSave(KEY, JSON.stringify([...this.learned]));
   }
 
   clear(): void {

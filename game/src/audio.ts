@@ -1,5 +1,6 @@
 import type { AmmoId } from './arena';
 import type { MaterialId } from './config';
+import { loadSave, writeSave } from './platform/saves';
 
 const MUTE_KEY = 'snowfort.muted';
 /** The same sound never starts twice within this many seconds (a collapsing wall breaks many blocks at once). */
@@ -20,9 +21,7 @@ export class Sfx {
   rate = 1;
 
   constructor() {
-    let m = false;
-    try { m = localStorage.getItem(MUTE_KEY) === '1'; } catch { /* storage may be blocked */ }
-    this.muted = m;
+    this.muted = loadSave(MUTE_KEY) === '1';
     document.addEventListener('visibilitychange', () => {
       if (!this.ctx) return;
       if (document.hidden) void this.ctx.suspend();
@@ -55,7 +54,7 @@ export class Sfx {
 
   setMuted(m: boolean): void {
     this.muted = m;
-    try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch { /* storage may be blocked */ }
+    writeSave(MUTE_KEY, m ? '1' : '0');
     this.applyVolume();
   }
 

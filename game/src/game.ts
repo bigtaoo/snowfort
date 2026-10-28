@@ -12,6 +12,7 @@ import { LOCALES, getLocale, loadLocale, localeName, setLocale, t, type Key, typ
 import { Launcher, type Shot } from './launcher';
 import { dealHand, type Card } from './cards';
 import { CpuShooter, randomFort, type Placement } from './cpu';
+import { loadSave, writeSave } from './platform/saves';
 
 type Mode = 'turns' | 'cpu';
 type Phase = 'menu' | 'build' | 'fight' | 'roundEnd' | 'cards' | 'replay' | 'results';
@@ -54,9 +55,9 @@ const CPU_KEY = 'snowfort.cpu';
 
 function loadCpuProgress(): CpuProgress {
   try {
-    const p = JSON.parse(localStorage.getItem(CPU_KEY) ?? 'null') as Partial<CpuProgress> | null;
+    const p = JSON.parse(loadSave(CPU_KEY) ?? 'null') as Partial<CpuProgress> | null;
     if (p && Number.isFinite(p.level) && Number.isFinite(p.played)) return { level: p.level!, played: p.played! };
-  } catch { /* storage may be blocked: every visit starts at level 1 */ }
+  } catch { /* a broken save: this visit starts at level 1 */ }
   return { level: 1, played: 0 };
 }
 
@@ -304,7 +305,7 @@ export class Game {
       const l = pick.value as Locale;
       if (!(await loadLocale(l))) return void (pick.value = getLocale());
       setLocale(l);
-      try { localStorage.setItem(LANG_KEY, l); } catch { /* storage may be blocked */ }
+      writeSave(LANG_KEY, l);
       this.relabel();
       this.showMenu();
     };
@@ -617,7 +618,7 @@ export class Game {
   private saveBlueprints(): void {
     for (const side of [0, 1] as Side[]) {
       if (this.mode === 'cpu' && side === 1) continue;
-      try { localStorage.setItem(`snowfort.blueprint2.${side}`, JSON.stringify(this.fortPlans[side])); } catch { /* storage may be blocked */ }
+      writeSave(`snowfort.blueprint2.${side}`, JSON.stringify(this.fortPlans[side]));
     }
   }
 
@@ -636,7 +637,7 @@ export class Game {
 
   private loadBlueprint(side: Side): Placement[] | null {
     try {
-      const s = localStorage.getItem(`snowfort.blueprint2.${side}`);
+      const s = loadSave(`snowfort.blueprint2.${side}`);
       return s ? (JSON.parse(s) as Placement[]) : null;
     } catch { return null; }
   }
@@ -1093,7 +1094,7 @@ export class Game {
     const p = this.cpuProgress;
     p.level = Math.min(CPU.maxLevel, Math.max(1, p.level + (won ? 1 : -1)));
     p.played++;
-    try { localStorage.setItem(CPU_KEY, JSON.stringify(p)); } catch { /* storage may be blocked */ }
+    writeSave(CPU_KEY, JSON.stringify(p));
   }
 
   // =====================================================================
