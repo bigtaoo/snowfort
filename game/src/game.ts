@@ -161,6 +161,9 @@ export class Game {
     this.buildHud();
     this.bindInput();
     this.showMenu();
+    // Bridge sends its queued events as the page goes hidden (a closed tab sends nothing after), so
+    // this listens in the capture phase on window, ahead of Bridge's own listener on document
+    window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') this.trackHidden(); }, true);
     (window as unknown as { __sf: Game }).__sf = this;
   }
 
@@ -382,9 +385,23 @@ export class Game {
   /** A match's end, finished or left: how long it ran and how far it got. */
   private trackEnd(event: string, extra: Record<string, string | number | boolean>): void {
     if (this.matchAt === null) return;
-    const duration_sec = Math.round((performance.now() - this.matchAt) / 1000);
+    const progress = this.matchProgress(this.matchAt);
     this.matchAt = null;
-    this.portal.track(event, { ...this.matchFields(), duration_sec, rounds: this.round, score: `${this.score[0]}-${this.score[1]}`, ...extra });
+    this.portal.track(event, { ...progress, ...extra });
+  }
+
+  /**
+   * The page went hidden mid-match: most often the player closed it, which nothing else reports.
+   * The match goes on, so a player who comes back can still finish it.
+   */
+  private trackHidden(): void {
+    if (this.matchAt === null) return;
+    this.portal.track('progression_paused', { ...this.matchProgress(this.matchAt), phase: this.phase, reason: 'hidden' });
+  }
+
+  private matchProgress(startedAt: number): Record<string, string | number | boolean> {
+    const duration_sec = Math.round((performance.now() - startedAt) / 1000);
+    return { ...this.matchFields(), duration_sec, rounds: this.round, score: `${this.score[0]}-${this.score[1]}` };
   }
 
   // =====================================================================
