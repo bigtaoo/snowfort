@@ -63,6 +63,32 @@ async function boot(): Promise<void> {
   };
   requestAnimationFrame(tick);
   bridge.send('game_ready');
+  trackOrientation(bridge, game.touch);
+}
+
+/**
+ * The menu funnel's first step, which no match event sees: what the player had in front of them
+ * at load, and whether a phone held upright (covered by the turn-sideways screen) was turned.
+ * Each event goes once per page.
+ */
+function trackOrientation(bridge: Bridge, touch: boolean): void {
+  const upright = matchMedia('(orientation: portrait) and (pointer: coarse)');
+  const loadedAt = performance.now();
+  const seconds = () => Math.round((performance.now() - loadedAt) / 1000);
+  bridge.track('menu_shown', { touch, portrait: upright.matches });
+  let shown = false;
+  let turned = false;
+  const check = () => {
+    if (upright.matches && !shown) {
+      shown = true;
+      bridge.track('rotate_prompt', { state: 'shown', seconds: seconds() });
+    } else if (!upright.matches && shown && !turned) {
+      turned = true;
+      bridge.track('rotate_prompt', { state: 'turned', seconds: seconds() });
+    }
+  };
+  check();
+  upright.addEventListener('change', check);
 }
 
 void boot();

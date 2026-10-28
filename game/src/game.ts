@@ -316,7 +316,7 @@ export class Game {
   private relabel(): void {
     this.pinfo.forEach((info, side) => { info.label.textContent = this.nameOf(side as Side); });
     this.muteEl.title = t('common.sound');
-    const rotate = document.getElementById('rotate');
+    const rotate = document.getElementById('rotateText');
     if (rotate) rotate.textContent = t('common.rotate');
   }
 
