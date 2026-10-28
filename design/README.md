@@ -165,7 +165,8 @@
   `player_got_achievement`（打赢电脑）、平台暂停（停帧 + 静音；插屏结束或玩家点屏 / 按键时一定恢复，
   因为线上见过插屏后 Bridge 没发恢复、画面卡在回放上）、平台声音开关（叠在自己的静音按钮上）。
 - 广告：只在两场之间（第一场之后再点开始 / 再来一局）放一次插屏，`playgama-bridge-config.json` 设两次插屏至少隔 180 秒。
-  没有激励广告。存档（静音、上次的城堡）还是 localStorage。
+  没有激励广告。存档（静音、上次的城堡）在 Playgama 上走 Bridge Storage，没有 Bridge 时才用 localStorage
+  （`game/src/platform/saves.ts`；旧的 localStorage 存档不迁移）。
 - 发布要用 Playgama MCP（`playgama-developer-console`，https://developer.playgama.com/api/mcp），
   配在仓库根的 `.mcp.json`（只有地址，没有密钥）；桌面版会话不读 `~/.claude.json` 里的项目级配置。
   新开的会话才能用，第一次要在 `/mcp` 里登录。
