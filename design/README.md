@@ -170,7 +170,8 @@
   配在仓库根的 `.mcp.json`（只有地址，没有密钥）；桌面版会话不读 `~/.claude.json` 里的项目级配置。
   新开的会话才能用，第一次要在 `/mcp` 里登录。
 - 已发布（2026-10-27，沙盒）：https://playgama.ai/play/dqq7iq6dcikez6 ，包检查 PASSED（Bridge 2.3.1）；
-  包按提交号命名（如 `snowfort-bc5fb5c`），线上现在是这一版（菜单只有双人 / 人机两个模式；人机一局定胜负、预设雪堡、隐藏 100 级难度）；MCP 连不上时也可以在网页后台
+  包按提交号命名（如 `snowfort-9d69ede`），线上现在是这一版（2026-10-28 发布；菜单只有双人 / 人机两个模式；人机一局定胜负、预设雪堡、隐藏 100 级难度；
+  比 `snowfort-bc5fb5c` 多了 `progression_paused` 遥测事件：对局中页面被切走 / 隐藏时发送，带 duration_sec、phase、score，对局本身继续）；MCP 连不上时也可以在网页后台
   Update Game 里传 zip，再点 Continue → 选包 → Update in Sandbox；
   商店文案（Game description / How to play）也在 Update Game 页，改完点 Save Changes。2026-10-27 已改成
   "双人先赢 3 局、对战 Frosty 一局定胜负"，并去掉了"三个难度""每局都修补选卡"的旧说法；规则再变要一起改。
