@@ -135,6 +135,9 @@ export class Game {
   private trailBall: (Entity | null)[] = [null, null];
   private trailNext = [0, 0];
   private replayT = 0;
+  /** Arena time the replay stops at. */
+  private replayEndAt = 0;
+  private replayLength: number = REPLAY.simSeconds;
   private replayLoser: Side = 0;
   private winnerOfMatch: Side = 0;
   /** Seconds until the results screen of a CPU match starts the next one. */
@@ -194,7 +197,7 @@ export class Game {
       for (const h of this.arena.kingHits) this.kingHud.hit(h.owner, h.dmg);
       if (this.phase === 'fight') this.afterStep();
       for (const m of this.arena.breaks) this.sfx.crunch(m);
-      if (this.phase === 'replay' && this.arena.time - this.decidedAt > REPLAY.simSeconds - REPLAY.leadSeconds) this.endReplay();
+      if (this.phase === 'replay' && this.arena.time > this.replayEndAt) this.endReplay();
     }
     if (n === PHYSICS.maxSubSteps) this.acc = 0;
     this.arena.sync();
@@ -221,7 +224,7 @@ export class Game {
         break;
       case 'replay': {
         this.replayT += dt;
-        const total = REPLAY.simSeconds / REPLAY.timeScale;
+        const total = this.replayLength / REPLAY.timeScale;
         this.view.orbit(Math.min(1, this.replayT / total), this.replayLoser === 0 ? -10 : 10, REPLAY.orbitRadius, REPLAY.orbitHeight);
         break;
       }
@@ -491,11 +494,27 @@ export class Game {
         this.cpuPlaceNext();
       }
     }
+    this.refundFallen();
     const s = this.session;
     if (!s) return;
     s.time -= dt;
     for (const d of this.drags.values()) this.updateDragGhost(d);
     if (s.time <= 0 || s.sides.every((side) => s.done[side])) this.endSession();
+  }
+
+  /** While building, a piece that tumbles into the ravine goes straight back to its tray. */
+  private refundFallen(): void {
+    let any = false;
+    for (const e of this.arena.ents) {
+      if (!e.alive || e.spring || !e.piece || (e.kind !== 'block' && e.kind !== 'king')) continue;
+      if (e.body.translation().y >= ARENA.fallY) continue;
+      this.budgets[e.owner][budgetKeyOf(e.piece)]++;
+      this.arena.remove(e);
+      any = true;
+    }
+    if (!any) return;
+    this.arena.ents = this.arena.ents.filter((e) => e.alive);
+    this.refreshPalettes();
   }
 
   private queueCpuBuild(plan: Placement[]): void {
@@ -1070,7 +1089,11 @@ export class Game {
     this.winnerOfMatch = this.score[0] >= this.winsNeeded ? 0 : 1;
     this.replayLoser = other(this.winnerOfMatch);
     this.hideTop();
-    if (!this.arena.rewindForReplay(this.decidedAt)) return this.showResults();
+    const from = this.arena.rewindForReplay(this.decidedAt, this.winnerOfMatch);
+    if (from === null) return this.showResults();
+    const untilFall = this.decidedAt + REPLAY.simSeconds - REPLAY.leadSeconds - from;
+    this.replayLength = Math.min(REPLAY.maxSimSeconds, Math.max(REPLAY.simSeconds, untilFall));
+    this.replayEndAt = from + this.replayLength;
     this.phase = 'replay';
     this.replayT = 0;
     this.timeScale = REPLAY.timeScale;

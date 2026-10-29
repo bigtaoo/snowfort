@@ -83,6 +83,8 @@ export class Arena {
   private lastSnapshotAt = -1;
   /** Projectile first-contacts this step, for sounds, effects and cocoa. */
   impacts: ImpactEvent[] = [];
+  /** When each side's shots last hit something (the replay is anchored on the winner's). */
+  lastImpactAt: [number, number] = [-Infinity, -Infinity];
   /** Damage each king took this step, for the HUD. */
   kingHits: { owner: Side; dmg: number }[] = [];
   /** Blocks shattered since the last step began, for sounds. */
@@ -136,6 +138,7 @@ export class Arena {
     this.damageOn = false;
     this.snapshots = [];
     this.lastSnapshotAt = -1;
+    this.lastImpactAt = [-Infinity, -Infinity];
     this.time = 0;
   }
 
@@ -291,6 +294,7 @@ export class Arena {
         if (e.kind === 'projectile') {
           if (e.hitAt === undefined) {
             e.hitAt = this.time;
+            this.lastImpactAt[e.owner] = this.time;
             const p = e.body.translation();
             this.impacts.push({ x: p.x, y: p.y, owner: e.owner, ammo: e.ammo ?? 'snowball', spring: !!other?.spring });
           }
@@ -373,10 +377,22 @@ export class Arena {
     if (this.snapshots.length > REPLAY.snapshotKeep) this.snapshots.shift();
   }
 
-  /** Rewinds to shortly before `decidedAt` and frees every body into 3D. Returns false if no snapshot fits. */
-  rewindForReplay(decidedAt: number): boolean {
-    const snap = [...this.snapshots].reverse().find((s) => s.time <= decidedAt - REPLAY.leadSeconds) ?? this.snapshots[0];
-    if (!snap) return false;
+  /**
+   * Rewinds to shortly before the winner's deciding shot lands and frees every body into 3D.
+   * The shot must still be in the air in that snapshot: a king that topples slowly is called
+   * down well after the hit, and a snapshot taken before the launch has no ball at all.
+   * Returns the snapshot time, or null if there is none.
+   */
+  rewindForReplay(decidedAt: number, winner: Side): number | null {
+    const hitAt = Math.min(decidedAt, this.lastImpactAt[winner]);
+    const anchor = hitAt > decidedAt - REPLAY.maxHitLag ? hitAt : decidedAt;
+    const newestFirst = [...this.snapshots].reverse().filter((s) => s.time <= anchor);
+    const inFlight = (s: Snapshot) => s.ents.some((d) => d.kind === 'projectile' && d.owner === winner && d.hitAt === undefined);
+    const snap = newestFirst.find((s) => s.time <= anchor - REPLAY.leadSeconds && inFlight(s))
+      ?? newestFirst.find(inFlight)
+      ?? newestFirst.find((s) => s.time <= anchor - REPLAY.leadSeconds)
+      ?? this.snapshots[0];
+    if (!snap) return null;
     for (const e of this.ents) this.dropMesh(e);
     this.world.free();
     this.world = RAPIER.World.restoreSnapshot(snap.bytes);
@@ -390,7 +406,7 @@ export class Arena {
     });
     this.freeAll();
     this.sync();
-    return true;
+    return snap.time;
   }
 
   private freeAll(): void {

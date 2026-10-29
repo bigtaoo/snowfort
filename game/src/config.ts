@@ -172,9 +172,14 @@ export const REPLAY = {
   /** The replay restarts from a snapshot at least this long before the deciding hit. */
   leadSeconds: 1.3,
   snapshotEvery: 0.25,
-  snapshotKeep: 16,
+  /** 10 s of history, so a king that topples slowly after the hit still has its shot on record. */
+  snapshotKeep: 40,
+  /** A winner's hit older than this before the king went down is not what decided the round. */
+  maxHitLag: 6,
   timeScale: 0.3,
+  /** Shortest replay, in simulated seconds; it runs on until the deciding fall, up to maxSimSeconds. */
   simSeconds: 4.2,
+  maxSimSeconds: 5.5,
   orbitRadius: 17,
   orbitHeight: 6,
   /** Small random nudges so the collapse leaves the plane. */
