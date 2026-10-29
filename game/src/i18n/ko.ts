@@ -96,7 +96,7 @@ export const ko: Table<typeof en> = {
     levelUp: '{name} Lv.{n}(으)로 레벨 업!',
     levelDown: '{name} Lv.{n}(으)로 내려감',
     streak: '{n}연승!',
-    like: '재미있나요? 페이지 위쪽의 ♥ 를 눌러 주세요 👆',
+    like: '혼자 만든 게임이고 Playgama 대회에 참가 중이에요.<br>마음에 드셨다면 페이지 위쪽의 ♥ 가 큰 도움이 돼요 👆',
   },
   coach: {
     drag: '블록을 내 마당으로 끌어 놓으세요<small>빛나는 눈 위에</small>',

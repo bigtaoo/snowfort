@@ -96,7 +96,7 @@ export const id: Table<typeof en> = {
     levelUp: '{name} naik ke Lv.{n}!',
     levelDown: '{name} turun ke Lv.{n}',
     streak: '{n} kemenangan beruntun!',
-    like: 'Suka? Ketuk ♥ di bagian atas halaman 👆',
+    like: 'Aku membuat game ini sendirian dan sedang ikut kontes Playgama.<br>Kalau suka, ♥ di bagian atas halaman sangat membantu 👆',
   },
   coach: {
     drag: 'Seret satu balok ke halamanmu<small>area salju yang bersinar</small>',

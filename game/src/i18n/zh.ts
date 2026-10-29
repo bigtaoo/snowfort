@@ -96,7 +96,7 @@ export const zh: Table<typeof en> = {
     levelUp: '{name}升到了 Lv.{n}！',
     levelDown: '{name}降到了 Lv.{n}',
     streak: '{n} 连胜！',
-    like: '喜欢吗？点页面顶部的 ♥ 👆',
+    like: '这个游戏是我一个人做的，正在参加 Playgama 的比赛。<br>喜欢的话点一下页面顶部的 ♥，真的很有帮助 👆',
   },
   coach: {
     drag: '把一块拖到你的院子里<small>发光的那片雪地</small>',

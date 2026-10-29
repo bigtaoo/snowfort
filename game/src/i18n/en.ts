@@ -94,7 +94,7 @@ export const en = {
     levelUp: '{name} levels up to Lv.{n}!',
     levelDown: '{name} drops to Lv.{n}',
     streak: '{n} wins in a row!',
-    like: 'Enjoying it? Tap ♥ at the top of the page 👆',
+    like: 'I made this game solo and it’s in a Playgama contest.<br>If you like it, a ♥ at the top of the page really helps 👆',
   },
   coach: {
     drag: 'Drag a block onto your yard<small>the glowing patch of snow</small>',
