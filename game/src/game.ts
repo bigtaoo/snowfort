@@ -1131,7 +1131,8 @@ export class Game {
     const asked = Number(loadSave(LIKE_KEY)) || 0;
     if (asked >= LIKE_ASKS) return;
     writeSave(LIKE_KEY, String(asked + 1));
-    o.append(el('div', 'likeAsk', t('end.like')));
+    // the portal's like button is in its top bar, so the ask sits above the title
+    o.prepend(el('div', 'likeAsk', t('end.like')));
     this.portal.track('like_prompt', { ask: asked + 1, mode: this.mode });
   }
 

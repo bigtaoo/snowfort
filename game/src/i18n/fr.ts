@@ -96,7 +96,7 @@ export const fr: Table<typeof en> = {
     levelUp: '{name} passe au niveau {n} !',
     levelDown: '{name} redescend au niveau {n}',
     streak: '{n} victoires d’affilée !',
-    like: 'Ça te plaît ? Touche ♥ sous le jeu 👇',
+    like: 'Ça te plaît ? Touche ♥ en haut de la page 👆',
   },
   coach: {
     drag: 'Fais glisser un bloc dans ta cour<small>la zone de neige qui brille</small>',

@@ -92,7 +92,7 @@ kbd { background: #17324d; color: #fff; border-radius: 5px; padding: 1px 6px; fo
 @keyframes coachGlow { to { outline-color: #ffcc3300; } }
 .ladder { font-size: 20px; font-weight: 800; color: #17324d; background: #fff; padding: 6px 16px; border-radius: 12px; text-align: center; line-height: 1.35; }
 .likeAsk { font-size: 18px; font-weight: 800; color: #fff; background: #e0457b; padding: 8px 18px; border-radius: 14px; animation: likeNudge 1.2s ease-in-out infinite alternate; }
-@keyframes likeNudge { to { transform: translateY(6px); } }
+@keyframes likeNudge { to { transform: translateY(-6px); } }
 .startHere { display: block; font-size: 11px; font-weight: 800; color: #b06a00; letter-spacing: .05em; }
 
 /* short landscape phones: the HUD and the tray at about two thirds size, so they leave the field visible */

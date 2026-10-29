@@ -96,7 +96,7 @@ export const ja: Table<typeof en> = {
     levelUp: '{name}が Lv.{n} に上がった！',
     levelDown: '{name}が Lv.{n} に下がった',
     streak: '{n}連勝！',
-    like: '気に入った？ゲームの下の ♥ をタップ 👇',
+    like: '気に入った？ページ上部の ♥ をタップ 👆',
   },
   coach: {
     drag: 'ブロックを自分の庭へドラッグ<small>光っている雪の場所</small>',

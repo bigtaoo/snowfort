@@ -96,7 +96,7 @@ export const th: Table<typeof en> = {
     levelUp: '{name} เลเวลอัปเป็น Lv.{n}!',
     levelDown: '{name} ลดลงเป็น Lv.{n}',
     streak: 'ชนะติดกัน {n} ครั้ง!',
-    like: 'ชอบไหม? แตะ ♥ ใต้เกมเลย 👇',
+    like: 'ชอบไหม? แตะ ♥ ด้านบนของหน้าเลย 👆',
   },
   coach: {
     drag: 'ลากบล็อกเข้าไปในลานของคุณ<small>บริเวณหิมะที่เรืองแสง</small>',

@@ -96,7 +96,7 @@ export const vi: Table<typeof en> = {
     levelUp: '{name} lên Lv.{n}!',
     levelDown: '{name} xuống Lv.{n}',
     streak: 'Thắng {n} trận liên tiếp!',
-    like: 'Thích không? Nhấn ♥ bên dưới trò chơi 👇',
+    like: 'Thích không? Nhấn ♥ ở đầu trang 👆',
   },
   coach: {
     drag: 'Kéo một khối vào sân của bạn<small>vùng tuyết đang phát sáng</small>',

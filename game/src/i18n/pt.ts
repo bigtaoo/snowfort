@@ -96,7 +96,7 @@ export const pt: Table<typeof en> = {
     levelUp: '{name} sobe para Nv.{n}!',
     levelDown: '{name} desce para Nv.{n}',
     streak: '{n} vitórias seguidas!',
-    like: 'Está curtindo? Toque em ♥ abaixo do jogo 👇',
+    like: 'Está curtindo? Toque em ♥ no topo da página 👆',
   },
   coach: {
     drag: 'Arraste um bloco para o seu pátio<small>a área de neve que brilha</small>',

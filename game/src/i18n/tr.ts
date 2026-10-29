@@ -96,7 +96,7 @@ export const tr: Table<typeof en> = {
     levelUp: '{name} Sv.{n} oldu!',
     levelDown: '{name} Sv.{n} seviyesine düştü',
     streak: 'Üst üste {n} galibiyet!',
-    like: 'Beğendin mi? Oyunun altındaki ♥’ye dokun 👇',
+    like: 'Beğendin mi? Sayfanın üstündeki ♥’e dokun 👆',
   },
   coach: {
     drag: 'Bir bloğu avluna sürükle<small>parlayan kar alanına</small>',
