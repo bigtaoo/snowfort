@@ -92,6 +92,11 @@ export const pl: Table<typeof en> = {
     rematch: 'Rewanż',
     next: 'Następny mecz ({n})',
     menu: 'Menu',
+    level: '{name} Poz.{n}',
+    levelUp: '{name} awansuje na poz. {n}!',
+    levelDown: '{name} spada na poz. {n}',
+    streak: '{n} wygrane z rzędu!',
+    like: 'Podoba się? Kliknij ♥ pod grą 👇',
   },
   coach: {
     drag: 'Przeciągnij blok na swoje podwórko<small>na świecący kawałek śniegu</small>',

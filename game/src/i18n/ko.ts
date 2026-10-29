@@ -92,6 +92,11 @@ export const ko: Table<typeof en> = {
     rematch: '재대결',
     next: '다음 경기 ({n})',
     menu: '메뉴',
+    level: '{name} Lv.{n}',
+    levelUp: '{name} Lv.{n}(으)로 레벨 업!',
+    levelDown: '{name} Lv.{n}(으)로 내려감',
+    streak: '{n}연승!',
+    like: '재미있나요? 게임 아래 ♥ 를 눌러 주세요 👇',
   },
   coach: {
     drag: '블록을 내 마당으로 끌어 놓으세요<small>빛나는 눈 위에</small>',

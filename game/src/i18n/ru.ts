@@ -92,6 +92,11 @@ export const ru: Table<typeof en> = {
     rematch: 'Реванш',
     next: 'Следующий матч ({n})',
     menu: 'Меню',
+    level: '{name} ур.{n}',
+    levelUp: '{name} поднимается до ур.{n}!',
+    levelDown: '{name} опускается до ур.{n}',
+    streak: '{n} побед подряд!',
+    like: 'Нравится? Нажми ♥ под игрой 👇',
   },
   coach: {
     drag: 'Перетащите блок в свой двор<small>на светящийся участок снега</small>',

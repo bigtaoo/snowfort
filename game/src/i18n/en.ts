@@ -90,6 +90,11 @@ export const en = {
     rematch: 'Rematch',
     next: 'Next match ({n})',
     menu: 'Menu',
+    level: '{name} Lv.{n}',
+    levelUp: '{name} levels up to Lv.{n}!',
+    levelDown: '{name} drops to Lv.{n}',
+    streak: '{n} wins in a row!',
+    like: 'Enjoying it? Tap ♥ below the game 👇',
   },
   coach: {
     drag: 'Drag a block onto your yard<small>the glowing patch of snow</small>',

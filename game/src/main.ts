@@ -61,9 +61,11 @@ async function boot(): Promise<void> {
       bridge.track('frame_error', { message: String(e).slice(0, 200), phase: game.phase });
     }
   };
+  // after the portal is wired, so a first-timer's match is tracked
+  const straightIn = game.start();
   requestAnimationFrame(tick);
   bridge.send('game_ready');
-  trackOrientation(bridge, game.touch);
+  trackOrientation(bridge, game.touch, straightIn);
 }
 
 /**
@@ -71,11 +73,12 @@ async function boot(): Promise<void> {
  * at load, and whether a phone held upright (covered by the turn-sideways screen) was turned.
  * Each event goes once per page.
  */
-function trackOrientation(bridge: Bridge, touch: boolean): void {
+function trackOrientation(bridge: Bridge, touch: boolean, straightIn: boolean): void {
   const upright = matchMedia('(orientation: portrait) and (pointer: coarse)');
   const loadedAt = performance.now();
   const seconds = () => Math.round((performance.now() - loadedAt) / 1000);
-  bridge.track('menu_shown', { touch, portrait: upright.matches });
+  // straight_in: a first-timer, sent into a match against Frosty instead of the menu
+  bridge.track('menu_shown', { touch, portrait: upright.matches, straight_in: straightIn });
   let shown = false;
   let turned = false;
   const check = () => {

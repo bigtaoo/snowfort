@@ -92,6 +92,11 @@ export const id: Table<typeof en> = {
     rematch: 'Tanding ulang',
     next: 'Pertandingan berikut ({n})',
     menu: 'Menu',
+    level: '{name} Lv.{n}',
+    levelUp: '{name} naik ke Lv.{n}!',
+    levelDown: '{name} turun ke Lv.{n}',
+    streak: '{n} kemenangan beruntun!',
+    like: 'Suka? Ketuk ♥ di bawah game 👇',
   },
   coach: {
     drag: 'Seret satu balok ke halamanmu<small>area salju yang bersinar</small>',

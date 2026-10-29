@@ -92,6 +92,11 @@ export const pt: Table<typeof en> = {
     rematch: 'Revanche',
     next: 'Próxima partida ({n})',
     menu: 'Menu',
+    level: '{name} Nv.{n}',
+    levelUp: '{name} sobe para Nv.{n}!',
+    levelDown: '{name} desce para Nv.{n}',
+    streak: '{n} vitórias seguidas!',
+    like: 'Está curtindo? Toque em ♥ abaixo do jogo 👇',
   },
   coach: {
     drag: 'Arraste um bloco para o seu pátio<small>a área de neve que brilha</small>',

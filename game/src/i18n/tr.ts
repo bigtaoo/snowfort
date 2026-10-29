@@ -92,6 +92,11 @@ export const tr: Table<typeof en> = {
     rematch: 'Rövanş',
     next: 'Sonraki maç ({n})',
     menu: 'Menü',
+    level: '{name} Sv.{n}',
+    levelUp: '{name} Sv.{n} oldu!',
+    levelDown: '{name} Sv.{n} seviyesine düştü',
+    streak: 'Üst üste {n} galibiyet!',
+    like: 'Beğendin mi? Oyunun altındaki ♥’ye dokun 👇',
   },
   coach: {
     drag: 'Bir bloğu avluna sürükle<small>parlayan kar alanına</small>',

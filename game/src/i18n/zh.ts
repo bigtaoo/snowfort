@@ -92,6 +92,11 @@ export const zh: Table<typeof en> = {
     rematch: '再来一场',
     next: '下一局（{n}）',
     menu: '菜单',
+    level: '{name} Lv.{n}',
+    levelUp: '{name}升到了 Lv.{n}！',
+    levelDown: '{name}降到了 Lv.{n}',
+    streak: '{n} 连胜！',
+    like: '喜欢吗？点游戏下方的 ♥ 👇',
   },
   coach: {
     drag: '把一块拖到你的院子里<small>发光的那片雪地</small>',

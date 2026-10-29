@@ -92,6 +92,11 @@ export const vi: Table<typeof en> = {
     rematch: 'Đấu lại',
     next: 'Trận tiếp theo ({n})',
     menu: 'Menu',
+    level: '{name} Lv.{n}',
+    levelUp: '{name} lên Lv.{n}!',
+    levelDown: '{name} xuống Lv.{n}',
+    streak: 'Thắng {n} trận liên tiếp!',
+    like: 'Thích không? Nhấn ♥ bên dưới trò chơi 👇',
   },
   coach: {
     drag: 'Kéo một khối vào sân của bạn<small>vùng tuyết đang phát sáng</small>',

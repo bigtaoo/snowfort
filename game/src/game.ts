@@ -49,17 +49,22 @@ export interface Portal {
 
 const NO_PORTAL: Portal = { gameplay: () => {}, achievement: () => {}, betweenMatches: async () => {}, track: () => {} };
 
-/** Frosty's hidden level and how many matches this player has had against him, kept across visits. */
-interface CpuProgress { level: number; played: number }
+/** Frosty's level, how many matches this player has had against him and their current win streak, kept across visits. */
+interface CpuProgress { level: number; played: number; streak: number }
 const CPU_KEY = 'snowfort.cpu';
 
 function loadCpuProgress(): CpuProgress {
   try {
     const p = JSON.parse(loadSave(CPU_KEY) ?? 'null') as Partial<CpuProgress> | null;
-    if (p && Number.isFinite(p.level) && Number.isFinite(p.played)) return { level: p.level!, played: p.played! };
+    // saves from before the streak count start it at 0
+    if (p && Number.isFinite(p.level) && Number.isFinite(p.played)) return { level: p.level!, played: p.played!, streak: Number.isFinite(p.streak) ? p.streak! : 0 };
   } catch { /* a broken save: this visit starts at level 1 */ }
-  return { level: 1, played: 0 };
+  return { level: 1, played: 0, streak: 0 };
 }
+
+/** How many times the results screen has asked for a like; it asks at most LIKE_ASKS times per player. */
+const LIKE_KEY = 'snowfort.likeAsks';
+const LIKE_ASKS = 2;
 
 /** A player's name and fire key in the current language. */
 const keyOf = (s: Side) => t(s === 0 ? 'keys.p0' : 'keys.p1');
@@ -161,7 +166,6 @@ export class Game {
     this.touch = matchMedia('(pointer: coarse)').matches || new URLSearchParams(location.search).has('touch');
     this.buildHud();
     this.bindInput();
-    this.showMenu();
     // Bridge sends its queued events as the page goes hidden (a closed tab sends nothing after), so
     // this listens in the capture phase on window, ahead of Bridge's own listener on document
     window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') this.trackHidden(); }, true);
@@ -259,6 +263,25 @@ export class Game {
   // menu / match flow
   // =====================================================================
 
+  /**
+   * The first screen, once the portal is wired: a first-timer goes straight into a match against
+   * Frosty (the menu comes after it), everyone else gets the menu. A phone held upright waits
+   * behind the turn-sideways screen until it is turned. Answers whether it went straight in.
+   */
+  start(): boolean {
+    this.showMenu();
+    if (!this.coach.needs('menu')) return false;
+    const upright = matchMedia('(orientation: portrait) and (pointer: coarse)');
+    const go = () => {
+      if (upright.matches) return;
+      upright.removeEventListener('change', go);
+      if (this.phase === 'menu' && this.coach.needs('menu')) void this.begin('cpu');
+    };
+    upright.addEventListener('change', go);
+    go();
+    return true;
+  }
+
   private showMenu(): void {
     this.phase = 'menu';
     this.portal.gameplay(false);
@@ -314,7 +337,7 @@ export class Game {
 
   /** The HUD text that is set once, again in the current language. */
   private relabel(): void {
-    this.pinfo.forEach((info, side) => { info.label.textContent = this.nameOf(side as Side); });
+    this.pinfo.forEach((info, side) => { info.label.textContent = this.plateOf(side as Side); });
     this.muteEl.title = t('common.sound');
     const rotate = document.getElementById('rotateText');
     if (rotate) rotate.textContent = t('common.rotate');
@@ -337,7 +360,8 @@ export class Game {
   startMatch(mode: Mode): void {
     this.portal.gameplay(true);
     this.mode = mode;
-    // Blue's name plate reads the CPU's name only in a CPU match
+    if (mode === 'cpu') this.cpuLevel = this.cpuProgress.level;
+    // Blue's name plate reads the CPU's name and level only in a CPU match
     this.relabel();
     this.arena.reset();
     this.view.puff.clear();
@@ -350,7 +374,6 @@ export class Game {
     this.lastWinner = null;
     this.thrown = [false, false];
     this.matchAt = performance.now();
-    if (mode === 'cpu') this.cpuLevel = this.cpuProgress.level;
     this.portal.track('progression_started', this.matchFields());
     this.cpu = mode === 'cpu' ? new CpuShooter(1, this.cpuLevel) : null;
     this.arena.damageMul = mode === 'turns' ? CATAPULT.turnDamageMul : 1;
@@ -702,6 +725,11 @@ export class Game {
   /** A side's name on screen; against the CPU, Blue is the CPU's own name. */
   private nameOf(s: Side): string {
     return t(s === 0 ? 'names.p0' : this.mode === 'cpu' ? 'names.cpu' : 'names.p1');
+  }
+
+  /** A side's name plate: Frosty's also shows his level. */
+  private plateOf(s: Side): string {
+    return s === 1 && this.mode === 'cpu' ? t('end.level', { name: this.nameOf(s), n: this.cpuLevel }) : this.nameOf(s);
   }
 
   /** Screen pixels the build trays (and their timers) take at the bottom, which the camera keeps clear. */
@@ -1063,6 +1091,7 @@ export class Game {
     });
     this.matchesPlayed++;
     const vsCpu = this.mode === 'cpu';
+    const levelBefore = this.cpuProgress.level;
     if (vsCpu && this.keepProgress) this.advanceCpu(this.winnerOfMatch === 0);
     this.portal.gameplay(false);
     if (this.mode === 'cpu' && this.winnerOfMatch === 0) this.portal.achievement();
@@ -1076,6 +1105,13 @@ export class Game {
     const title = vsCpu ? t(this.winnerOfMatch === 0 ? 'end.youWin' : 'end.cpuWins', { name: t('names.cpu') }) : t('end.wins', { name: this.nameOf(this.winnerOfMatch) });
     o.append(el('h1', 'title', title));
     if (!vsCpu) o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
+    if (vsCpu) {
+      const { level, streak } = this.cpuProgress;
+      const lines: string[] = [];
+      if (level !== levelBefore) lines.push(t(level > levelBefore ? 'end.levelUp' : 'end.levelDown', { name: t('names.cpu'), n: level }));
+      if (this.winnerOfMatch === 0 && streak >= 2) lines.push(t('end.streak', { n: streak }));
+      if (lines.length) o.append(el('div', 'ladder', lines.join('<br>')));
+    }
     const row = el('div', 'row menu');
     // against the CPU the next match starts by itself after a short count
     const again = el('button', 'btn big', t(vsCpu ? 'end.next' : 'end.rematch', { n: CPU.nextMatchSeconds }));
@@ -1086,7 +1122,17 @@ export class Game {
     menu.onclick = () => { this.nextBtn = null; this.arena.reset(); this.view.homeCamera(); this.timeScale = 1; this.showMenu(); };
     row.append(again, menu);
     o.append(row);
+    // a win (or a finished two-player match) is the moment to point at the portal's like button
+    if ((!vsCpu || this.winnerOfMatch === 0) && this.portal !== NO_PORTAL) this.askForLike(o);
     this.overlay(true);
+  }
+
+  private askForLike(o: HTMLElement): void {
+    const asked = Number(loadSave(LIKE_KEY)) || 0;
+    if (asked >= LIKE_ASKS) return;
+    writeSave(LIKE_KEY, String(asked + 1));
+    o.append(el('div', 'likeAsk', t('end.like')));
+    this.portal.track('like_prompt', { ask: asked + 1, mode: this.mode });
   }
 
   /** One step up Frosty's hidden ladder for a win, one down for a loss. */
@@ -1094,6 +1140,7 @@ export class Game {
     const p = this.cpuProgress;
     p.level = Math.min(CPU.maxLevel, Math.max(1, p.level + (won ? 1 : -1)));
     p.played++;
+    p.streak = won ? p.streak + 1 : 0;
     writeSave(CPU_KEY, JSON.stringify(p));
   }
 
@@ -1184,7 +1231,7 @@ export class Game {
     for (const side of [0, 1] as Side[]) {
       const root = el('div', `pinfo p${side}`);
       const name = el('div', 'name');
-      const label = el('span', '', this.nameOf(side));
+      const label = el('span', '', this.plateOf(side));
       const pips = el('span', 'pips');
       name.append(label, pips);
       const bar = el('i');

@@ -92,6 +92,11 @@ export const ja: Table<typeof en> = {
     rematch: '再戦',
     next: '次の試合（{n}）',
     menu: 'メニュー',
+    level: '{name} Lv.{n}',
+    levelUp: '{name}が Lv.{n} に上がった！',
+    levelDown: '{name}が Lv.{n} に下がった',
+    streak: '{n}連勝！',
+    like: '気に入った？ゲームの下の ♥ をタップ 👇',
   },
   coach: {
     drag: 'ブロックを自分の庭へドラッグ<small>光っている雪の場所</small>',

@@ -92,6 +92,11 @@ export const th: Table<typeof en> = {
     rematch: 'แข่งอีกครั้ง',
     next: 'แมตช์ถัดไป ({n})',
     menu: 'เมนู',
+    level: '{name} Lv.{n}',
+    levelUp: '{name} เลเวลอัปเป็น Lv.{n}!',
+    levelDown: '{name} ลดลงเป็น Lv.{n}',
+    streak: 'ชนะติดกัน {n} ครั้ง!',
+    like: 'ชอบไหม? แตะ ♥ ใต้เกมเลย 👇',
   },
   coach: {
     drag: 'ลากบล็อกเข้าไปในลานของคุณ<small>บริเวณหิมะที่เรืองแสง</small>',
