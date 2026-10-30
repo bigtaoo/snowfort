@@ -189,7 +189,7 @@
   配在仓库根的 `.mcp.json`（只有地址，没有密钥）；桌面版会话不读 `~/.claude.json` 里的项目级配置。
   新开的会话才能用，第一次要在 `/mcp` 里登录。
 - 已发布（2026-10-27，沙盒）：https://playgama.ai/play/dqq7iq6dcikez6 ，包检查 PASSED（Bridge 2.3.1）；
-  包按提交号命名（如 `snowfort-9d5a513`），线上现在是 `snowfort-6ff2b07`（2026-10-29 发布：回放一定从决胜那发球飞行中开始、建造时掉崖的块自动退回托盘）；之前是 `snowfort-9d5a513`（2026-10-29 发布：新玩家直接开局、
+  包按提交号命名（如 `snowfort-9d5a513`），线上现在是 `snowfort-a5a0517`（2026-10-30 发布：对战霜霜先赢 2 局、第 1 场后不放插屏也不提示点赞、霜霜等新玩家先扔、转屏提示改字；同时商店文案改成"对战 Frosty 先赢 2 局"）；之前是 `snowfort-6ff2b07`（2026-10-29 发布：回放一定从决胜那发球飞行中开始、建造时掉崖的块自动退回托盘）；之前是 `snowfort-9d5a513`（2026-10-29 发布：新玩家直接开局、
   霜霜名牌显示等级（Lv.N）、结果页显示升 / 降级和连胜、赢了提示点赞，见上面遥测一节）；之前是 `snowfort-0eb4e2b`（2026-10-28 发布；菜单只有双人 / 人机两个模式；人机一局定胜负、预设雪堡、隐藏 100 级难度；
   有 `progression_paused` 遥测事件（对局中页面被切走 / 隐藏时发送，带 duration_sec、phase、score，对局本身继续）；存档走 Bridge Storage；
   比 `snowfort-da4fc4e` 多了：菜单漏斗遥测 `menu_shown`（touch、portrait）和 `rotate_prompt`（state shown / turned、seconds），
@@ -197,7 +197,7 @@
   Update Game 里传 zip，再点 Continue → 选包 → Update in Sandbox；
   商店文案（Game description / How to play）也在 Update Game 页，改完点 Save Changes。2026-10-27 已改成
   "双人先赢 3 局、对战 Frosty 一局定胜负"，并去掉了"三个难度""每局都修补选卡"的旧说法；规则再变要一起改。
-  2026-10-30 对战 Frosty 改成先赢 2 局，商店文案里的"一局定胜负"还没改（要在 Update Game 页改）。
+  2026-10-30 对战 Frosty 改成先赢 2 局，商店文案（Game description / How to play）同一天已跟着改。
   封面（方形 / 竖版 / 横版）在 `art/covers/`。同一天已把这个链接交到挑战页。
   社交帖（挑战第 2 步，用户自己发）：草稿和截图在 `art/social/`（X 短帖 tag @PlaygamaCom，
   长帖给 Reddit / LinkedIn / Discord，附中文）。资格线要平均时长 ≥ 5 分钟，所以号召要说清"两人同一台设备、
