@@ -201,6 +201,8 @@ export const CPU = {
   wildFadeAt: 0.6,
   /** From the second match on, the player gets this long to adjust their fort. */
   adjustSeconds: 30,
+  /** Rounds to win a match against the CPU (two-player matches use ROUND.winsNeeded). */
+  winsNeeded: 2,
   /** The results screen moves on to the next match by itself after this long. */
   nextMatchSeconds: 5,
   /** Angles the CPU likes to throw at (it waits for the sweep to pass one). */

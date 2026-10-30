@@ -5,7 +5,7 @@ import type { Table } from './index';
 export const id: Table<typeof en> = {
   lang: { name: 'Bahasa Indonesia' },
   common: {
-    rotate: 'Putar perangkatmu ke posisi mendatar',
+    rotate: 'Putar ponselmu ke posisi mendatar, permainan langsung dimulai',
     sound: 'Suara nyala/mati',
     language: 'Bahasa',
   },
@@ -15,8 +15,8 @@ export const id: Table<typeof en> = {
     turns: '2 pemain — bergiliran',
     cpu: 'lawan {name}',
     startHere: 'BARU? MULAI DI SINI',
-    helpTouch: 'Bangun: seret balok dari bakimu ke sisimu. Bertarung: tahan separuh layarmu untuk mengunci bidikan dan mengisi tenaga, lepas untuk melempar. Jatuhkan raja salju lawan dari bukitnya atau buat dia pingsan untuk memenangkan ronde. 2 pemain: yang pertama menang 3 ronde. Lawan {cpu}: satu ronde saja.',
-    helpKeys: 'Bangun: seret balok dari baki ke sisimu (klik balok yang sudah ditaruh untuk mengambilnya lagi). Bertarung: {red} {space}, {blue} {enter} — tekan untuk mengunci bidikan yang berayun, tahan untuk mengisi tenaga, lepas untuk melempar. Jatuhkan raja salju lawan dari bukitnya atau buat dia pingsan untuk memenangkan ronde. 2 pemain: yang pertama menang 3 ronde. Lawan {cpu}: satu ronde saja.',
+    helpTouch: 'Bangun: seret balok dari bakimu ke sisimu. Bertarung: tahan separuh layarmu untuk mengunci bidikan dan mengisi tenaga, lepas untuk melempar. Jatuhkan raja salju lawan dari bukitnya atau buat dia pingsan untuk memenangkan ronde. 2 pemain: yang pertama menang 3 ronde. Lawan {cpu}: yang lebih dulu menang 2 ronde.',
+    helpKeys: 'Bangun: seret balok dari baki ke sisimu (klik balok yang sudah ditaruh untuk mengambilnya lagi). Bertarung: {red} {space}, {blue} {enter} — tekan untuk mengunci bidikan yang berayun, tahan untuk mengisi tenaga, lepas untuk melempar. Jatuhkan raja salju lawan dari bukitnya atau buat dia pingsan untuk memenangkan ronde. 2 pemain: yang pertama menang 3 ronde. Lawan {cpu}: yang lebih dulu menang 2 ronde.',
   },
   pieces: { snow: 'Salju', ice: 'Es', plankH: 'Papan —', plankV: 'Papan |', king: 'Raja' },
   build: {

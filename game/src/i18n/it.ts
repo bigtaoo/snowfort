@@ -5,7 +5,7 @@ import type { Table } from './index';
 export const it: Table<typeof en> = {
   lang: { name: 'Italiano' },
   common: {
-    rotate: 'Ruota il dispositivo in orizzontale',
+    rotate: 'Gira il telefono in orizzontale e la partita parte subito',
     sound: 'Audio sì/no',
     language: 'Lingua',
   },
@@ -15,8 +15,8 @@ export const it: Table<typeof en> = {
     turns: '2 giocatori — a turni',
     cpu: 'contro {name}',
     startHere: 'NUOVO? INIZIA QUI',
-    helpTouch: 'Costruisci: trascina i pezzi dal tuo vassoio nella tua metà. Combatti: tieni premuta la tua metà dello schermo per bloccare la mira e caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. In due: vince chi arriva a 3 round. Contro {cpu}: un solo round.',
-    helpKeys: 'Costruisci: trascina i pezzi dal vassoio nella tua metà (clicca un pezzo piazzato per riprenderlo). Combatti: {red} {space}, {blue} {enter} — premi per bloccare la mira che oscilla, tieni premuto per caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. In due: vince chi arriva a 3 round. Contro {cpu}: un solo round.',
+    helpTouch: 'Costruisci: trascina i pezzi dal tuo vassoio nella tua metà. Combatti: tieni premuta la tua metà dello schermo per bloccare la mira e caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. In due: vince chi arriva a 3 round. Contro {cpu}: vince chi arriva a 2 round.',
+    helpKeys: 'Costruisci: trascina i pezzi dal vassoio nella tua metà (clicca un pezzo piazzato per riprenderlo). Combatti: {red} {space}, {blue} {enter} — premi per bloccare la mira che oscilla, tieni premuto per caricare, rilascia per lanciare. Butta il re di neve avversario giù dalla collina o mettilo K.O. per vincere il round. In due: vince chi arriva a 3 round. Contro {cpu}: vince chi arriva a 2 round.',
   },
   pieces: { snow: 'Neve', ice: 'Ghiaccio', plankH: 'Asse —', plankV: 'Asse |', king: 'Re' },
   build: {

@@ -5,7 +5,7 @@ import type { Table } from './index';
 export const es: Table<typeof en> = {
   lang: { name: 'Español' },
   common: {
-    rotate: 'Gira tu dispositivo en horizontal',
+    rotate: 'Gira el móvil en horizontal y la partida empieza al instante',
     sound: 'Sonido sí/no',
     language: 'Idioma',
   },
@@ -15,8 +15,8 @@ export const es: Table<typeof en> = {
     turns: '2 jugadores — por turnos',
     cpu: 'contra {name}',
     startHere: '¿NUEVO? EMPIEZA AQUÍ',
-    helpTouch: 'Construir: arrastra piezas de tu bandeja a tu lado. Luchar: mantén pulsada tu mitad de la pantalla para fijar la puntería y cargar, suelta para lanzar. Tira al rey de nieve rival de su colina o déjalo K.O. para ganar la ronda. 2 jugadores: gana quien llegue a 3 rondas. Contra {cpu}: una sola ronda.',
-    helpKeys: 'Construir: arrastra piezas de la bandeja a tu lado (haz clic en una pieza colocada para recogerla). Luchar: {red} {space}, {blue} {enter} — pulsa para fijar la puntería que oscila, mantén para cargar, suelta para lanzar. Tira al rey de nieve rival de su colina o déjalo K.O. para ganar la ronda. 2 jugadores: gana quien llegue a 3 rondas. Contra {cpu}: una sola ronda.',
+    helpTouch: 'Construir: arrastra piezas de tu bandeja a tu lado. Luchar: mantén pulsada tu mitad de la pantalla para fijar la puntería y cargar, suelta para lanzar. Tira al rey de nieve rival de su colina o déjalo K.O. para ganar la ronda. 2 jugadores: gana quien llegue a 3 rondas. Contra {cpu}: gana quien llegue a 2 rondas.',
+    helpKeys: 'Construir: arrastra piezas de la bandeja a tu lado (haz clic en una pieza colocada para recogerla). Luchar: {red} {space}, {blue} {enter} — pulsa para fijar la puntería que oscila, mantén para cargar, suelta para lanzar. Tira al rey de nieve rival de su colina o déjalo K.O. para ganar la ronda. 2 jugadores: gana quien llegue a 3 rondas. Contra {cpu}: gana quien llegue a 2 rondas.',
   },
   pieces: { snow: 'Nieve', ice: 'Hielo', plankH: 'Tabla —', plankV: 'Tabla |', king: 'Rey' },
   build: {

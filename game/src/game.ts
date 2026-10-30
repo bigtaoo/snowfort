@@ -346,14 +346,15 @@ export class Game {
     if (rotate) rotate.textContent = t('common.rotate');
   }
 
-  /** A match from a button: after the first one the platform may show an ad in between. */
+  /** A match from a button: after the second one the platform may show an ad in between. */
   private async begin(mode: Mode): Promise<void> {
     if (this.starting) return;
     this.starting = true;
     this.mode = mode;
     this.coach.learn('menu');
     try {
-      if (this.matchesPlayed > 0) await this.portal.betweenMatches();
+      // no ad between the first and second match, where most players decide whether to stay
+      if (this.matchesPlayed > 1) await this.portal.betweenMatches();
     } finally {
       this.starting = false;
     }
@@ -672,9 +673,9 @@ export class Game {
       .sort((a, b) => a.y! - b.y!);
   }
 
-  /** Rounds to win the match: a CPU match is a single round. */
+  /** Rounds to win the match: a CPU match is shorter than a two-player one. */
   private get winsNeeded(): number {
-    return this.mode === 'cpu' ? 1 : ROUND.winsNeeded;
+    return this.mode === 'cpu' ? CPU.winsNeeded : ROUND.winsNeeded;
   }
 
   private loadBlueprint(side: Side): Placement[] | null {
@@ -793,7 +794,7 @@ export class Game {
     this.firePointers.clear();
     this.showKeys(true);
     this.sfx.bell();
-    if (this.mode === 'cpu') this.banner(t('fight.fireAtWill'), '', 1.6);
+    if (this.mode === 'cpu') this.banner(t('fight.round', { n: this.round }), t('fight.fireAtWill'), 1.6);
     else this.banner(t('fight.round', { n: this.round }), this.mode === 'turns' ? t('fight.firstTurn', { name: this.nameOf(this.turn) }) : t('fight.fireAtWill'), 1.6);
   }
 
@@ -847,7 +848,8 @@ export class Game {
     // card pieces dropped in at round start settle before anything can get hurt
     this.arena.damageOn = this.roundTime > ROUND.damageGraceSeconds;
     for (const l of this.launchers) l.update(dt);
-    if (this.cpu) {
+    // a first-timer's opening throw comes before Frosty's, so the first seconds are theirs to learn the aim
+    if (this.cpu && (this.thrown[0] || !this.coach.needs('aim'))) {
       const l = this.launchers[1];
       const act = this.cpu.update(dt, l, this.arena);
       if (act.press) this.press(1);
@@ -1000,7 +1002,10 @@ export class Game {
     if (this.score[0] >= this.winsNeeded || this.score[1] >= this.winsNeeded) return this.startReplay();
     this.cleanupBetweenRounds();
     if (this.mode === 'cpu') {
-      // a drawn round is thrown again from the forts it started with
+      // every CPU round, drawn or not, is thrown again from the forts the match started with
+      // (clearing refunds only the pieces still standing, so the trays start full again)
+      for (const s of [0, 1] as Side[]) this.clearFort(s);
+      this.budgets = [{ ...BUILD.budget }, { ...BUILD.budget }];
       for (const s of [0, 1] as Side[]) this.placeFort(s, this.fortPlans[s]);
       return this.startRound();
     }
@@ -1127,7 +1132,7 @@ export class Game {
     o.innerHTML = '';
     const title = vsCpu ? t(this.winnerOfMatch === 0 ? 'end.youWin' : 'end.cpuWins', { name: t('names.cpu') }) : t('end.wins', { name: this.nameOf(this.winnerOfMatch) });
     o.append(el('h1', 'title', title));
-    if (!vsCpu) o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
+    o.append(el('div', 'who', `${this.score[0]} – ${this.score[1]}`));
     if (vsCpu) {
       const { level, streak } = this.cpuProgress;
       const lines: string[] = [];
@@ -1145,8 +1150,9 @@ export class Game {
     menu.onclick = () => { this.nextBtn = null; this.arena.reset(); this.view.homeCamera(); this.timeScale = 1; this.showMenu(); };
     row.append(again, menu);
     o.append(row);
-    // a win (or a finished two-player match) is the moment to point at the portal's like button
-    if ((!vsCpu || this.winnerOfMatch === 0) && this.portal !== NO_PORTAL) this.askForLike(o);
+    // a win (or a finished two-player match) is the moment to point at the portal's like button,
+    // from the second match on: after the first, the ask went with fewer players staying
+    if ((!vsCpu || this.winnerOfMatch === 0) && this.matchesPlayed >= 2 && this.portal !== NO_PORTAL) this.askForLike(o);
     this.overlay(true);
   }
 

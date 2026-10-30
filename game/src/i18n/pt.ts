@@ -5,7 +5,7 @@ import type { Table } from './index';
 export const pt: Table<typeof en> = {
   lang: { name: 'Português' },
   common: {
-    rotate: 'Gire o aparelho na horizontal',
+    rotate: 'Gire o celular na horizontal e o jogo começa na hora',
     sound: 'Som liga/desliga',
     language: 'Idioma',
   },
@@ -15,8 +15,8 @@ export const pt: Table<typeof en> = {
     turns: '2 jogadores — em turnos',
     cpu: 'contra {name}',
     startHere: 'NOVO? COMECE AQUI',
-    helpTouch: 'Construir: arraste peças da sua bandeja para o seu lado. Lutar: segure a sua metade da tela para travar a mira e carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. 2 jogadores: vence quem chegar a 3 rodadas. Contra {cpu}: uma rodada só.',
-    helpKeys: 'Construir: arraste peças da bandeja para o seu lado (clique numa peça colocada para pegá-la de volta). Lutar: {red} {space}, {blue} {enter} — aperte para travar a mira que balança, segure para carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. 2 jogadores: vence quem chegar a 3 rodadas. Contra {cpu}: uma rodada só.',
+    helpTouch: 'Construir: arraste peças da sua bandeja para o seu lado. Lutar: segure a sua metade da tela para travar a mira e carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. 2 jogadores: vence quem chegar a 3 rodadas. Contra {cpu}: vence quem ganhar 2 rodadas primeiro.',
+    helpKeys: 'Construir: arraste peças da bandeja para o seu lado (clique numa peça colocada para pegá-la de volta). Lutar: {red} {space}, {blue} {enter} — aperte para travar a mira que balança, segure para carregar, solte para arremessar. Derrube o rei de neve rival do morro ou nocauteie-o para vencer a rodada. 2 jogadores: vence quem chegar a 3 rodadas. Contra {cpu}: vence quem ganhar 2 rodadas primeiro.',
   },
   pieces: { snow: 'Neve', ice: 'Gelo', plankH: 'Tábua —', plankV: 'Tábua |', king: 'Rei' },
   build: {

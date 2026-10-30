@@ -3,7 +3,7 @@
 export const en = {
   lang: { name: 'English' },
   common: {
-    rotate: 'Please turn your device sideways',
+    rotate: 'Turn your phone sideways — the game starts right away',
     sound: 'Sound on/off',
     language: 'Language',
   },
@@ -13,8 +13,8 @@ export const en = {
     turns: '2 Players — take turns',
     cpu: 'vs {name}',
     startHere: 'NEW? START HERE',
-    helpTouch: 'Build: drag pieces from your tray onto your side. Fight: touch and hold your half of the screen to lock the aim and charge, let go to throw. Knock the rival snow king off his hill or pound him to win the round. 2 players: first to 3 rounds. vs {cpu}: one round.',
-    helpKeys: 'Build: drag pieces from the tray onto your side (click a placed piece to pick it up again). Fight: {red} {space}, {blue} {enter} — press to lock the swinging aim, hold to charge, release to throw. Knock the rival snow king off his hill or pound him to win the round. 2 players: first to 3 rounds. vs {cpu}: one round.',
+    helpTouch: 'Build: drag pieces from your tray onto your side. Fight: touch and hold your half of the screen to lock the aim and charge, let go to throw. Knock the rival snow king off his hill or pound him to win the round. 2 players: first to 3 rounds. vs {cpu}: first to 2 rounds.',
+    helpKeys: 'Build: drag pieces from the tray onto your side (click a placed piece to pick it up again). Fight: {red} {space}, {blue} {enter} — press to lock the swinging aim, hold to charge, release to throw. Knock the rival snow king off his hill or pound him to win the round. 2 players: first to 3 rounds. vs {cpu}: first to 2 rounds.',
   },
   pieces: { snow: 'Snow', ice: 'Ice', plankH: 'Plank —', plankV: 'Plank |', king: 'King' },
   build: {

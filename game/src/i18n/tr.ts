@@ -5,7 +5,7 @@ import type { Table } from './index';
 export const tr: Table<typeof en> = {
   lang: { name: 'Türkçe' },
   common: {
-    rotate: 'Lütfen cihazını yatay çevir',
+    rotate: 'Telefonunu yatay çevir, oyun hemen başlasın',
     sound: 'Ses aç/kapat',
     language: 'Dil',
   },
@@ -15,8 +15,8 @@ export const tr: Table<typeof en> = {
     turns: '2 oyuncu — sırayla',
     cpu: 'rakip: {name}',
     startHere: 'YENİ MİSİN? BURADAN BAŞLA',
-    helpTouch: 'İnşa: parçaları tepsinden kendi tarafına sürükle. Savaş: nişanı sabitleyip güç toplamak için ekranın kendi yarını basılı tut, atmak için bırak. Rakibin kar kralını tepesinden düşür ya da nakavt et, raundu kazan. 2 oyuncu: 3 raunda ilk ulaşan kazanır. {cpu} ile: tek raunt.',
-    helpKeys: 'İnşa: parçaları tepsiden kendi tarafına sürükle (yerleştirdiğin parçaya tıklayıp geri alabilirsin). Savaş: {red} {space}, {blue} {enter} — sallanan nişanı sabitlemek için bas, güç toplamak için basılı tut, atmak için bırak. Rakibin kar kralını tepesinden düşür ya da nakavt et, raundu kazan. 2 oyuncu: 3 raunda ilk ulaşan kazanır. {cpu} ile: tek raunt.',
+    helpTouch: 'İnşa: parçaları tepsinden kendi tarafına sürükle. Savaş: nişanı sabitleyip güç toplamak için ekranın kendi yarını basılı tut, atmak için bırak. Rakibin kar kralını tepesinden düşür ya da nakavt et, raundu kazan. 2 oyuncu: 3 raunda ilk ulaşan kazanır. {cpu} ile: 2 raunt kazanan kazanır.',
+    helpKeys: 'İnşa: parçaları tepsiden kendi tarafına sürükle (yerleştirdiğin parçaya tıklayıp geri alabilirsin). Savaş: {red} {space}, {blue} {enter} — sallanan nişanı sabitlemek için bas, güç toplamak için basılı tut, atmak için bırak. Rakibin kar kralını tepesinden düşür ya da nakavt et, raundu kazan. 2 oyuncu: 3 raunda ilk ulaşan kazanır. {cpu} ile: 2 raunt kazanan kazanır.',
   },
   pieces: { snow: 'Kar', ice: 'Buz', plankH: 'Tahta —', plankV: 'Tahta |', king: 'Kral' },
   build: {

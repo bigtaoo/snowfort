@@ -5,7 +5,7 @@ import type { Table } from './index';
 export const vi: Table<typeof en> = {
   lang: { name: 'Tiếng Việt' },
   common: {
-    rotate: 'Hãy xoay ngang thiết bị',
+    rotate: 'Xoay ngang điện thoại, trò chơi sẽ bắt đầu ngay',
     sound: 'Bật/tắt âm thanh',
     language: 'Ngôn ngữ',
   },
@@ -15,8 +15,8 @@ export const vi: Table<typeof en> = {
     turns: '2 người — lần lượt',
     cpu: 'đấu với {name}',
     startHere: 'MỚI CHƠI? BẮT ĐẦU Ở ĐÂY',
-    helpTouch: 'Xây: kéo khối từ khay sang phía của bạn. Đánh: giữ nửa màn hình của bạn để khóa hướng ngắm và nạp lực, thả ra để ném. Đẩy vua tuyết của đối thủ khỏi đồi hoặc hạ gục nó để thắng hiệp. 2 người: ai thắng 3 hiệp trước là thắng. Đấu với {cpu}: một hiệp quyết định.',
-    helpKeys: 'Xây: kéo khối từ khay sang phía của bạn (nhấp vào khối đã đặt để nhấc lại). Đánh: {red} {space}, {blue} {enter} — nhấn để khóa hướng ngắm đang lắc, giữ để nạp lực, thả để ném. Đẩy vua tuyết của đối thủ khỏi đồi hoặc hạ gục nó để thắng hiệp. 2 người: ai thắng 3 hiệp trước là thắng. Đấu với {cpu}: một hiệp quyết định.',
+    helpTouch: 'Xây: kéo khối từ khay sang phía của bạn. Đánh: giữ nửa màn hình của bạn để khóa hướng ngắm và nạp lực, thả ra để ném. Đẩy vua tuyết của đối thủ khỏi đồi hoặc hạ gục nó để thắng hiệp. 2 người: ai thắng 3 hiệp trước là thắng. Đấu với {cpu}: ai thắng 2 hiệp trước sẽ thắng.',
+    helpKeys: 'Xây: kéo khối từ khay sang phía của bạn (nhấp vào khối đã đặt để nhấc lại). Đánh: {red} {space}, {blue} {enter} — nhấn để khóa hướng ngắm đang lắc, giữ để nạp lực, thả để ném. Đẩy vua tuyết của đối thủ khỏi đồi hoặc hạ gục nó để thắng hiệp. 2 người: ai thắng 3 hiệp trước là thắng. Đấu với {cpu}: ai thắng 2 hiệp trước sẽ thắng.',
   },
   pieces: { snow: 'Tuyết', ice: 'Băng', plankH: 'Ván —', plankV: 'Ván |', king: 'Vua' },
   build: {

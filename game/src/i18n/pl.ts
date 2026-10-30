@@ -5,7 +5,7 @@ import type { Table } from './index';
 export const pl: Table<typeof en> = {
   lang: { name: 'Polski' },
   common: {
-    rotate: 'Obróć urządzenie poziomo',
+    rotate: 'Obróć telefon poziomo – gra zacznie się od razu',
     sound: 'Dźwięk wł./wył.',
     language: 'Język',
   },
@@ -15,8 +15,8 @@ export const pl: Table<typeof en> = {
     turns: '2 graczy — na zmianę',
     cpu: 'rywal: {name}',
     startHere: 'NOWY? ZACZNIJ TUTAJ',
-    helpTouch: 'Budowa: przeciągaj elementy z tacki na swoją stronę. Walka: przytrzymaj swoją połowę ekranu, by ustalić celownik i naładować, puść, by rzucić. Zrzuć śnieżnego króla rywala z jego wzgórza albo go znokautuj, by wygrać rundę. We dwoje: wygrywa ten, kto pierwszy zdobędzie 3 rundy. Przeciw {cpu}: jedna runda.',
-    helpKeys: 'Budowa: przeciągaj elementy z tacki na swoją stronę (kliknij postawiony element, by go podnieść). Walka: {red} {space}, {blue} {enter} — naciśnij, by zatrzymać kołyszący się celownik, przytrzymaj, by naładować, puść, by rzucić. Zrzuć śnieżnego króla rywala z jego wzgórza albo go znokautuj, by wygrać rundę. We dwoje: wygrywa ten, kto pierwszy zdobędzie 3 rundy. Przeciw {cpu}: jedna runda.',
+    helpTouch: 'Budowa: przeciągaj elementy z tacki na swoją stronę. Walka: przytrzymaj swoją połowę ekranu, by ustalić celownik i naładować, puść, by rzucić. Zrzuć śnieżnego króla rywala z jego wzgórza albo go znokautuj, by wygrać rundę. We dwoje: wygrywa ten, kto pierwszy zdobędzie 3 rundy. Przeciw {cpu}: do 2 wygranych rund.',
+    helpKeys: 'Budowa: przeciągaj elementy z tacki na swoją stronę (kliknij postawiony element, by go podnieść). Walka: {red} {space}, {blue} {enter} — naciśnij, by zatrzymać kołyszący się celownik, przytrzymaj, by naładować, puść, by rzucić. Zrzuć śnieżnego króla rywala z jego wzgórza albo go znokautuj, by wygrać rundę. We dwoje: wygrywa ten, kto pierwszy zdobędzie 3 rundy. Przeciw {cpu}: do 2 wygranych rund.',
   },
   pieces: { snow: 'Śnieg', ice: 'Lód', plankH: 'Deska —', plankV: 'Deska |', king: 'Król' },
   build: {
